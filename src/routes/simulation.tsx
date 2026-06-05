@@ -270,8 +270,17 @@ function SimulationPage() {
         {/* Main */}
         <section className="flex-1 min-w-0">
           {!active ? (
-            <div className="flex-1 flex items-center justify-center min-h-[60vh] px-8 text-center">
-              <div className="max-w-md">
+            <div className="relative flex-1 flex items-center justify-center min-h-[calc(100vh-6rem)] px-8 text-center overflow-hidden">
+              {/* Hero collage background */}
+              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 opacity-30">
+                {HERO_COLLAGE.map((src, i) => (
+                  <div key={i} className="relative overflow-hidden">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
+              <div className="relative max-w-md">
                 <p className="text-[0.6rem] tracking-[0.4em] uppercase text-[var(--gold)] mb-4">The Portal Awaits</p>
                 <h1 className="font-display text-5xl font-light leading-tight mb-6">
                   Explore the life you <span className="italic text-gold-gradient">never lived.</span>
@@ -288,13 +297,33 @@ function SimulationPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col h-[calc(100vh-6rem)]">
-              <header className="border-b border-border px-6 md:px-8 py-4 flex items-center gap-4">
+            <div className="relative flex flex-col h-[calc(100vh-6rem)]">
+              {(() => {
+                const activeWorld = WORLDS.find((w) => w.name === active.profile.world);
+                return activeWorld?.img ? (
+                  <>
+                    <img
+                      src={activeWorld.img}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background pointer-events-none" />
+                  </>
+                ) : null;
+              })()}
+              <header className="relative border-b border-border px-6 md:px-8 py-4 flex items-center gap-4 bg-background/60 backdrop-blur">
                 {active.profile.photo ? (
                   <img src={active.profile.photo} alt="" className="w-12 h-12 rounded-full object-cover border border-[var(--gold)]/50" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl">
-                    {WORLDS.find((w) => w.name === active.profile.world)?.emoji ?? "✦"}
+                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl overflow-hidden">
+                    {(() => {
+                      const w = WORLDS.find((w) => w.name === active.profile.world);
+                      return w?.img ? (
+                        <img src={w.img} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{w?.emoji ?? "✦"}</span>
+                      );
+                    })()}
                   </div>
                 )}
                 <div className="min-w-0">
