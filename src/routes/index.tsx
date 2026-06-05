@@ -79,17 +79,15 @@ function Home() {
         <div className="gold-hairline w-24 mx-auto mb-8" />
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-6">What Is Revenio</p>
         <h2 className="font-display text-4xl md:text-6xl font-light mb-10 leading-tight">
-          A galactic saga.<br />
-          <span className="italic text-gold-gradient">Written around you.</span>
+          A big story.<br />
+          <span className="italic text-gold-gradient">Built around you.</span>
         </h2>
         <p className="text-lg text-muted-foreground leading-relaxed font-light max-w-3xl mx-auto">
-          Revenio is an AI-powered simulation platform. Strap in, step through the portal, and arrive
-          inside a living galaxy — sentinel orders, smuggler ports, rebel fleets, shadow empires.
-          The AI builds the world. You write the saga. Every session is a different version of you,
-          in a different version of the stars.
+          Revenio is an AI world you can step into. Pick a world. The AI builds it around you —
+          the people, the places, the fight. You make the choices. You live the story.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-center">
-          {["Every simulation is unique.", "Every decision rewrites the story.", "Every session is a new life."].map((t) => (
+          {["Every world is new.", "Every choice matters.", "Every run is a new life."].map((t) => (
             <p key={t} className="font-display italic text-lg md:text-xl text-[var(--gold)]/90 border-t md:border-t border-[var(--gold)]/30 pt-6">
               {t}
             </p>
