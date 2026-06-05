@@ -48,6 +48,7 @@ FORMAT
 - Always end with the numbered choice block. Nothing after it.
 
 Start now. First word is action.`;
+};
 
 const MsgSchema = z.object({
   role: z.enum(["user", "assistant"]),
