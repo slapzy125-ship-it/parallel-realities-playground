@@ -101,7 +101,7 @@ function Experience() {
         <div className="relative max-w-3xl mx-auto">
           <div className="gold-hairline w-24 mx-auto mb-8" />
           <h2 className="font-display text-5xl md:text-7xl font-light mb-8 leading-tight">
-            Your saga<br />
+            Your story<br />
             <span className="italic text-gold-gradient">starts now.</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
