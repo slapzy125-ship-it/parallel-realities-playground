@@ -63,13 +63,13 @@ const worlds = [
     name: "Neon Dominion",
     tag: "The future is a fight.",
     desc: "A neon mega-city. AI, hacking, gangs, and big tech. Find your edge.",
-    img: wFuture,
+    img: neonDominionWorld.url,
   },
   {
     name: "Eternal Odyssey",
     tag: "Your fate is waiting.",
     desc: "A long journey across old lands. Beat monsters. Find lost gear. Live a legend.",
-    img: wEmpire,
+    img: eternalOdysseyWorld.url,
   },
 ];
 
