@@ -99,13 +99,13 @@ function Home() {
       <section className="relative py-32 px-6 bg-[var(--onyx)] border-y border-border text-center">
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-6">Three Steps</p>
         <h2 className="font-display text-5xl md:text-6xl font-light mb-16">
-          Pick a galaxy.<br /><span className="italic text-gold-gradient">Live a saga.</span>
+          Pick a world.<br /><span className="italic text-gold-gradient">Live a story.</span>
         </h2>
         <div className="grid md:grid-cols-3 gap-px bg-border max-w-5xl mx-auto">
           {[
-            { n: "01", t: "Choose a World", d: "Eight galactic settings — order, empire, frontier, rebellion." },
-            { n: "02", t: "Step Through the Portal", d: "AI builds your role, your allies, your enemies, your stakes." },
-            { n: "03", t: "Live the Saga", d: "Every choice locks in. Every session a new ending." },
+            { n: "01", t: "Pick a World", d: "Eight worlds. Magic, space, kingdoms, heroes, and more." },
+            { n: "02", t: "Step Inside", d: "The AI builds your role, your friends, your enemies." },
+            { n: "03", t: "Live the Story", d: "Every choice sticks. Every run ends in a new way." },
           ].map((s) => (
             <div key={s.n} className="bg-background p-10 text-left">
               <p className="font-display text-5xl text-[var(--gold)]/40 mb-4">{s.n}</p>
