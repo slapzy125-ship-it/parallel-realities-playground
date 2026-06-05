@@ -6,10 +6,10 @@ import heroPortals from "@/assets/hero-portals.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Revenio — Explore the Life You Never Lived" },
-      { name: "description", content: "Step into AI-powered galactic simulations. Wield a lightblade, captain a starship, rule a star system. One headset. Infinite worlds." },
-      { property: "og:title", content: "Revenio — Become Another You" },
-      { property: "og:description", content: "AI-powered parallel-universe simulations. Coming 2031." },
+      { title: "Revenio — Live Another Life" },
+      { name: "description", content: "Step into AI worlds. Pick a world. Live a story. One headset. Endless worlds." },
+      { property: "og:title", content: "Revenio — Be Someone Else" },
+      { property: "og:description", content: "AI worlds you can step into. Coming 2031." },
     ],
   }),
   component: Home,
