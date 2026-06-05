@@ -6,9 +6,9 @@ export const Route = createFileRoute("/experience")({
   head: () => ({
     meta: [
       { title: "Experience — Revenio" },
-      { name: "description", content: "How Revenio works. Choose a galaxy. Step through the portal. Live the saga." },
-      { property: "og:title", content: "The Revenio Experience" },
-      { property: "og:description", content: "AI-powered parallel-universe simulation. One choice. Infinite sagas." },
+      { name: "description", content: "How Revenio works. Pick a world. Step in. Live the story." },
+      { property: "og:title", content: "How Revenio Works" },
+      { property: "og:description", content: "AI worlds you live in. One choice. Endless stories." },
     ],
   }),
   component: Experience,
