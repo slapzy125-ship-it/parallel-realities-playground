@@ -4,6 +4,14 @@ import ReactMarkdown from "react-markdown";
 import { useServerFn } from "@tanstack/react-start";
 import { simulationChat } from "@/lib/simulation.functions";
 import { SiteNav } from "@/components/SiteNav";
+import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
+import dragonfallKingdomsWorld from "@/assets/dragonfall-kingdoms-world.asset.json";
+import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
+import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
+import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
+import neonDominionWorld from "@/assets/neon-dominion-world.asset.json";
+import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
+import eternalOdysseyWorld from "@/assets/eternal-odyssey-world.asset.json";
 
 export const Route = createFileRoute("/simulation")({
   head: () => ({
@@ -16,12 +24,21 @@ export const Route = createFileRoute("/simulation")({
 });
 
 const WORLDS = [
-  { name: "Arcane Academy", emoji: "🧙" },
-  { name: "Dragonfall Kingdoms", emoji: "⚔️" },
-  { name: "Galactic Frontier", emoji: "🌌" },
-  { name: "Champions Legacy", emoji: "⚽" },
-  { name: "Hero Nexus", emoji: "🦸" },
-  { name: "Neon Dominion", emoji: "🏙️" },
+  { name: "Arcane Academy", emoji: "🧙", img: arcaneAcademyWorld.url },
+  { name: "Dragonfall Kingdoms", emoji: "⚔️", img: dragonfallKingdomsWorld.url },
+  { name: "Galactic Frontier", emoji: "🌌", img: galacticFrontierWorld.url },
+  { name: "Champions Legacy", emoji: "⚽", img: championsLegacyWorld.url },
+  { name: "Hero Nexus", emoji: "🦸", img: heroNexusWorld.url },
+  { name: "Neon Dominion", emoji: "🏙️", img: neonDominionWorld.url },
+  { name: "Shadow Guild", emoji: "🗡️", img: shadowGuildWorld.url },
+  { name: "Eternal Odyssey", emoji: "🧭", img: eternalOdysseyWorld.url },
+];
+
+const HERO_COLLAGE = [
+  arcaneAcademyWorld.url,
+  dragonfallKingdomsWorld.url,
+  neonDominionWorld.url,
+  eternalOdysseyWorld.url,
 ];
 
 const TRAITS = [
@@ -253,8 +270,17 @@ function SimulationPage() {
         {/* Main */}
         <section className="flex-1 min-w-0">
           {!active ? (
-            <div className="flex-1 flex items-center justify-center min-h-[60vh] px-8 text-center">
-              <div className="max-w-md">
+            <div className="relative flex-1 flex items-center justify-center min-h-[calc(100vh-6rem)] px-8 text-center overflow-hidden">
+              {/* Hero collage background */}
+              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 opacity-30">
+                {HERO_COLLAGE.map((src, i) => (
+                  <div key={i} className="relative overflow-hidden">
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
+              <div className="relative max-w-md">
                 <p className="text-[0.6rem] tracking-[0.4em] uppercase text-[var(--gold)] mb-4">The Portal Awaits</p>
                 <h1 className="font-display text-5xl font-light leading-tight mb-6">
                   Explore the life you <span className="italic text-gold-gradient">never lived.</span>
@@ -271,13 +297,33 @@ function SimulationPage() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col h-[calc(100vh-6rem)]">
-              <header className="border-b border-border px-6 md:px-8 py-4 flex items-center gap-4">
+            <div className="relative flex flex-col h-[calc(100vh-6rem)]">
+              {(() => {
+                const activeWorld = WORLDS.find((w) => w.name === active.profile.world);
+                return activeWorld?.img ? (
+                  <>
+                    <img
+                      src={activeWorld.img}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background pointer-events-none" />
+                  </>
+                ) : null;
+              })()}
+              <header className="relative border-b border-border px-6 md:px-8 py-4 flex items-center gap-4 bg-background/60 backdrop-blur">
                 {active.profile.photo ? (
                   <img src={active.profile.photo} alt="" className="w-12 h-12 rounded-full object-cover border border-[var(--gold)]/50" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl">
-                    {WORLDS.find((w) => w.name === active.profile.world)?.emoji ?? "✦"}
+                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl overflow-hidden">
+                    {(() => {
+                      const w = WORLDS.find((w) => w.name === active.profile.world);
+                      return w?.img ? (
+                        <img src={w.img} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{w?.emoji ?? "✦"}</span>
+                      );
+                    })()}
                   </div>
                 )}
                 <div className="min-w-0">
@@ -286,7 +332,7 @@ function SimulationPage() {
                 </div>
               </header>
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
+              <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
                 {active.messages.map((m) => (
                   <MessageBubble key={m.id} message={m} onChoice={handleSend} />
                 ))}
@@ -301,7 +347,7 @@ function SimulationPage() {
 
               <form
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="border-t border-border p-4 md:px-12 md:py-6 bg-card/40 backdrop-blur"
+                className="relative border-t border-border p-4 md:px-12 md:py-6 bg-card/60 backdrop-blur"
               >
                 <div className="flex gap-3 items-end max-w-4xl mx-auto">
                   <textarea
@@ -532,10 +578,20 @@ function NewSimWizard({
                       key={w.name}
                       type="button"
                       onClick={() => { setWorld(w.name); }}
-                      className={`text-left p-4 border transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-border hover:border-[var(--gold)]/50"}`}
+                      className={`group relative text-left border overflow-hidden aspect-[4/3] transition-all ${selected ? "border-[var(--gold)] ring-2 ring-[var(--gold)]/40" : "border-border hover:border-[var(--gold)]/50"}`}
                     >
-                      <div className="text-2xl mb-2">{w.emoji}</div>
-                      <div className="text-sm">{w.name}</div>
+                      {w.img && (
+                        <img
+                          src={w.img}
+                          alt=""
+                          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${selected ? "opacity-80 scale-105" : "opacity-50 group-hover:opacity-75 group-hover:scale-105"}`}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
+                      <div className="relative h-full flex flex-col justify-end p-4">
+                        <div className="text-xl mb-1">{w.emoji}</div>
+                        <div className={`text-sm font-medium ${selected ? "text-[var(--gold)]" : "text-foreground"}`}>{w.name}</div>
+                      </div>
                     </button>
                   );
                 })}
