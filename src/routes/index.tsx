@@ -49,8 +49,8 @@ function Home() {
             <span className="shimmer-text italic font-medium">Another You.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-light">
-            Step into AI-powered simulations where every choice opens a new galaxy.
-            Wield a lightblade. Captain a starship. Rule a star system. One headset. Infinite worlds.
+            Step into AI worlds. Cast spells. Fly ships. Rule kingdoms.
+            One headset. Endless worlds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
