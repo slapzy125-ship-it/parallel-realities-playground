@@ -10,18 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as ExperienceRouteImport } from './routes/experience'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedSimulationRouteImport } from './routes/_authenticated/simulation'
-import { Route as AuthenticatedSimulationIndexRouteImport } from './routes/_authenticated/simulation.index'
-import { Route as AuthenticatedSimulationIdRouteImport } from './routes/_authenticated/simulation.$id'
 
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
   path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationRoute = SimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HardwareRoute = HardwareRouteImport.update({
@@ -48,54 +51,32 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedSimulationRoute = AuthenticatedSimulationRouteImport.update({
-  id: '/simulation',
-  path: '/simulation',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSimulationIndexRoute =
-  AuthenticatedSimulationIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedSimulationRoute,
-  } as any)
-const AuthenticatedSimulationIdRoute =
-  AuthenticatedSimulationIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedSimulationRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
-  '/simulation': typeof AuthenticatedSimulationRouteWithChildren
-  '/simulation/$id': typeof AuthenticatedSimulationIdRoute
-  '/simulation/': typeof AuthenticatedSimulationIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
-  '/simulation/$id': typeof AuthenticatedSimulationIdRoute
-  '/simulation': typeof AuthenticatedSimulationIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_authenticated': typeof AuthenticatedRouteRoute
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
-  '/_authenticated/simulation': typeof AuthenticatedSimulationRouteWithChildren
-  '/_authenticated/simulation/$id': typeof AuthenticatedSimulationIdRoute
-  '/_authenticated/simulation/': typeof AuthenticatedSimulationIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,19 +85,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/experience'
     | '/hardware'
-    | '/worlds'
     | '/simulation'
-    | '/simulation/$id'
-    | '/simulation/'
+    | '/worlds'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/auth'
-    | '/experience'
-    | '/hardware'
-    | '/worlds'
-    | '/simulation/$id'
-    | '/simulation'
+  to: '/' | '/auth' | '/experience' | '/hardware' | '/simulation' | '/worlds'
   id:
     | '__root__'
     | '/'
@@ -124,18 +96,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/experience'
     | '/hardware'
+    | '/simulation'
     | '/worlds'
-    | '/_authenticated/simulation'
-    | '/_authenticated/simulation/$id'
-    | '/_authenticated/simulation/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRoute
   AuthRoute: typeof AuthRoute
   ExperienceRoute: typeof ExperienceRoute
   HardwareRoute: typeof HardwareRoute
+  SimulationRoute: typeof SimulationRoute
   WorldsRoute: typeof WorldsRoute
 }
 
@@ -146,6 +117,13 @@ declare module '@tanstack/react-router' {
       path: '/worlds'
       fullPath: '/worlds'
       preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation': {
+      id: '/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof SimulationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hardware': {
@@ -183,63 +161,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/simulation': {
-      id: '/_authenticated/simulation'
-      path: '/simulation'
-      fullPath: '/simulation'
-      preLoaderRoute: typeof AuthenticatedSimulationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/simulation/': {
-      id: '/_authenticated/simulation/'
-      path: '/'
-      fullPath: '/simulation/'
-      preLoaderRoute: typeof AuthenticatedSimulationIndexRouteImport
-      parentRoute: typeof AuthenticatedSimulationRoute
-    }
-    '/_authenticated/simulation/$id': {
-      id: '/_authenticated/simulation/$id'
-      path: '/$id'
-      fullPath: '/simulation/$id'
-      preLoaderRoute: typeof AuthenticatedSimulationIdRouteImport
-      parentRoute: typeof AuthenticatedSimulationRoute
-    }
   }
 }
-
-interface AuthenticatedSimulationRouteChildren {
-  AuthenticatedSimulationIdRoute: typeof AuthenticatedSimulationIdRoute
-  AuthenticatedSimulationIndexRoute: typeof AuthenticatedSimulationIndexRoute
-}
-
-const AuthenticatedSimulationRouteChildren: AuthenticatedSimulationRouteChildren =
-  {
-    AuthenticatedSimulationIdRoute: AuthenticatedSimulationIdRoute,
-    AuthenticatedSimulationIndexRoute: AuthenticatedSimulationIndexRoute,
-  }
-
-const AuthenticatedSimulationRouteWithChildren =
-  AuthenticatedSimulationRoute._addFileChildren(
-    AuthenticatedSimulationRouteChildren,
-  )
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedSimulationRoute: typeof AuthenticatedSimulationRouteWithChildren
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedSimulationRoute: AuthenticatedSimulationRouteWithChildren,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthenticatedRouteRoute: AuthenticatedRouteRoute,
   AuthRoute: AuthRoute,
   ExperienceRoute: ExperienceRoute,
   HardwareRoute: HardwareRoute,
+  SimulationRoute: SimulationRoute,
   WorldsRoute: WorldsRoute,
 }
 export const routeTree = rootRouteImport
