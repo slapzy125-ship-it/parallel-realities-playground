@@ -14,9 +14,9 @@ export const Route = createFileRoute("/worlds")({
   head: () => ({
     meta: [
       { title: "Worlds — Revenio" },
-      { name: "description", content: "Eight galactic sagas. Sentinel orders, shadow empires, smuggler ports, rebel fleets. Pick a star. Live a life." },
-      { property: "og:title", content: "Choose Your Galaxy — Revenio" },
-      { property: "og:description", content: "Eight AI-generated galactic worlds. One headset. Infinite sagas." },
+      { name: "description", content: "Eight realities. Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more. Pick a world. Live a life." },
+      { property: "og:title", content: "Choose Your World — Revenio" },
+      { property: "og:description", content: "Eight AI-generated worlds. One platform. Infinite lives." },
     ],
   }),
   component: Worlds,
@@ -82,11 +82,11 @@ function Worlds() {
         <div className="gold-hairline w-24 mx-auto mb-8" />
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Choose Your Reality</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
-          Eight galaxies.<br />
+          Eight worlds.<br />
           <span className="italic text-gold-gradient">One of them is yours.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Step into a saga inspired by the greatest stories ever told between the stars.
+          Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more.
           The AI does the rest.
         </p>
       </section>
@@ -132,12 +132,12 @@ function Worlds() {
           </div>
           <div className="space-y-px">
             {[
-              "you trained as a sentinel and held a lightblade for the first time?",
-              "you flew the final attack run against an imperial dreadnought?",
-              "you out-gambled a kingpin in a smoke-filled cantina on the edge of the galaxy?",
-              "you ruled an empire and decided which star system burned tonight?",
-              "you took a bounty that turned out to be a child you were supposed to protect?",
-              "you broke a galactic senate in a single, perfectly timed sentence?",
+              "you cast your first spell at a hidden academy and felt the arcane surge through your hands?",
+              "you piloted a starfighter through a dying nebula with the fleet at your back?",
+              "you discovered you had powers no one on Earth had ever seen before?",
+              "you rode a dragon into battle and the realm held its breath?",
+              "you scored the winning goal in front of eighty thousand screaming fans?",
+              "you infiltrated a corporate megastructure and stole the keys to the city?",
             ].map((q, i) => (
               <div key={q} className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer">
                 <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">{String(i + 1).padStart(2, "0")}</span>
