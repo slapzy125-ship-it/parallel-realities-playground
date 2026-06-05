@@ -78,7 +78,7 @@ function Experience() {
           <div className="text-center mb-20">
             <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Why Revenio</p>
             <h2 className="font-display text-5xl md:text-7xl font-light">
-              Every choice<br /><span className="italic text-gold-gradient">opens a galaxy.</span>
+              Every choice<br /><span className="italic text-gold-gradient">opens a world.</span>
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
