@@ -21,12 +21,12 @@ export const Route = createFileRoute("/hardware")({
 });
 
 const features = [
-  { t: "AI-Powered Simulations", d: "Every saga adapts to the choices you make in real time." },
-  { t: "Dynamic Storytelling", d: "No two sessions unfold the same way — ever." },
-  { t: "Choice-Based Outcomes", d: "Every decision permanently rewrites your timeline." },
-  { t: "AI Companions", d: "Allies and rivals who remember every word you say to them." },
-  { t: "Infinite Endings", d: "Replay the same world ten times. Watch ten different fates." },
-  { t: "Galactic Hand-Tracking", d: "Reach out. Grip the lightblade. Pull the trigger. No controllers." },
+  { t: "AI Worlds", d: "The story changes with every choice you make." },
+  { t: "Live Storytelling", d: "No two runs play out the same way." },
+  { t: "Choices That Stick", d: "Every choice changes what happens next." },
+  { t: "AI Friends", d: "People in the world remember what you say." },
+  { t: "Endless Endings", d: "Play the same world ten times. Ten new endings." },
+  { t: "Hand Tracking", d: "Reach out. Grab the sword. Pull the trigger. No controllers." },
 ];
 
 const gear = [
@@ -34,31 +34,31 @@ const gear = [
     name: "Arcane Academy Wand",
     world: "Arcane Academy",
     img: gearWand.url,
-    desc: "Forged with ancient magic. Guided by intention. Powered by you. Cast spells with a flick of the wrist — every gesture tracked, every incantation answered.",
+    desc: "Cast spells with a flick of your wrist. Every move is tracked. Every spell hits.",
   },
   {
     name: "Revenio One Gloves",
-    world: "Universal",
+    world: "All Worlds",
     img: gearGloves.url,
-    desc: "Precision haptic gauntlets with gold-channel feedback. Feel the weight of every object, the recoil of every weapon, the texture of every world.",
+    desc: "Feel what you hold. Feel the kick. Feel the world.",
   },
   {
     name: "Galactic Frontier Energy Saber",
     world: "Galactic Frontier",
     img: gearSaber.url,
-    desc: "A weapon for a more civilized age. Ignite the blade, feel the hum, duel across star systems with full motion tracking and live impact response.",
+    desc: "Turn it on. Hear the hum. Fight across the stars with full motion and real hits.",
   },
   {
     name: "Dragonsteel Blade",
     world: "Dragonfall Kingdoms",
     img: gearSword.url,
-    desc: "VR sword controller forged for the realm. Motion tracking, haptic feedback, LED edge lighting, and ergonomic grip — built for siege and saddle alike.",
+    desc: "A VR sword for the kingdom. Motion tracking, real feedback, glowing edge. Built for the fight.",
   },
   {
     name: "Champions Legacy Footwear",
     world: "Champions Legacy",
     img: gearShoes.url,
-    desc: "Performance. Immersion. Victory. Enhanced movement, motion tracking, and stability — sprint, cut, and leap inside the stadium without leaving your room.",
+    desc: "Sprint, cut, and jump in the stadium without leaving your room.",
   },
 ];
 
