@@ -2,6 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import showcaseAsset from "@/assets/revenio-showcase.asset.json";
+import gearWand from "@/assets/gear-wand.png.asset.json";
+import gearGloves from "@/assets/gear-gloves.png.asset.json";
+import gearSaber from "@/assets/gear-saber.png.asset.json";
+import gearSword from "@/assets/gear-sword.png.asset.json";
+import gearShoes from "@/assets/gear-shoes.png.asset.json";
 
 export const Route = createFileRoute("/hardware")({
   head: () => ({
@@ -24,15 +29,37 @@ const features = [
   { t: "Galactic Hand-Tracking", d: "Reach out. Grip the lightblade. Pull the trigger. No controllers." },
 ];
 
-const future = [
-  "Haptic Gauntlets",
-  "Environmental Immersion",
-  "AI Companion Network",
-  "Lightblade Peripherals",
-  "Mixed Reality Cockpits",
-  "Speeder Rig Add-On",
-  "Surround Audio Suite",
-  "Personalized Universes",
+const gear = [
+  {
+    name: "Arcane Academy Wand",
+    world: "Arcane Academy",
+    img: gearWand.url,
+    desc: "Forged with ancient magic. Guided by intention. Powered by you. Cast spells with a flick of the wrist — every gesture tracked, every incantation answered.",
+  },
+  {
+    name: "Revenio One Gloves",
+    world: "Universal",
+    img: gearGloves.url,
+    desc: "Precision haptic gauntlets with gold-channel feedback. Feel the weight of every object, the recoil of every weapon, the texture of every world.",
+  },
+  {
+    name: "Galactic Frontier Energy Saber",
+    world: "Galactic Frontier",
+    img: gearSaber.url,
+    desc: "A weapon for a more civilized age. Ignite the blade, feel the hum, duel across star systems with full motion tracking and live impact response.",
+  },
+  {
+    name: "Dragonsteel Blade",
+    world: "Dragonfall Kingdoms",
+    img: gearSword.url,
+    desc: "VR sword controller forged for the realm. Motion tracking, haptic feedback, LED edge lighting, and ergonomic grip — built for siege and saddle alike.",
+  },
+  {
+    name: "Champions Legacy Footwear",
+    world: "Champions Legacy",
+    img: gearShoes.url,
+    desc: "Performance. Immersion. Victory. Enhanced movement, motion tracking, and stability — sprint, cut, and leap inside the stadium without leaving your room.",
+  },
 ];
 
 function Hardware() {
