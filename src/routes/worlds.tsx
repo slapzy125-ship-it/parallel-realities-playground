@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import wHero from "@/assets/world-hero.jpg";
-import wSurvival from "@/assets/world-survival.jpg";
+import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
+import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
 import wKingdom from "@/assets/world-kingdom.jpg";
-import wSpace from "@/assets/world-space.jpg";
+import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
 import wFuture from "@/assets/world-future.jpg";
 import wEmpire from "@/assets/world-empire.jpg";
-import wSports from "@/assets/world-sports.jpg";
-import wMagic from "@/assets/world-magic.jpg";
+import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
+import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
 
 export const Route = createFileRoute("/worlds")({
   head: () => ({
@@ -27,19 +27,19 @@ const worlds = [
     name: "Arcane Academy",
     tag: "Learn real magic.",
     desc: "A hidden school of magic. Cast spells, mix potions, duel students, and uncover old secrets.",
-    img: wMagic,
+    img: arcaneAcademyWorld.url,
   },
   {
     name: "Galactic Frontier",
     tag: "Pick a side.",
     desc: "A war across the stars. Swing an energy blade. Fly a ship. Stand with order, rebels, or power.",
-    img: wSpace,
+    img: galacticFrontierWorld.url,
   },
   {
     name: "Hero Nexus",
     tag: "Power rises. So do you.",
     desc: "Get powers. Team up with heroes. Fight villains. Decide what kind of hero you are.",
-    img: wHero,
+    img: heroNexusWorld.url,
   },
   {
     name: "Dragonfall Kingdoms",
@@ -51,13 +51,13 @@ const worlds = [
     name: "Champions Legacy",
     tag: "Earn your name.",
     desc: "Start as a nobody. Train hard. Win games. Become the best in the world.",
-    img: wSports,
+    img: championsLegacyWorld.url,
   },
   {
     name: "Shadow Guild",
     tag: "Strike from the dark.",
     desc: "Join a secret group. Crack open plots. Pull off risky jobs. Save the world — or run it.",
-    img: wSurvival,
+    img: shadowGuildWorld.url,
   },
   {
     name: "Neon Dominion",
