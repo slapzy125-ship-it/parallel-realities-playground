@@ -14,7 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      simulation_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          simulation_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          simulation_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          simulation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_messages_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulations: {
+        Row: {
+          character_age: number
+          character_name: string
+          created_at: string
+          goals: string
+          id: string
+          title: string
+          traits: string
+          updated_at: string
+          user_id: string
+          world: string
+        }
+        Insert: {
+          character_age: number
+          character_name: string
+          created_at?: string
+          goals?: string
+          id?: string
+          title?: string
+          traits?: string
+          updated_at?: string
+          user_id: string
+          world: string
+        }
+        Update: {
+          character_age?: number
+          character_name?: string
+          created_at?: string
+          goals?: string
+          id?: string
+          title?: string
+          traits?: string
+          updated_at?: string
+          user_id?: string
+          world?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
