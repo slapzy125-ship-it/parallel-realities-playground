@@ -332,7 +332,7 @@ function SimulationPage() {
                 </div>
               </header>
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
+              <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
                 {active.messages.map((m) => (
                   <MessageBubble key={m.id} message={m} onChoice={handleSend} />
                 ))}
