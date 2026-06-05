@@ -95,20 +95,20 @@ function Hardware() {
           <div className="grid md:grid-cols-2 gap-px bg-border mt-px">
             <div className="bg-background p-10">
               <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-3">Onyx Edition</p>
-              <h3 className="font-display text-3xl mb-4">Black & Gold. The flagship.</h3>
+              <h3 className="font-display text-3xl mb-4">Black & Gold. The main one.</h3>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>· Transparent gold-rim optics</li>
-                <li>· Maximum immersion field</li>
-                <li>· Precision motion sensors</li>
+                <li>· Clear gold-rim lenses</li>
+                <li>· Wide view</li>
+                <li>· Sharp motion tracking</li>
               </ul>
             </div>
             <div className="bg-background p-10">
               <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-3">Luxe Edition</p>
-              <h3 className="font-display text-3xl mb-4">White & Gold. The ceremonial.</h3>
+              <h3 className="font-display text-3xl mb-4">White & Gold. The fancy one.</h3>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>· Premium comfort headband</li>
-                <li>· Ultra-clear display lattice</li>
-                <li>· Hand-finished gold detailing</li>
+                <li>· Comfy headband</li>
+                <li>· Extra-sharp display</li>
+                <li>· Hand-finished gold details</li>
               </ul>
             </div>
           </div>
