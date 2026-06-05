@@ -70,7 +70,7 @@ function Home() {
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.6rem] tracking-[0.4em] text-muted-foreground/60 uppercase animate-float">
-          Scroll · Enter the Galaxy
+          Scroll · Step In
         </div>
       </section>
 
