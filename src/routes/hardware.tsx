@@ -143,8 +143,8 @@ function Hardware() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Signature Gear</p>
-            <h2 className="font-display text-5xl md:text-7xl font-light">Crafted for <span className="italic text-gold-gradient">every world.</span></h2>
-            <p className="mt-6 text-muted-foreground max-w-2xl mx-auto">Bespoke peripherals built to match the saga you step into. Each piece is forged, finished, and tuned to its world.</p>
+            <h2 className="font-display text-5xl md:text-7xl font-light">Made for <span className="italic text-gold-gradient">every world.</span></h2>
+            <p className="mt-6 text-muted-foreground max-w-2xl mx-auto">Gear built to match the world you step into. Each piece is made for one story.</p>
           </div>
           <div className="space-y-px bg-border">
             {gear.map((g, i) => (
