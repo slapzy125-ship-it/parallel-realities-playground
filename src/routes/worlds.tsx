@@ -9,7 +9,20 @@ import wFuture from "@/assets/world-future.jpg";
 import wEmpire from "@/assets/world-empire.jpg";
 import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
 import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
-...
+
+export const Route = createFileRoute("/worlds")({
+  head: () => ({
+    meta: [
+      { title: "Worlds — Revenio" },
+      { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
+      { property: "og:title", content: "Pick Your World — Revenio" },
+      { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
+    ],
+  }),
+  component: Worlds,
+});
+
+const worlds = [
   {
     name: "Arcane Academy",
     tag: "Learn real magic.",
