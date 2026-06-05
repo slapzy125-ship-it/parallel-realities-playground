@@ -138,23 +138,31 @@ function Hardware() {
         </div>
       </section>
 
-      {/* Future tech */}
+      {/* Signature Gear */}
       <section className="relative py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">The Road Map</p>
-            <h2 className="font-display text-5xl md:text-7xl font-light">The future of <span className="italic text-gold-gradient">reality.</span></h2>
+            <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Signature Gear</p>
+            <h2 className="font-display text-5xl md:text-7xl font-light">Crafted for <span className="italic text-gold-gradient">every world.</span></h2>
+            <p className="mt-6 text-muted-foreground max-w-2xl mx-auto">Bespoke peripherals built to match the saga you step into. Each piece is forged, finished, and tuned to its world.</p>
           </div>
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {future.map((tech) => (
-              <div key={tech} className="aspect-square border border-border hover:border-[var(--gold)] p-6 flex flex-col justify-between group hover:bg-[var(--gold)]/5 transition-all duration-500">
-                <span className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)]/60 group-hover:text-[var(--gold)]">Concept</span>
-                <p className="font-display text-2xl leading-tight">{tech}</p>
+          <div className="space-y-px bg-border">
+            {gear.map((g, i) => (
+              <div key={g.name} className={`grid md:grid-cols-2 bg-background ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}>
+                <div className="relative aspect-[4/3] overflow-hidden border-b md:border-b-0 md:border-r border-border">
+                  <img src={g.img} alt={g.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="p-10 md:p-16 flex flex-col justify-center">
+                  <p className="text-[0.6rem] tracking-[0.4em] uppercase text-[var(--gold)] mb-3">{g.world}</p>
+                  <h3 className="font-display text-3xl md:text-4xl mb-5 leading-tight">{g.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{g.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* CTA */}
       <section className="relative py-40 px-6 text-center overflow-hidden">
