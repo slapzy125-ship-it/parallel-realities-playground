@@ -12,9 +12,9 @@ export const Route = createFileRoute("/hardware")({
   head: () => ({
     meta: [
       { title: "Hardware — Revenio One" },
-      { name: "description", content: "Revenio One. Two finishes. Built for galactic immersion. Coming 2031." },
-      { property: "og:title", content: "Revenio One — The Hardware" },
-      { property: "og:description", content: "Onyx and Luxe editions. One headset. Infinite worlds." },
+      { name: "description", content: "Revenio One. Two looks. Built to step inside. Coming 2031." },
+      { property: "og:title", content: "Revenio One — The Headset" },
+      { property: "og:description", content: "Onyx and Luxe. One headset. Endless worlds." },
     ],
   }),
   component: Hardware,
