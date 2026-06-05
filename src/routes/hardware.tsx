@@ -73,10 +73,10 @@ function Hardware() {
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Coming 2031</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
           Revenio One.<br />
-          <span className="italic text-gold-gradient">Built for immersion.</span>
+          <span className="italic text-gold-gradient">Built to step inside.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          One headset. Two finishes. Engineered from the ground up for AI-powered galactic simulation.
+          One headset. Two looks. Made for AI worlds.
         </p>
       </section>
 
