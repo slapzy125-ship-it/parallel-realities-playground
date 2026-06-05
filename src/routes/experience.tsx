@@ -17,28 +17,28 @@ export const Route = createFileRoute("/experience")({
 const steps = [
   {
     n: "01",
-    t: "Choose Your Galaxy",
-    d: "Eight star systems. Sentinel temples, shadow empires, smuggler ports, rebel fleets. Pick the saga that calls to you.",
+    t: "Pick Your World",
+    d: "Eight worlds. Magic, space, kingdoms, heroes, and more. Pick the one you want.",
   },
   {
     n: "02",
-    t: "Step Through the Portal",
-    d: "The AI builds your role, your allies, your enemies, and your stakes in real time. No two entries are the same.",
+    t: "Step Inside",
+    d: "The AI sets up your role, your friends, your enemies — live, on the fly. No two runs are the same.",
   },
   {
     n: "03",
-    t: "Live the Saga",
-    d: "Every choice locks in. Every conversation shifts the story. Every session writes a different ending.",
+    t: "Live the Story",
+    d: "Every choice sticks. Every chat moves the story. Every run ends a different way.",
   },
 ];
 
 const features = [
-  { t: "AI-Powered Simulations", d: "Every saga adapts to the choices you make in real time." },
-  { t: "Dynamic Storytelling", d: "No two sessions unfold the same way — ever." },
-  { t: "Choice-Based Outcomes", d: "Every decision permanently rewrites your timeline." },
-  { t: "AI Companions", d: "Allies and rivals who remember every word you say to them." },
-  { t: "Infinite Endings", d: "Replay the same world ten times. Watch ten different fates." },
-  { t: "Full Immersion", d: "Reach out. Grip the lightblade. Pull the trigger. Feel the galaxy around you." },
+  { t: "AI Worlds", d: "The story changes with every choice you make." },
+  { t: "Live Storytelling", d: "No two runs play out the same way." },
+  { t: "Choices That Stick", d: "Every choice changes what happens next." },
+  { t: "AI Friends", d: "People in the world remember what you say." },
+  { t: "Endless Endings", d: "Play the same world ten times. Ten new endings." },
+  { t: "Full Immersion", d: "Reach out. Grab the sword. Pull the trigger. Feel the world." },
 ];
 
 function Experience() {
