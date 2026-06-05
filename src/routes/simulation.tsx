@@ -16,24 +16,37 @@ export const Route = createFileRoute("/simulation")({
 });
 
 const WORLDS = [
-  "Arcane Academy",
-  "Galactic Frontier",
-  "Hero Nexus",
-  "Dragonfall Kingdoms",
-  "Champions Legacy",
-  "Shadow Guild",
-  "Neon Dominion",
-  "Eternal Odyssey",
+  { name: "Arcane Academy", emoji: "🧙" },
+  { name: "Dragonfall Kingdoms", emoji: "⚔️" },
+  { name: "Galactic Frontier", emoji: "🌌" },
+  { name: "Champions Legacy", emoji: "⚽" },
+  { name: "Hero Nexus", emoji: "🦸" },
+  { name: "Neon Dominion", emoji: "🏙️" },
 ];
 
-type Msg = { id: string; role: "user" | "assistant"; content: string };
+const TRAITS = [
+  "Ambitious", "Loyal", "Intelligent", "Brave", "Competitive",
+  "Funny", "Ruthless", "Creative", "Confident", "Curious",
+];
+
+const GOALS = [
+  "Become the greatest",
+  "Get rich",
+  "Save the world",
+  "Build a kingdom",
+  "Become a legend",
+  "Discover the unknown",
+];
+
 type Profile = {
   character_name: string;
-  character_age: number;
   world: string;
-  traits: string;
-  goals: string;
+  traits: string[];
+  goal: string;
+  photo?: string; // base64 data URL
 };
+
+type Msg = { id: string; role: "user" | "assistant"; content: string };
 type Saga = {
   id: string;
   title: string;
@@ -42,7 +55,7 @@ type Saga = {
   updated_at: number;
 };
 
-const STORAGE_KEY = "revenio.sagas.v1";
+const STORAGE_KEY = "revenio.sagas.v2";
 
 function loadSagas(): Saga[] {
   if (typeof window === "undefined") return [];
@@ -58,7 +71,17 @@ function loadSagas(): Saga[] {
 
 function saveSagas(sagas: Saga[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sagas));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sagas));
+  } catch {
+    // Storage full (likely from large photos). Try without photos.
+    try {
+      const stripped = sagas.map((s) => ({ ...s, profile: { ...s.profile, photo: undefined } }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
+    } catch {
+      /* give up silently */
+    }
+  }
 }
 
 function uid() {
@@ -104,8 +127,13 @@ function SimulationPage() {
     try {
       const { content } = await chat({
         data: {
-          profile,
-          messages: [{ role: "user", content: "Begin the simulation. Generate my Character Profile, the World, and drop me into the opening scene with choices." }],
+          profile: {
+            character_name: profile.character_name,
+            world: profile.world,
+            traits: profile.traits,
+            goal: profile.goal,
+          },
+          messages: [{ role: "user", content: "Begin." }],
         },
       });
       const saga: Saga = {
@@ -140,7 +168,12 @@ function SimulationPage() {
     try {
       const { content: reply } = await chat({
         data: {
-          profile: active.profile,
+          profile: {
+            character_name: active.profile.character_name,
+            world: active.profile.world,
+            traits: active.profile.traits,
+            goal: active.profile.goal,
+          },
           messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
         },
       });
@@ -153,7 +186,6 @@ function SimulationPage() {
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed");
-      // rollback user msg
       persist((prev) =>
         prev.map((s) => (s.id === active.id ? { ...s, messages: active.messages } : s)),
       );
@@ -188,11 +220,19 @@ function SimulationPage() {
             )}
             {sagas.map((s) => {
               const isActive = activeId === s.id;
+              const world = WORLDS.find((w) => w.name === s.profile.world);
               return (
                 <div key={s.id} className={`group flex items-stretch border ${isActive ? "border-[var(--gold)] bg-[var(--gold)]/5" : "border-transparent hover:border-border"} transition-colors`}>
-                  <button onClick={() => setActiveId(s.id)} className="flex-1 text-left px-3 py-3 min-w-0">
-                    <div className="text-sm truncate">{s.profile.character_name}</div>
-                    <div className="text-[0.6rem] tracking-[0.2em] uppercase text-muted-foreground truncate">{s.profile.world}</div>
+                  <button onClick={() => setActiveId(s.id)} className="flex-1 text-left px-3 py-3 min-w-0 flex items-center gap-3">
+                    {s.profile.photo ? (
+                      <img src={s.profile.photo} alt="" className="w-8 h-8 object-cover rounded-full border border-[var(--gold)]/40" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-sm">{world?.emoji ?? "✦"}</div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-sm truncate">{s.profile.character_name}</div>
+                      <div className="text-[0.6rem] tracking-[0.2em] uppercase text-muted-foreground truncate">{s.profile.world}</div>
+                    </div>
                   </button>
                   <button
                     onClick={() => handleDelete(s.id)}
@@ -220,21 +260,30 @@ function SimulationPage() {
                   Explore the life you <span className="italic text-gold-gradient">never lived.</span>
                 </h1>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-                  No login. No setup. Forge a character, choose a world, and the AI will drop you into a cinematic saga that remembers every choice.
+                  Four quick taps. Then you're in.
                 </p>
                 <button
                   onClick={() => setShowNew(true)}
                   className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
                 >
-                  Forge Your Reality →
+                  Begin →
                 </button>
               </div>
             </div>
           ) : (
             <div className="flex flex-col h-[calc(100vh-6rem)]">
-              <header className="border-b border-border px-8 py-4">
-                <p className="text-[0.6rem] tracking-[0.3em] uppercase text-[var(--gold)]">{active.profile.world}</p>
-                <h1 className="font-display text-2xl font-light">{active.profile.character_name}</h1>
+              <header className="border-b border-border px-6 md:px-8 py-4 flex items-center gap-4">
+                {active.profile.photo ? (
+                  <img src={active.profile.photo} alt="" className="w-12 h-12 rounded-full object-cover border border-[var(--gold)]/50" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl">
+                    {WORLDS.find((w) => w.name === active.profile.world)?.emoji ?? "✦"}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-[0.6rem] tracking-[0.3em] uppercase text-[var(--gold)] truncate">{active.profile.world}</p>
+                  <h1 className="font-display text-2xl font-light truncate">{active.profile.character_name}</h1>
+                </div>
               </header>
 
               <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
@@ -260,7 +309,7 @@ function SimulationPage() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                     rows={2}
-                    placeholder="What do you do? (or write your own plan…)"
+                    placeholder="What do you do?"
                     className="flex-1 bg-background border border-border px-4 py-3 text-sm resize-none focus:border-[var(--gold)] focus:outline-none"
                     disabled={sending}
                   />
@@ -279,7 +328,7 @@ function SimulationPage() {
       </div>
 
       {showNew && (
-        <NewSimDialog
+        <NewSimWizard
           submitting={sending}
           onClose={() => setShowNew(false)}
           onCreate={handleCreate}
@@ -300,13 +349,14 @@ function MessageBubble({ message, onChoice }: { message: Msg; onChoice: (text: s
     );
   }
 
+  // Parse trailing choices. Accept "A)", "A.", "1.", "1)".
   const lines = message.content.split("\n");
   const choices: string[] = [];
   let bodyEnd = lines.length;
   for (let i = lines.length - 1; i >= 0; i--) {
-    const m = lines[i].match(/^\s*(\d+)[.)]\s+(.*)/);
+    const m = lines[i].match(/^\s*(?:[A-Z]|\d+)[.)]\s+(.*)/);
     if (m && choices.length < 6) {
-      choices.unshift(m[2]);
+      choices.unshift(m[1]);
       bodyEnd = i;
     } else if (choices.length > 0 && lines[i].trim() === "") {
       bodyEnd = i;
@@ -330,7 +380,7 @@ function MessageBubble({ message, onChoice }: { message: Msg; onChoice: (text: s
               onClick={() => onChoice(c)}
               className="block w-full text-left border border-border hover:border-[var(--gold)] hover:bg-[var(--gold)]/5 px-4 py-3 text-sm transition-all"
             >
-              <span className="text-[var(--gold)] mr-3">{i + 1}.</span>{c}
+              <span className="text-[var(--gold)] mr-3">{String.fromCharCode(65 + i)})</span>{c}
             </button>
           ))}
         </div>
@@ -339,7 +389,9 @@ function MessageBubble({ message, onChoice }: { message: Msg; onChoice: (text: s
   );
 }
 
-function NewSimDialog({
+/* ---------------- 4-Step Wizard ---------------- */
+
+function NewSimWizard({
   onClose,
   onCreate,
   submitting,
@@ -348,60 +400,233 @@ function NewSimDialog({
   onCreate: (p: Profile) => Promise<void>;
   submitting: boolean;
 }) {
+  const [step, setStep] = useState(1);
   const [name, setName] = useState("");
-  const [age, setAge] = useState(18);
-  const [world, setWorld] = useState(WORLDS[0]);
-  const [traits, setTraits] = useState("");
-  const [goals, setGoals] = useState("");
+  const [photo, setPhoto] = useState<string | undefined>(undefined);
+  const [world, setWorld] = useState<string | null>(null);
+  const [traits, setTraits] = useState<string[]>([]);
+  const [goal, setGoal] = useState<string | null>(null);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onCreate({ character_name: name, character_age: age, world, traits, goals });
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handlePhoto = (file: File) => {
+    if (file.size > 2_000_000) {
+      alert("Please use an image under 2MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const toggleTrait = (t: string) => {
+    setTraits((prev) => {
+      if (prev.includes(t)) return prev.filter((x) => x !== t);
+      if (prev.length >= 3) return prev;
+      return [...prev, t];
+    });
+  };
+
+  const next = () => setStep((s) => Math.min(4, s + 1));
+  const back = () => setStep((s) => Math.max(1, s - 1));
+
+  const canNext =
+    (step === 1 && name.trim().length > 0) ||
+    (step === 2 && !!world) ||
+    (step === 3 && traits.length === 3) ||
+    (step === 4 && !!goal);
+
+  const finish = async () => {
+    if (!world || !goal || traits.length !== 3 || !name.trim()) return;
+    await onCreate({ character_name: name.trim(), world, traits, goal, photo });
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/90 backdrop-blur-md flex items-center justify-center p-6 overflow-y-auto">
-      <form onSubmit={submit} className="relative w-full max-w-xl border border-border bg-card p-8 my-8">
-        <button type="button" onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl">×</button>
-        <p className="text-[0.6rem] tracking-[0.4em] uppercase text-[var(--gold)] mb-3">Forge Your Reality</p>
-        <h2 className="font-display text-3xl font-light mb-6">A life <span className="italic text-gold-gradient">never lived.</span></h2>
+    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-4 md:p-6 overflow-y-auto">
+      <div className="relative w-full max-w-2xl border border-border bg-card my-8">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl z-10"
+          aria-label="Close"
+        >
+          ×
+        </button>
 
-        <div className="space-y-4">
-          <Field label="Your Character's Name">
-            <input required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-background border border-border px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" placeholder="Kai Solari" />
-          </Field>
-          <Field label="Age">
-            <input required type="number" min={5} max={120} value={age} onChange={(e) => setAge(parseInt(e.target.value || "0", 10))} className="w-full bg-background border border-border px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" />
-          </Field>
-          <Field label="World">
-            <select value={world} onChange={(e) => setWorld(e.target.value)} className="w-full bg-background border border-border px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none">
-              {WORLDS.map((w) => <option key={w}>{w}</option>)}
-            </select>
-          </Field>
-          <Field label="Personality Traits (optional)">
-            <textarea value={traits} onChange={(e) => setTraits(e.target.value)} rows={2} className="w-full bg-background border border-border px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" placeholder="Cunning, loyal, reckless, secretly afraid of failure…" />
-          </Field>
-          <Field label="Goals (optional)">
-            <textarea value={goals} onChange={(e) => setGoals(e.target.value)} rows={2} className="w-full bg-background border border-border px-3 py-2 text-sm focus:border-[var(--gold)] focus:outline-none" placeholder="Become the most feared bounty hunter in the outer rim." />
-          </Field>
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 px-8 pt-8">
+          {[1, 2, 3, 4].map((n) => (
+            <div
+              key={n}
+              className={`h-[2px] flex-1 transition-colors ${n <= step ? "bg-[var(--gold)]" : "bg-border"}`}
+            />
+          ))}
+        </div>
+        <p className="px-8 mt-3 text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
+          Step {step} of 4
+        </p>
+
+        <div className="px-8 pb-8 pt-4 min-h-[420px]">
+          {step === 1 && (
+            <>
+              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">Who are you?</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground mb-2">Name</label>
+                  <input
+                    autoFocus
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && canNext) next(); }}
+                    placeholder="Noah"
+                    className="w-full bg-background border border-border px-4 py-3 text-lg focus:border-[var(--gold)] focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground mb-2">Photo (optional)</label>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="w-20 h-20 rounded-full border border-dashed border-border hover:border-[var(--gold)] flex items-center justify-center overflow-hidden transition-colors"
+                    >
+                      {photo ? (
+                        <img src={photo} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-2xl text-muted-foreground">+</span>
+                      )}
+                    </button>
+                    <div className="text-xs text-muted-foreground">
+                      {photo ? (
+                        <button type="button" onClick={() => setPhoto(undefined)} className="hover:text-[var(--gold)] underline">
+                          Remove
+                        </button>
+                      ) : (
+                        <span>Upload a face for your character.</span>
+                      )}
+                    </div>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handlePhoto(f);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">Choose your reality.</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {WORLDS.map((w) => {
+                  const selected = world === w.name;
+                  return (
+                    <button
+                      key={w.name}
+                      type="button"
+                      onClick={() => { setWorld(w.name); }}
+                      className={`text-left p-4 border transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-border hover:border-[var(--gold)]/50"}`}
+                    >
+                      <div className="text-2xl mb-2">{w.emoji}</div>
+                      <div className="text-sm">{w.name}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <h2 className="font-display text-3xl md:text-4xl font-light mb-3">What kind of person are you?</h2>
+              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+                Pick 3 · {traits.length}/3 selected
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {TRAITS.map((t) => {
+                  const selected = traits.includes(t);
+                  const disabled = !selected && traits.length >= 3;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTrait(t)}
+                      disabled={disabled}
+                      className={`px-4 py-2 border text-sm transition-all ${selected
+                        ? "border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]"
+                        : disabled
+                          ? "border-border opacity-30 cursor-not-allowed"
+                          : "border-border hover:border-[var(--gold)]/60"
+                        }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">What's your goal?</h2>
+              <div className="space-y-2">
+                {GOALS.map((g) => {
+                  const selected = goal === g;
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGoal(g)}
+                      className={`block w-full text-left px-4 py-3 border text-sm transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]" : "border-border hover:border-[var(--gold)]/60"}`}
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
-        <button type="submit" disabled={submitting} className="mt-6 w-full bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase py-4 hover:bg-[var(--gold-bright)] disabled:opacity-50 transition-all">
-          {submitting ? "Forging your reality…" : "Enter The Portal"}
-        </button>
-        <p className="text-[0.55rem] tracking-[0.25em] uppercase text-muted-foreground/60 text-center mt-4">
-          No account required · Saved on this device
-        </p>
-      </form>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground mb-2">{label}</label>
-      {children}
+        {/* Footer nav */}
+        <div className="flex items-center justify-between px-8 py-5 border-t border-border bg-background/40">
+          <button
+            type="button"
+            onClick={back}
+            disabled={step === 1 || submitting}
+            className="text-[0.65rem] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            ← Back
+          </button>
+          {step < 4 ? (
+            <button
+              type="button"
+              onClick={next}
+              disabled={!canNext}
+              className="bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase px-6 py-3 hover:bg-[var(--gold-bright)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              Continue →
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={finish}
+              disabled={!canNext || submitting}
+              className="bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase px-6 py-3 hover:bg-[var(--gold-bright)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              {submitting ? "Entering…" : "Enter →"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
