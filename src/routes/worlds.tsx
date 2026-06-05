@@ -14,9 +14,9 @@ export const Route = createFileRoute("/worlds")({
   head: () => ({
     meta: [
       { title: "Worlds — Revenio" },
-      { name: "description", content: "Eight galactic sagas. Sentinel orders, shadow empires, smuggler ports, rebel fleets. Pick a star. Live a life." },
-      { property: "og:title", content: "Choose Your Galaxy — Revenio" },
-      { property: "og:description", content: "Eight AI-generated galactic worlds. One headset. Infinite sagas." },
+      { name: "description", content: "Eight realities. Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more. Pick a world. Live a life." },
+      { property: "og:title", content: "Choose Your World — Revenio" },
+      { property: "og:description", content: "Eight AI-generated worlds. One platform. Infinite lives." },
     ],
   }),
   component: Worlds,
@@ -24,52 +24,52 @@ export const Route = createFileRoute("/worlds")({
 
 const worlds = [
   {
-    name: "Order of the Sentinels",
-    tag: "Guardians of the Light.",
-    desc: "Train at a hidden temple on a sun-scorched moon. Master the lightblade. Hold the galaxy together while it tears itself apart.",
-    img: wHero,
+    name: "Arcane Academy",
+    tag: "Learn the forbidden arts.",
+    desc: "A legendary school hidden from the ordinary world where students learn spellcasting, magical combat, potion-making, and ancient secrets.",
+    img: wMagic,
   },
   {
-    name: "The Shadow Empire",
-    tag: "Rule with the dark.",
-    desc: "Ascend the obsidian throne. Command starfleets. Crush dissent across a thousand systems with a single thought.",
-    img: wKingdom,
-  },
-  {
-    name: "Outlaw of the Outer Rim",
-    tag: "Run the spice routes.",
-    desc: "A cargo hold of contraband, a price on your head, and a crew that almost likes you. Smuggle, gamble, survive.",
-    img: wSurvival,
-  },
-  {
-    name: "Bounty Contracts",
-    tag: "Armor up. Hunt anything.",
-    desc: "Beskar plating. A jetpack. A target. The galaxy calls you when no one else can finish the job.",
-    img: wEmpire,
-  },
-  {
-    name: "Rebel Starfighter Wing",
-    tag: "Fly for the spark.",
-    desc: "Take an X-wing into the void against an impossible imperial fleet. The galaxy doesn't need a hero. It needs a pilot.",
+    name: "Galactic Frontier",
+    tag: "Choose your side.",
+    desc: "Join a galaxy-wide conflict, master energy blades, pilot starships, and choose between order, rebellion, or power.",
     img: wSpace,
   },
   {
-    name: "The Galactic Senate",
-    tag: "Politics is the long war.",
-    desc: "A thousand worlds. A million agendas. Master the chamber, the back-channels, and the knives that wait in the dark.",
-    img: wFuture,
+    name: "Hero Nexus",
+    tag: "Power rises. So do you.",
+    desc: "Develop extraordinary abilities, form alliances with heroes, battle powerful villains, and determine the fate of the world.",
+    img: wHero,
   },
   {
-    name: "Speeder Circuit Champion",
-    tag: "Race the canyons.",
-    desc: "Anti-grav podracers at lethal speeds through asteroid fields and desert canyons. Win the crown — or die spectacularly.",
+    name: "Dragonfall Kingdoms",
+    tag: "Rule from the sky.",
+    desc: "Ride dragons, command armies, forge alliances, and compete for control of the realm.",
+    img: wKingdom,
+  },
+  {
+    name: "Champions Legacy",
+    tag: "Earn your legacy.",
+    desc: "Start as an unknown prospect and work your way to becoming the greatest athlete in the world, winning championships, trophies, and global fame.",
     img: wSports,
   },
   {
-    name: "Academy of the Forgotten Order",
-    tag: "Study what was erased.",
-    desc: "A monastery on a frozen world holds the last archives of a banned discipline. Train, decode, and decide what to do with what you find.",
-    img: wMagic,
+    name: "Shadow Guild",
+    tag: "Strike from the dark.",
+    desc: "Join a secret order, uncover conspiracies, complete dangerous missions, and decide whether to save or control the world.",
+    img: wSurvival,
+  },
+  {
+    name: "Neon Dominion",
+    tag: "The future is war.",
+    desc: "A futuristic mega-city filled with AI, advanced technology, virtual worlds, corporate wars, and endless opportunities.",
+    img: wFuture,
+  },
+  {
+    name: "Eternal Odyssey",
+    tag: "Fate awaits.",
+    desc: "Embark on an epic adventure across ancient lands, battle mythical creatures, discover legendary artifacts, and fulfill a prophecy.",
+    img: wEmpire,
   },
 ];
 
@@ -82,11 +82,11 @@ function Worlds() {
         <div className="gold-hairline w-24 mx-auto mb-8" />
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Choose Your Reality</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
-          Eight galaxies.<br />
+          Eight worlds.<br />
           <span className="italic text-gold-gradient">One of them is yours.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Step into a saga inspired by the greatest stories ever told between the stars.
+          Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more.
           The AI does the rest.
         </p>
       </section>
@@ -132,12 +132,12 @@ function Worlds() {
           </div>
           <div className="space-y-px">
             {[
-              "you trained as a sentinel and held a lightblade for the first time?",
-              "you flew the final attack run against an imperial dreadnought?",
-              "you out-gambled a kingpin in a smoke-filled cantina on the edge of the galaxy?",
-              "you ruled an empire and decided which star system burned tonight?",
-              "you took a bounty that turned out to be a child you were supposed to protect?",
-              "you broke a galactic senate in a single, perfectly timed sentence?",
+              "you cast your first spell at a hidden academy and felt the arcane surge through your hands?",
+              "you piloted a starfighter through a dying nebula with the fleet at your back?",
+              "you discovered you had powers no one on Earth had ever seen before?",
+              "you rode a dragon into battle and the realm held its breath?",
+              "you scored the winning goal in front of eighty thousand screaming fans?",
+              "you infiltrated a corporate megastructure and stole the keys to the city?",
             ].map((q, i) => (
               <div key={q} className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer">
                 <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">{String(i + 1).padStart(2, "0")}</span>
