@@ -347,7 +347,7 @@ function SimulationPage() {
 
               <form
                 onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="border-t border-border p-4 md:px-12 md:py-6 bg-card/40 backdrop-blur"
+                className="relative border-t border-border p-4 md:px-12 md:py-6 bg-card/60 backdrop-blur"
               >
                 <div className="flex gap-3 items-end max-w-4xl mx-auto">
                   <textarea
