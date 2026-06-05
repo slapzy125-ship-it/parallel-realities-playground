@@ -95,6 +95,82 @@ function Experience() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section className="relative py-32 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Pricing</p>
+            <h2 className="font-display text-5xl md:text-7xl font-light">
+              Pick your<br /><span className="italic text-gold-gradient">path.</span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Explorer — Free */}
+            <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
+              <h3 className="font-display text-3xl mb-2">Revenio Explorer</h3>
+              <p className="text-2xl font-display text-[var(--gold)] mb-8">FREE</p>
+              <ul className="space-y-3 text-sm text-muted-foreground flex-1">
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Access to 2 Worlds</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Arcane Academy</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Champions Legacy</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>3 Simulations Per Day</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Basic Character Creation</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Save 1 Character</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Standard AI Speed</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Community Access</li>
+              </ul>
+              <button className="mt-8 w-full py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
+                Start Free
+              </button>
+            </div>
+
+            {/* Legend — $9.99 */}
+            <div className="bg-[var(--onyx)] border-2 border-[var(--gold)]/60 p-8 flex flex-col relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--gold)] text-background text-[10px] tracking-[0.2em] uppercase px-4 py-1 font-medium">
+                Most Popular
+              </div>
+              <h3 className="font-display text-3xl mb-2">Revenio Legend</h3>
+              <p className="text-2xl font-display text-[var(--gold)] mb-8">$9.99<span className="text-sm text-muted-foreground font-sans">/month</span></p>
+              <ul className="space-y-3 text-sm text-muted-foreground flex-1">
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Access to All 8 Worlds</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Unlimited Simulations</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Advanced Character Creation</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Unlimited Character Saves</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Story Progress Tracking</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Equipment</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Faster AI Responses</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Character Slots</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future World Access</li>
+              </ul>
+              <button className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
+                Become A Legend
+              </button>
+            </div>
+
+            {/* Infinite — $19.99 */}
+            <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
+              <h3 className="font-display text-3xl mb-2">Revenio Infinite</h3>
+              <p className="text-2xl font-display text-[var(--gold)] mb-8">$19.99<span className="text-sm text-muted-foreground font-sans">/month</span></p>
+              <ul className="space-y-3 text-sm text-muted-foreground flex-1">
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Everything In Legend</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Early Access To New Worlds</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Storylines</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Founder Rewards</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Equipment Sets</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>AI Companion Characters</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Cosmetics</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Revenio One Discounts</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future Hardware Benefits</li>
+              </ul>
+              <button className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
+                Enter Infinite
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="relative py-40 px-6 text-center overflow-hidden">
         <div className="absolute inset-0 bg-[var(--gradient-radial-gold)] opacity-50" />
