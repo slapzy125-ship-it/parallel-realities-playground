@@ -578,10 +578,20 @@ function NewSimWizard({
                       key={w.name}
                       type="button"
                       onClick={() => { setWorld(w.name); }}
-                      className={`text-left p-4 border transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold)]/10" : "border-border hover:border-[var(--gold)]/50"}`}
+                      className={`group relative text-left border overflow-hidden aspect-[4/3] transition-all ${selected ? "border-[var(--gold)] ring-2 ring-[var(--gold)]/40" : "border-border hover:border-[var(--gold)]/50"}`}
                     >
-                      <div className="text-2xl mb-2">{w.emoji}</div>
-                      <div className="text-sm">{w.name}</div>
+                      {w.img && (
+                        <img
+                          src={w.img}
+                          alt=""
+                          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${selected ? "opacity-80 scale-105" : "opacity-50 group-hover:opacity-75 group-hover:scale-105"}`}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
+                      <div className="relative h-full flex flex-col justify-end p-4">
+                        <div className="text-xl mb-1">{w.emoji}</div>
+                        <div className={`text-sm font-medium ${selected ? "text-[var(--gold)]" : "text-foreground"}`}>{w.name}</div>
+                      </div>
                     </button>
                   );
                 })}
