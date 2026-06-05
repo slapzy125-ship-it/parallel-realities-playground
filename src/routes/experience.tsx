@@ -1,19 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import showcaseAsset from "@/assets/revenio-showcase.asset.json";
 
 export const Route = createFileRoute("/experience")({
   head: () => ({
     meta: [
-      { title: "Experience — Revenio One" },
-      { name: "description", content: "Revenio One. Two finishes. Built for galactic immersion. Coming 2031." },
-      { property: "og:title", content: "Revenio One — The Hardware" },
-      { property: "og:description", content: "Onyx and Luxe editions. One headset. Infinite worlds." },
+      { title: "Experience — Revenio" },
+      { name: "description", content: "How Revenio works. Choose a galaxy. Step through the portal. Live the saga." },
+      { property: "og:title", content: "The Revenio Experience" },
+      { property: "og:description", content: "AI-powered parallel-universe simulation. One choice. Infinite sagas." },
     ],
   }),
   component: Experience,
 });
+
+const steps = [
+  {
+    n: "01",
+    t: "Choose Your Galaxy",
+    d: "Eight star systems. Sentinel temples, shadow empires, smuggler ports, rebel fleets. Pick the saga that calls to you.",
+  },
+  {
+    n: "02",
+    t: "Step Through the Portal",
+    d: "The AI builds your role, your allies, your enemies, and your stakes in real time. No two entries are the same.",
+  },
+  {
+    n: "03",
+    t: "Live the Saga",
+    d: "Every choice locks in. Every conversation shifts the story. Every session writes a different ending.",
+  },
+];
 
 const features = [
   { t: "AI-Powered Simulations", d: "Every saga adapts to the choices you make in real time." },
@@ -21,18 +38,7 @@ const features = [
   { t: "Choice-Based Outcomes", d: "Every decision permanently rewrites your timeline." },
   { t: "AI Companions", d: "Allies and rivals who remember every word you say to them." },
   { t: "Infinite Endings", d: "Replay the same world ten times. Watch ten different fates." },
-  { t: "Galactic Hand-Tracking", d: "Reach out. Grip the lightblade. Pull the trigger. No controllers." },
-];
-
-const future = [
-  "Haptic Gauntlets",
-  "Environmental Immersion",
-  "AI Companion Network",
-  "Lightblade Peripherals",
-  "Mixed Reality Cockpits",
-  "Speeder Rig Add-On",
-  "Surround Audio Suite",
-  "Personalized Universes",
+  { t: "Full Immersion", d: "Reach out. Grip the lightblade. Pull the trigger. Feel the galaxy around you." },
 ];
 
 function Experience() {
@@ -43,48 +49,26 @@ function Experience() {
       {/* Hero */}
       <section className="relative pt-40 pb-20 px-6 text-center">
         <div className="gold-hairline w-24 mx-auto mb-8" />
-        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Coming 2031</p>
+        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">How It Works</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
-          Revenio One.<br />
-          <span className="italic text-gold-gradient">Built for immersion.</span>
+          One choice.<br />
+          <span className="italic text-gold-gradient">Infinite sagas.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          One headset. Two finishes. Engineered from the ground up for AI-powered galactic simulation.
+          Revenio is an AI-powered simulation platform. You pick the galaxy. The AI builds the world around you. You write the story.
         </p>
       </section>
 
-      {/* Showcase */}
-      <section className="relative pb-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative border border-[var(--gold)]/30 overflow-hidden shadow-[var(--shadow-deep)]">
-            <img
-              src={showcaseAsset.url}
-              alt="Revenio One — Onyx and Luxe editions"
-              className="w-full h-auto"
-            />
-            <div className="absolute inset-0 ring-1 ring-inset ring-[var(--gold)]/20 pointer-events-none" />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-px bg-border mt-px">
-            <div className="bg-background p-10">
-              <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-3">Onyx Edition</p>
-              <h3 className="font-display text-3xl mb-4">Black & Gold. The flagship.</h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>· Transparent gold-rim optics</li>
-                <li>· Maximum immersion field</li>
-                <li>· Precision motion sensors</li>
-              </ul>
+      {/* Steps */}
+      <section className="relative pb-32 px-6">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-px bg-border">
+          {steps.map((s) => (
+            <div key={s.n} className="bg-background p-10 text-left">
+              <p className="font-display text-5xl text-[var(--gold)]/40 mb-4">{s.n}</p>
+              <h3 className="font-display text-2xl mb-3">{s.t}</h3>
+              <p className="text-sm text-muted-foreground">{s.d}</p>
             </div>
-            <div className="bg-background p-10">
-              <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-3">Luxe Edition</p>
-              <h3 className="font-display text-3xl mb-4">White & Gold. The ceremonial.</h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>· Premium comfort headband</li>
-                <li>· Ultra-clear display lattice</li>
-                <li>· Hand-finished gold detailing</li>
-              </ul>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -111,32 +95,14 @@ function Experience() {
         </div>
       </section>
 
-      {/* Future tech */}
-      <section className="relative py-32 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">The Road Map</p>
-            <h2 className="font-display text-5xl md:text-7xl font-light">The future of <span className="italic text-gold-gradient">reality.</span></h2>
-          </div>
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {future.map((tech) => (
-              <div key={tech} className="aspect-square border border-border hover:border-[var(--gold)] p-6 flex flex-col justify-between group hover:bg-[var(--gold)]/5 transition-all duration-500">
-                <span className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)]/60 group-hover:text-[var(--gold)]">Concept</span>
-                <p className="font-display text-2xl leading-tight">{tech}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="relative py-40 px-6 text-center overflow-hidden">
         <div className="absolute inset-0 bg-[var(--gradient-radial-gold)] opacity-50" />
         <div className="relative max-w-3xl mx-auto">
           <div className="gold-hairline w-24 mx-auto mb-8" />
           <h2 className="font-display text-5xl md:text-7xl font-light mb-8 leading-tight">
-            One headset.<br />
-            <span className="italic text-gold-gradient">Infinite worlds.</span>
+            Your saga<br />
+            <span className="italic text-gold-gradient">starts now.</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/worlds" className="px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
@@ -153,3 +119,4 @@ function Experience() {
     </main>
   );
 }
+

@@ -45,6 +45,9 @@ export function SiteNav() {
           <Link to="/experience" className="hover:text-[var(--gold)] transition" activeProps={{ className: "text-[var(--gold)]" }}>
             Experience
           </Link>
+          <Link to="/hardware" className="hover:text-[var(--gold)] transition" activeProps={{ className: "text-[var(--gold)]" }}>
+            Hardware
+          </Link>
         </div>
 
         {user ? (

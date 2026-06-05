@@ -64,7 +64,7 @@ function Home() {
               to="/experience"
               className="px-10 py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500"
             >
-              Explore Hardware
+              How It Works
             </Link>
           </div>
         </div>
