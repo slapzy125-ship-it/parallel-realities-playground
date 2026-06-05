@@ -52,10 +52,10 @@ function Experience() {
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">How It Works</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
           One choice.<br />
-          <span className="italic text-gold-gradient">Infinite sagas.</span>
+          <span className="italic text-gold-gradient">Endless stories.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Revenio is an AI-powered simulation platform. You pick the galaxy. The AI builds the world around you. You write the story.
+          Revenio is a world you can step into. You pick the world. The AI builds it around you. You live the story.
         </p>
       </section>
 
