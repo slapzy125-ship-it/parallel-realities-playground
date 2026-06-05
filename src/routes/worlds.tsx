@@ -80,14 +80,14 @@ function Worlds() {
 
       <section className="relative pt-40 pb-20 px-6 text-center">
         <div className="gold-hairline w-24 mx-auto mb-8" />
-        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Choose Your Reality</p>
+        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Pick Your World</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
           Eight worlds.<br />
-          <span className="italic text-gold-gradient">One of them is yours.</span>
+          <span className="italic text-gold-gradient">One is yours.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more.
-          The AI does the rest.
+          Magic schools, space wars, hero teams, dragon kingdoms, and more.
+          You pick. The AI does the rest.
         </p>
       </section>
 
