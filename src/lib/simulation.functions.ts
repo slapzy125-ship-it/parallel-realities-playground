@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const SYSTEM_PROMPT = (sim: {
   character_name: string;
@@ -48,148 +47,44 @@ Cinematic, immersive, emotionally charged. Match the chosen world's genre. Use v
 
 Format with markdown for emphasis, scene breaks (---), and clearly numbered choice lists.`;
 
-const callLovableAI = async (messages: { role: string; content: string }[]) => {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+const MsgSchema = z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(8000) });
+
+export const simulationChat = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      profile: z.object({
+        character_name: z.string().min(1).max(80),
+        character_age: z.number().int().min(5).max(120),
+        world: z.string().min(1).max(120),
+        traits: z.string().max(500).default(""),
+        goals: z.string().max(500).default(""),
+      }),
+      messages: z.array(MsgSchema).max(200),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
+
+    const payload = {
       model: "google/gemini-2.5-flash",
-      messages,
-    }),
-  });
-  if (res.status === 429) throw new Error("Rate limit hit. Try again shortly.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Top up Lovable AI.");
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`AI gateway error ${res.status}: ${t.slice(0, 200)}`);
-  }
-  const data = (await res.json()) as { choices: { message: { content: string } }[] };
-  return data.choices[0]?.message?.content ?? "";
-};
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT(data.profile) },
+        ...data.messages,
+      ],
+    };
 
-export const listSimulations = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("simulations")
-      .select("id, title, world, character_name, updated_at")
-      .order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return data ?? [];
-  });
-
-export const getSimulation = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ context, data }) => {
-    const { data: sim, error } = await context.supabase
-      .from("simulations").select("*").eq("id", data.id).maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!sim) throw new Error("Simulation not found");
-    const { data: messages, error: mErr } = await context.supabase
-      .from("simulation_messages")
-      .select("id, role, content, created_at")
-      .eq("simulation_id", data.id)
-      .order("created_at", { ascending: true });
-    if (mErr) throw new Error(mErr.message);
-    return { simulation: sim, messages: messages ?? [] };
-  });
-
-export const createSimulation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      character_name: z.string().min(1).max(80),
-      character_age: z.number().int().min(5).max(120),
-      world: z.string().min(1).max(120),
-      traits: z.string().max(500).default(""),
-      goals: z.string().max(500).default(""),
-    }).parse(d),
-  )
-  .handler(async ({ context, data }) => {
-    const title = `${data.character_name} — ${data.world}`;
-    const { data: sim, error } = await context.supabase
-      .from("simulations")
-      .insert({
-        user_id: context.userId,
-        title,
-        character_name: data.character_name,
-        character_age: data.character_age,
-        world: data.world,
-        traits: data.traits,
-        goals: data.goals,
-      })
-      .select()
-      .single();
-    if (error) throw new Error(error.message);
-
-    // Generate opening scene
-    const systemPrompt = SYSTEM_PROMPT(sim);
-    const opening = await callLovableAI([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: "Begin the simulation. Generate my Character Profile, the World, and drop me into the opening scene with choices." },
-    ]);
-    const { error: insErr } = await context.supabase
-      .from("simulation_messages")
-      .insert({ simulation_id: sim.id, role: "assistant", content: opening });
-    if (insErr) throw new Error(insErr.message);
-
-    return { id: sim.id };
-  });
-
-export const sendSimulationMessage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      simulation_id: z.string().uuid(),
-      content: z.string().min(1).max(4000),
-    }).parse(d),
-  )
-  .handler(async ({ context, data }) => {
-    const { data: sim, error: sErr } = await context.supabase
-      .from("simulations").select("*").eq("id", data.simulation_id).maybeSingle();
-    if (sErr) throw new Error(sErr.message);
-    if (!sim) throw new Error("Simulation not found");
-
-    // Save user message
-    const { error: uErr } = await context.supabase.from("simulation_messages")
-      .insert({ simulation_id: sim.id, role: "user", content: data.content });
-    if (uErr) throw new Error(uErr.message);
-
-    // Load history
-    const { data: history } = await context.supabase
-      .from("simulation_messages")
-      .select("role, content")
-      .eq("simulation_id", sim.id)
-      .order("created_at", { ascending: true });
-
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT(sim) },
-      ...(history ?? []).map((m) => ({ role: m.role, content: m.content })),
-    ];
-
-    const reply = await callLovableAI(messages);
-
-    const { data: saved, error: aErr } = await context.supabase
-      .from("simulation_messages")
-      .insert({ simulation_id: sim.id, role: "assistant", content: reply })
-      .select("id, role, content, created_at")
-      .single();
-    if (aErr) throw new Error(aErr.message);
-
-    return saved;
-  });
-
-export const deleteSimulation = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ context, data }) => {
-    const { error } = await context.supabase.from("simulations").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.status === 429) throw new Error("Rate limit hit. Try again shortly.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Top up Lovable AI.");
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`AI gateway error ${res.status}: ${t.slice(0, 200)}`);
+    }
+    const json = (await res.json()) as { choices: { message: { content: string } }[] };
+    return { content: json.choices[0]?.message?.content ?? "" };
   });
