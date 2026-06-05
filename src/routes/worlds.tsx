@@ -14,9 +14,9 @@ export const Route = createFileRoute("/worlds")({
   head: () => ({
     meta: [
       { title: "Worlds — Revenio" },
-      { name: "description", content: "Eight realities. Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more. Pick a world. Live a life." },
-      { property: "og:title", content: "Choose Your World — Revenio" },
-      { property: "og:description", content: "Eight AI-generated worlds. One platform. Infinite lives." },
+      { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
+      { property: "og:title", content: "Pick Your World — Revenio" },
+      { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
     ],
   }),
   component: Worlds,
