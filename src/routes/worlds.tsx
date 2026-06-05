@@ -132,12 +132,12 @@ function Worlds() {
           </div>
           <div className="space-y-px">
             {[
-              "you cast your first spell at a hidden academy and felt the arcane surge through your hands?",
-              "you piloted a starfighter through a dying nebula with the fleet at your back?",
-              "you discovered you had powers no one on Earth had ever seen before?",
-              "you rode a dragon into battle and the realm held its breath?",
-              "you scored the winning goal in front of eighty thousand screaming fans?",
-              "you infiltrated a corporate megastructure and stole the keys to the city?",
+              "you cast your first spell and felt the magic in your hands?",
+              "you flew a starfighter into battle with the fleet behind you?",
+              "you woke up with powers no one else on Earth had?",
+              "you rode a dragon into a fight and the whole kingdom watched?",
+              "you scored the winning goal in front of 80,000 fans?",
+              "you broke into a giant tower and walked out with its secrets?",
             ].map((q, i) => (
               <div key={q} className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer">
                 <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">{String(i + 1).padStart(2, "0")}</span>
@@ -151,7 +151,7 @@ function Worlds() {
               to="/simulation"
               className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
             >
-              Start Your Simulation →
+              Start Your Story →
             </Link>
           </div>
         </div>
