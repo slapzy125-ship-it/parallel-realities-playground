@@ -6,10 +6,10 @@ import heroPortals from "@/assets/hero-portals.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Revenio — Explore the Life You Never Lived" },
-      { name: "description", content: "Step into AI-powered galactic simulations. Wield a lightblade, captain a starship, rule a star system. One headset. Infinite worlds." },
-      { property: "og:title", content: "Revenio — Become Another You" },
-      { property: "og:description", content: "AI-powered parallel-universe simulations. Coming 2031." },
+      { title: "Revenio — Live Another Life" },
+      { name: "description", content: "Step into AI worlds. Pick a world. Live a story. One headset. Endless worlds." },
+      { property: "og:title", content: "Revenio — Be Someone Else" },
+      { property: "og:description", content: "AI worlds you can step into. Coming 2031." },
     ],
   }),
   component: Home,
@@ -49,8 +49,8 @@ function Home() {
             <span className="shimmer-text italic font-medium">Another You.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-light">
-            Step into AI-powered simulations where every choice opens a new galaxy.
-            Wield a lightblade. Captain a starship. Rule a star system. One headset. Infinite worlds.
+            Step into AI worlds. Cast spells. Fly ships. Rule kingdoms.
+            One headset. Endless worlds.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
@@ -70,7 +70,7 @@ function Home() {
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[0.6rem] tracking-[0.4em] text-muted-foreground/60 uppercase animate-float">
-          Scroll · Enter the Galaxy
+          Scroll · Step In
         </div>
       </section>
 
@@ -79,17 +79,15 @@ function Home() {
         <div className="gold-hairline w-24 mx-auto mb-8" />
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-6">What Is Revenio</p>
         <h2 className="font-display text-4xl md:text-6xl font-light mb-10 leading-tight">
-          A galactic saga.<br />
-          <span className="italic text-gold-gradient">Written around you.</span>
+          A big story.<br />
+          <span className="italic text-gold-gradient">Built around you.</span>
         </h2>
         <p className="text-lg text-muted-foreground leading-relaxed font-light max-w-3xl mx-auto">
-          Revenio is an AI-powered simulation platform. Strap in, step through the portal, and arrive
-          inside a living galaxy — sentinel orders, smuggler ports, rebel fleets, shadow empires.
-          The AI builds the world. You write the saga. Every session is a different version of you,
-          in a different version of the stars.
+          Revenio is an AI world you can step into. Pick a world. The AI builds it around you —
+          the people, the places, the fight. You make the choices. You live the story.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-center">
-          {["Every simulation is unique.", "Every decision rewrites the story.", "Every session is a new life."].map((t) => (
+          {["Every world is new.", "Every choice matters.", "Every run is a new life."].map((t) => (
             <p key={t} className="font-display italic text-lg md:text-xl text-[var(--gold)]/90 border-t md:border-t border-[var(--gold)]/30 pt-6">
               {t}
             </p>
@@ -101,13 +99,13 @@ function Home() {
       <section className="relative py-32 px-6 bg-[var(--onyx)] border-y border-border text-center">
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-6">Three Steps</p>
         <h2 className="font-display text-5xl md:text-6xl font-light mb-16">
-          Pick a galaxy.<br /><span className="italic text-gold-gradient">Live a saga.</span>
+          Pick a world.<br /><span className="italic text-gold-gradient">Live a story.</span>
         </h2>
         <div className="grid md:grid-cols-3 gap-px bg-border max-w-5xl mx-auto">
           {[
-            { n: "01", t: "Choose a World", d: "Eight galactic settings — order, empire, frontier, rebellion." },
-            { n: "02", t: "Step Through the Portal", d: "AI builds your role, your allies, your enemies, your stakes." },
-            { n: "03", t: "Live the Saga", d: "Every choice locks in. Every session a new ending." },
+            { n: "01", t: "Pick a World", d: "Eight worlds. Magic, space, kingdoms, heroes, and more." },
+            { n: "02", t: "Step Inside", d: "The AI builds your role, your friends, your enemies." },
+            { n: "03", t: "Live the Story", d: "Every choice sticks. Every run ends in a new way." },
           ].map((s) => (
             <div key={s.n} className="bg-background p-10 text-left">
               <p className="font-display text-5xl text-[var(--gold)]/40 mb-4">{s.n}</p>

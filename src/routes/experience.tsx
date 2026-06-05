@@ -6,9 +6,9 @@ export const Route = createFileRoute("/experience")({
   head: () => ({
     meta: [
       { title: "Experience — Revenio" },
-      { name: "description", content: "How Revenio works. Choose a galaxy. Step through the portal. Live the saga." },
-      { property: "og:title", content: "The Revenio Experience" },
-      { property: "og:description", content: "AI-powered parallel-universe simulation. One choice. Infinite sagas." },
+      { name: "description", content: "How Revenio works. Pick a world. Step in. Live the story." },
+      { property: "og:title", content: "How Revenio Works" },
+      { property: "og:description", content: "AI worlds you live in. One choice. Endless stories." },
     ],
   }),
   component: Experience,
@@ -17,28 +17,28 @@ export const Route = createFileRoute("/experience")({
 const steps = [
   {
     n: "01",
-    t: "Choose Your Galaxy",
-    d: "Eight star systems. Sentinel temples, shadow empires, smuggler ports, rebel fleets. Pick the saga that calls to you.",
+    t: "Pick Your World",
+    d: "Eight worlds. Magic, space, kingdoms, heroes, and more. Pick the one you want.",
   },
   {
     n: "02",
-    t: "Step Through the Portal",
-    d: "The AI builds your role, your allies, your enemies, and your stakes in real time. No two entries are the same.",
+    t: "Step Inside",
+    d: "The AI sets up your role, your friends, your enemies — live, on the fly. No two runs are the same.",
   },
   {
     n: "03",
-    t: "Live the Saga",
-    d: "Every choice locks in. Every conversation shifts the story. Every session writes a different ending.",
+    t: "Live the Story",
+    d: "Every choice sticks. Every chat moves the story. Every run ends a different way.",
   },
 ];
 
 const features = [
-  { t: "AI-Powered Simulations", d: "Every saga adapts to the choices you make in real time." },
-  { t: "Dynamic Storytelling", d: "No two sessions unfold the same way — ever." },
-  { t: "Choice-Based Outcomes", d: "Every decision permanently rewrites your timeline." },
-  { t: "AI Companions", d: "Allies and rivals who remember every word you say to them." },
-  { t: "Infinite Endings", d: "Replay the same world ten times. Watch ten different fates." },
-  { t: "Full Immersion", d: "Reach out. Grip the lightblade. Pull the trigger. Feel the galaxy around you." },
+  { t: "AI Worlds", d: "The story changes with every choice you make." },
+  { t: "Live Storytelling", d: "No two runs play out the same way." },
+  { t: "Choices That Stick", d: "Every choice changes what happens next." },
+  { t: "AI Friends", d: "People in the world remember what you say." },
+  { t: "Endless Endings", d: "Play the same world ten times. Ten new endings." },
+  { t: "Full Immersion", d: "Reach out. Grab the sword. Pull the trigger. Feel the world." },
 ];
 
 function Experience() {
@@ -52,10 +52,10 @@ function Experience() {
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">How It Works</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
           One choice.<br />
-          <span className="italic text-gold-gradient">Infinite sagas.</span>
+          <span className="italic text-gold-gradient">Endless stories.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Revenio is an AI-powered simulation platform. You pick the galaxy. The AI builds the world around you. You write the story.
+          Revenio is a world you can step into. You pick the world. The AI builds it around you. You live the story.
         </p>
       </section>
 
@@ -78,7 +78,7 @@ function Experience() {
           <div className="text-center mb-20">
             <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Why Revenio</p>
             <h2 className="font-display text-5xl md:text-7xl font-light">
-              Every choice<br /><span className="italic text-gold-gradient">opens a galaxy.</span>
+              Every choice<br /><span className="italic text-gold-gradient">opens a world.</span>
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
@@ -101,7 +101,7 @@ function Experience() {
         <div className="relative max-w-3xl mx-auto">
           <div className="gold-hairline w-24 mx-auto mb-8" />
           <h2 className="font-display text-5xl md:text-7xl font-light mb-8 leading-tight">
-            Your saga<br />
+            Your story<br />
             <span className="italic text-gold-gradient">starts now.</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

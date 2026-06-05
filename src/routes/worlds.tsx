@@ -14,9 +14,9 @@ export const Route = createFileRoute("/worlds")({
   head: () => ({
     meta: [
       { title: "Worlds — Revenio" },
-      { name: "description", content: "Eight realities. Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more. Pick a world. Live a life." },
-      { property: "og:title", content: "Choose Your World — Revenio" },
-      { property: "og:description", content: "Eight AI-generated worlds. One platform. Infinite lives." },
+      { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
+      { property: "og:title", content: "Pick Your World — Revenio" },
+      { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
     ],
   }),
   component: Worlds,
@@ -25,50 +25,50 @@ export const Route = createFileRoute("/worlds")({
 const worlds = [
   {
     name: "Arcane Academy",
-    tag: "Learn the forbidden arts.",
-    desc: "A legendary school hidden from the ordinary world where students learn spellcasting, magical combat, potion-making, and ancient secrets.",
+    tag: "Learn real magic.",
+    desc: "A hidden school of magic. Cast spells, mix potions, duel students, and uncover old secrets.",
     img: wMagic,
   },
   {
     name: "Galactic Frontier",
-    tag: "Choose your side.",
-    desc: "Join a galaxy-wide conflict, master energy blades, pilot starships, and choose between order, rebellion, or power.",
+    tag: "Pick a side.",
+    desc: "A war across the stars. Swing an energy blade. Fly a ship. Stand with order, rebels, or power.",
     img: wSpace,
   },
   {
     name: "Hero Nexus",
     tag: "Power rises. So do you.",
-    desc: "Develop extraordinary abilities, form alliances with heroes, battle powerful villains, and determine the fate of the world.",
+    desc: "Get powers. Team up with heroes. Fight villains. Decide what kind of hero you are.",
     img: wHero,
   },
   {
     name: "Dragonfall Kingdoms",
     tag: "Rule from the sky.",
-    desc: "Ride dragons, command armies, forge alliances, and compete for control of the realm.",
+    desc: "Ride dragons. Lead armies. Make friends. Take the throne.",
     img: wKingdom,
   },
   {
     name: "Champions Legacy",
-    tag: "Earn your legacy.",
-    desc: "Start as an unknown prospect and work your way to becoming the greatest athlete in the world, winning championships, trophies, and global fame.",
+    tag: "Earn your name.",
+    desc: "Start as a nobody. Train hard. Win games. Become the best in the world.",
     img: wSports,
   },
   {
     name: "Shadow Guild",
     tag: "Strike from the dark.",
-    desc: "Join a secret order, uncover conspiracies, complete dangerous missions, and decide whether to save or control the world.",
+    desc: "Join a secret group. Crack open plots. Pull off risky jobs. Save the world — or run it.",
     img: wSurvival,
   },
   {
     name: "Neon Dominion",
-    tag: "The future is war.",
-    desc: "A futuristic mega-city filled with AI, advanced technology, virtual worlds, corporate wars, and endless opportunities.",
+    tag: "The future is a fight.",
+    desc: "A neon mega-city. AI, hacking, gangs, and big tech. Find your edge.",
     img: wFuture,
   },
   {
     name: "Eternal Odyssey",
-    tag: "Fate awaits.",
-    desc: "Embark on an epic adventure across ancient lands, battle mythical creatures, discover legendary artifacts, and fulfill a prophecy.",
+    tag: "Your fate is waiting.",
+    desc: "A long journey across old lands. Beat monsters. Find lost gear. Live a legend.",
     img: wEmpire,
   },
 ];
@@ -80,14 +80,14 @@ function Worlds() {
 
       <section className="relative pt-40 pb-20 px-6 text-center">
         <div className="gold-hairline w-24 mx-auto mb-8" />
-        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Choose Your Reality</p>
+        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Pick Your World</p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
           Eight worlds.<br />
-          <span className="italic text-gold-gradient">One of them is yours.</span>
+          <span className="italic text-gold-gradient">One is yours.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Magic academies, galactic frontiers, hero nexuses, dragon kingdoms, and more.
-          The AI does the rest.
+          Magic schools, space wars, hero teams, dragon kingdoms, and more.
+          You pick. The AI does the rest.
         </p>
       </section>
 
@@ -132,12 +132,12 @@ function Worlds() {
           </div>
           <div className="space-y-px">
             {[
-              "you cast your first spell at a hidden academy and felt the arcane surge through your hands?",
-              "you piloted a starfighter through a dying nebula with the fleet at your back?",
-              "you discovered you had powers no one on Earth had ever seen before?",
-              "you rode a dragon into battle and the realm held its breath?",
-              "you scored the winning goal in front of eighty thousand screaming fans?",
-              "you infiltrated a corporate megastructure and stole the keys to the city?",
+              "you cast your first spell and felt the magic in your hands?",
+              "you flew a starfighter into battle with the fleet behind you?",
+              "you woke up with powers no one else on Earth had?",
+              "you rode a dragon into a fight and the whole kingdom watched?",
+              "you scored the winning goal in front of 80,000 fans?",
+              "you broke into a giant tower and walked out with its secrets?",
             ].map((q, i) => (
               <div key={q} className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer">
                 <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">{String(i + 1).padStart(2, "0")}</span>
@@ -151,7 +151,7 @@ function Worlds() {
               to="/simulation"
               className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
             >
-              Start Your Simulation →
+              Start Your Story →
             </Link>
           </div>
         </div>
