@@ -3,7 +3,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
 import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
-import wKingdom from "@/assets/world-kingdom.jpg";
+import dragonfallKingdomsWorld from "@/assets/dragonfall-kingdoms-world.asset.json";
 import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
 import neonDominionWorld from "@/assets/neon-dominion-world.asset.json";
 import eternalOdysseyWorld from "@/assets/eternal-odyssey-world.asset.json";
@@ -45,7 +45,7 @@ const worlds = [
     name: "Dragonfall Kingdoms",
     tag: "Rule from the sky.",
     desc: "Ride dragons. Lead armies. Make friends. Take the throne.",
-    img: wKingdom,
+    img: dragonfallKingdomsWorld.url,
   },
   {
     name: "Champions Legacy",
