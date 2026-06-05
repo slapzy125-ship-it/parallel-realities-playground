@@ -4,6 +4,14 @@ import ReactMarkdown from "react-markdown";
 import { useServerFn } from "@tanstack/react-start";
 import { simulationChat } from "@/lib/simulation.functions";
 import { SiteNav } from "@/components/SiteNav";
+import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
+import dragonfallKingdomsWorld from "@/assets/dragonfall-kingdoms-world.asset.json";
+import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
+import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
+import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
+import neonDominionWorld from "@/assets/neon-dominion-world.asset.json";
+import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
+import eternalOdysseyWorld from "@/assets/eternal-odyssey-world.asset.json";
 
 export const Route = createFileRoute("/simulation")({
   head: () => ({
@@ -16,12 +24,21 @@ export const Route = createFileRoute("/simulation")({
 });
 
 const WORLDS = [
-  { name: "Arcane Academy", emoji: "🧙" },
-  { name: "Dragonfall Kingdoms", emoji: "⚔️" },
-  { name: "Galactic Frontier", emoji: "🌌" },
-  { name: "Champions Legacy", emoji: "⚽" },
-  { name: "Hero Nexus", emoji: "🦸" },
-  { name: "Neon Dominion", emoji: "🏙️" },
+  { name: "Arcane Academy", emoji: "🧙", img: arcaneAcademyWorld.url },
+  { name: "Dragonfall Kingdoms", emoji: "⚔️", img: dragonfallKingdomsWorld.url },
+  { name: "Galactic Frontier", emoji: "🌌", img: galacticFrontierWorld.url },
+  { name: "Champions Legacy", emoji: "⚽", img: championsLegacyWorld.url },
+  { name: "Hero Nexus", emoji: "🦸", img: heroNexusWorld.url },
+  { name: "Neon Dominion", emoji: "🏙️", img: neonDominionWorld.url },
+  { name: "Shadow Guild", emoji: "🗡️", img: shadowGuildWorld.url },
+  { name: "Eternal Odyssey", emoji: "🧭", img: eternalOdysseyWorld.url },
+];
+
+const HERO_COLLAGE = [
+  arcaneAcademyWorld.url,
+  dragonfallKingdomsWorld.url,
+  neonDominionWorld.url,
+  eternalOdysseyWorld.url,
 ];
 
 const TRAITS = [
