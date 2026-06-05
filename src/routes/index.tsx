@@ -57,7 +57,7 @@ function Home() {
               to="/worlds"
               className="group relative px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
             >
-              Start Simulation
+              Explore Worlds
               <span className="ml-3 inline-block transition-transform group-hover:translate-x-1">→</span>
             </Link>
             <Link
@@ -121,7 +121,7 @@ function Home() {
             to="/worlds"
             className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
           >
-            Enter the Galaxy →
+            Explore Worlds →
           </Link>
         </div>
       </section>

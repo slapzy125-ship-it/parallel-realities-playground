@@ -148,10 +148,10 @@ function Worlds() {
           </div>
           <div className="text-center mt-16">
             <Link
-              to="/auth"
+              to="/simulation"
               className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
             >
-              Create Your Account →
+              Start Your Simulation →
             </Link>
           </div>
         </div>
