@@ -5,8 +5,8 @@ import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
 import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
 import wKingdom from "@/assets/world-kingdom.jpg";
 import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
-import wFuture from "@/assets/world-future.jpg";
-import wEmpire from "@/assets/world-empire.jpg";
+import neonDominionWorld from "@/assets/neon-dominion-world.asset.json";
+import eternalOdysseyWorld from "@/assets/eternal-odyssey-world.asset.json";
 import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
 import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
 
@@ -63,13 +63,13 @@ const worlds = [
     name: "Neon Dominion",
     tag: "The future is a fight.",
     desc: "A neon mega-city. AI, hacking, gangs, and big tech. Find your edge.",
-    img: wFuture,
+    img: neonDominionWorld.url,
   },
   {
     name: "Eternal Odyssey",
     tag: "Your fate is waiting.",
     desc: "A long journey across old lands. Beat monsters. Find lost gear. Live a legend.",
-    img: wEmpire,
+    img: eternalOdysseyWorld.url,
   },
 ];
 
