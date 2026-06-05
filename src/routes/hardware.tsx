@@ -171,7 +171,7 @@ function Hardware() {
           <div className="gold-hairline w-24 mx-auto mb-8" />
           <h2 className="font-display text-5xl md:text-7xl font-light mb-8 leading-tight">
             One headset.<br />
-            <span className="italic text-gold-gradient">Infinite worlds.</span>
+            <span className="italic text-gold-gradient">Endless worlds.</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/worlds" className="px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
