@@ -176,3 +176,43 @@ export const simulationChat = createServerFn({ method: "POST" })
     const json = (await res.json()) as { choices: { message: { content: string } }[] };
     return { content: json.choices[0]?.message?.content ?? "" };
   });
+
+export const simulationScene = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({
+      systemPrompt: z.string().min(1).max(16000),
+      userMessage: z.string().min(1).max(4000),
+    }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: data.systemPrompt },
+          { role: "user", content: data.userMessage },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (res.status === 429) throw new Error("Rate limit hit. Try again shortly.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Top up Lovable AI.");
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`AI gateway error ${res.status}: ${t.slice(0, 200)}`);
+    }
+    const json = (await res.json()) as { choices: { message: { content: string } }[] };
+    const raw = json.choices[0]?.message?.content ?? "{}";
+    const clean = raw.replace(/```json|```/g, "").trim();
+    try {
+      return { scene: JSON.parse(clean) };
+    } catch {
+      const match = clean.match(/\{[\s\S]*\}/);
+      return { scene: match ? JSON.parse(match[0]) : {} };
+    }
+  });
