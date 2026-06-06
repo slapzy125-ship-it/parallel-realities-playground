@@ -1,685 +1,567 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { useRef, useState, type CSSProperties } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { simulationChat } from "@/lib/simulation.functions";
-import { SiteNav } from "@/components/SiteNav";
-import arcaneAcademyWorld from "@/assets/arcane-academy-world.asset.json";
-import dragonfallKingdomsWorld from "@/assets/dragonfall-kingdoms-world.asset.json";
-import galacticFrontierWorld from "@/assets/galactic-frontier-world.asset.json";
-import championsLegacyWorld from "@/assets/champions-legacy-world.asset.json";
-import heroNexusWorld from "@/assets/hero-nexus-world.asset.json";
-import neonDominionWorld from "@/assets/neon-dominion-world.asset.json";
-import shadowGuildWorld from "@/assets/shadow-guild-world.asset.json";
-import eternalOdysseyWorld from "@/assets/eternal-odyssey-world.asset.json";
+import { simulationScene } from "@/lib/simulation.functions";
 
 export const Route = createFileRoute("/simulation")({
   head: () => ({
     meta: [
       { title: "Simulation — Revenio" },
-      { name: "description", content: "Step into your simulation and live the life you never lived. No account required." },
+      { name: "description", content: "Step into your simulation and live the life you never lived." },
     ],
   }),
-  component: SimulationPage,
+  component: Revenio,
 });
 
-const WORLDS = [
-  { name: "Arcane Academy", emoji: "🧙", img: arcaneAcademyWorld.url },
-  { name: "Dragonfall Kingdoms", emoji: "⚔️", img: dragonfallKingdomsWorld.url },
-  { name: "Galactic Frontier", emoji: "🌌", img: galacticFrontierWorld.url },
-  { name: "Champions Legacy", emoji: "⚽", img: championsLegacyWorld.url },
-  { name: "Hero Nexus", emoji: "🦸", img: heroNexusWorld.url },
-  { name: "Neon Dominion", emoji: "🏙️", img: neonDominionWorld.url },
-  { name: "Shadow Guild", emoji: "🗡️", img: shadowGuildWorld.url },
-  { name: "Eternal Odyssey", emoji: "🧭", img: eternalOdysseyWorld.url },
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+
+const TRAITS = ["Ambitious","Loyal","Brave","Competitive","Intelligent","Creative","Confident","Curious","Ruthless","Charismatic"];
+const GOALS = ["Become a Legend","Gain Power","Build an Empire","Become Rich","Save the World","Discover the Unknown"];
+
+type World = { id: string; name: string; icon: string; tag: string; color: string; desc: string };
+
+const WORLDS: World[] = [
+  { id:"arcane",    name:"Arcane Academy",     icon:"🔮", tag:"Magic & Power",       color:"#7c3aed", desc:"Enter the world's greatest magic school. What kind of power will you seek?" },
+  { id:"galactic",  name:"Galactic Frontier",  icon:"🚀", tag:"Space & Rebellion",   color:"#0ea5e9", desc:"A galaxy of factions, starships, and destiny awaits your command." },
+  { id:"hero",      name:"Hero Nexus",         icon:"⚡", tag:"Power & Identity",    color:"#f59e0b", desc:"You just got powers. The city is watching. What kind of hero will you be?" },
+  { id:"dragon",    name:"Dragonfall Kingdoms",icon:"🐉", tag:"War & Legacy",        color:"#dc2626", desc:"Dragons, kingdoms, armies, betrayal. Who will you become as a ruler?" },
+  { id:"champions", name:"Champions Legacy",   icon:"⚽", tag:"Glory & Sacrifice",   color:"#16a34a", desc:"Start unknown. Become the greatest athlete the world has ever seen." },
+  { id:"shadow",    name:"Shadow Guild",       icon:"🗡️", tag:"Secrets & Betrayal",  color:"#6b7280", desc:"A hidden network of spies and power brokers. Trust no one." },
+  { id:"neon",      name:"Neon Domination",    icon:"🤖", tag:"Tech & Control",      color:"#06b6d4", desc:"A mega-city ruled by AI and corporations. Fight it or own it." },
+  { id:"odyssey",   name:"Eternal Odyssey",    icon:"⚔️", tag:"Myth & Destiny",      color:"#d97706", desc:"Mythical realms, ancient trials, legendary creatures. Write your epic." },
 ];
 
-const HERO_COLLAGE = [
-  arcaneAcademyWorld.url,
-  dragonfallKingdomsWorld.url,
-  neonDominionWorld.url,
-  eternalOdysseyWorld.url,
-];
-
-const TRAITS = [
-  "Ambitious", "Loyal", "Intelligent", "Brave", "Competitive",
-  "Funny", "Ruthless", "Creative", "Confident", "Curious",
-];
-
-const GOALS = [
-  "Become the greatest",
-  "Get rich",
-  "Save the world",
-  "Build a kingdom",
-  "Become a legend",
-  "Discover the unknown",
-];
-
-type Profile = {
-  character_name: string;
-  world: string;
-  traits: string[];
-  goal: string;
-  photo?: string; // base64 data URL
+type Relationship = { name: string; status: string };
+type Player = {
+  name: string; age: string;
+  traits: string[]; goal: string;
+  profileImage: string | null;
+  level: number; reputation: number; wealth: number;
+  skills: Record<string, number>;
+  relationships: Relationship[];
+  inventory: string[]; achievements: string[]; titles: string[];
+  majorDecisions: string[];
+  currentWorld: string; currentFaction: string;
+  storyProgress: number;
+};
+type Choice = { id: string; text: string; type: string; risk: string; potentialOutcome: string };
+type Scene = {
+  sceneTitle: string; sceneText: string; choices: Choice[];
+  statChanges?: { reputation?: number; wealth?: number; level?: number };
+  relationshipChanges?: { name: string; status: string; change?: string }[];
+  inventoryUnlocks?: string[]; newAchievements?: string[]; nextSceneHint?: string;
 };
 
-type Msg = { id: string; role: "user" | "assistant"; content: string };
-type Saga = {
-  id: string;
-  title: string;
-  profile: Profile;
-  messages: Msg[];
-  updated_at: number;
-};
+const SYSTEM_PROMPT = (player: Player, worldName: string) => `You are the Revenio Simulation Engine — an AI that generates short, punchy, interactive life-simulation scenes.
 
-const STORAGE_KEY = "revenio.sagas.v2";
+Player Profile:
+- Name: ${player.name}
+- Age: ${player.age}
+- Traits: ${player.traits.join(", ")}
+- Goal: ${player.goal}
+- World: ${worldName}
+- Level: ${player.level}
+- Reputation: ${player.reputation}
+- Wealth: ${player.wealth}
+- Story Progress: ${player.storyProgress}
+- Major Decisions so far: ${player.majorDecisions.slice(-3).join("; ") || "none yet"}
+- Relationships: ${player.relationships.map(r => r.name + " (" + r.status + ")").join(", ") || "none yet"}
 
-function loadSagas(): Saga[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Saga[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
+RULES:
+1. Keep sceneText SHORT — 2-4 punchy sentences max. No lore dumps. Show action.
+2. Always include exactly 4 choices: A (safe/strategic), B (bold/risky), C (emotional/loyalty), D (create your own plan — keep text as "Create your own plan...")
+3. Return ONLY valid JSON, no markdown, no backticks, no preamble.
+4. Make stat changes meaningful but balanced (small integers, -5 to +8).
+5. Choices should feel real and meaningful. Stakes should be clear.
+6. The player's name is ${player.name} — use it naturally.
+7. Make the story feel personal to their traits and goal.
 
-function saveSagas(sagas: Saga[]) {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sagas));
-  } catch {
-    // Storage full (likely from large photos). Try without photos.
-    try {
-      const stripped = sagas.map((s) => ({ ...s, profile: { ...s.profile, photo: undefined } }));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
-    } catch {
-      /* give up silently */
-    }
-  }
-}
+Return this exact JSON format:
+{
+  "sceneTitle": "short dramatic title",
+  "sceneText": "2-4 punchy sentences. Show action. Show stakes.",
+  "choices": [
+    {"id":"A","text":"choice text","type":"safe","risk":"Low","potentialOutcome":"brief outcome hint"},
+    {"id":"B","text":"choice text","type":"risky","risk":"High","potentialOutcome":"brief outcome hint"},
+    {"id":"C","text":"choice text","type":"loyalty","risk":"Medium","potentialOutcome":"brief outcome hint"},
+    {"id":"D","text":"Create your own plan...","type":"custom","risk":"Variable","potentialOutcome":"Custom outcome"}
+  ],
+  "statChanges": {"reputation": 0, "wealth": 0, "level": 0},
+  "relationshipChanges": [{"name":"character name","status":"ally|rival|neutral","change":"brief note"}],
+  "inventoryUnlocks": [],
+  "newAchievements": [],
+  "nextSceneHint": "one sentence teaser"
+}`;
 
-function uid() {
-  return `s_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-}
+const CHOICE_PROMPT = (player: Player, worldName: string, scene: Scene, choiceText: string, customText?: string) => `You are the Revenio Simulation Engine.
 
-function SimulationPage() {
-  const chat = useServerFn(simulationChat);
+Player: ${player.name}, traits: ${player.traits.join(", ")}, goal: ${player.goal}, world: ${worldName}
+Current scene: "${scene.sceneTitle}" — ${scene.sceneText}
+Player chose: "${customText || choiceText}"
+Player level: ${player.level}, reputation: ${player.reputation}, wealth: ${player.wealth}
+Story progress: scene ${player.storyProgress}
 
-  const [sagas, setSagas] = useState<Saga[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [showNew, setShowNew] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [input, setInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
+Generate the CONSEQUENCE scene that directly follows this choice. The consequence should feel earned based on who ${player.name} is.
 
-  const scrollRef = useRef<HTMLDivElement>(null);
+RULES:
+1. sceneText: 2-4 punchy sentences. Show immediate consequence, then new stakes.
+2. 4 choices again (A safe, B risky, C loyalty, D custom).
+3. Make stat changes reflect the choice made.
+4. Return ONLY valid JSON, no markdown fences.
 
-  useEffect(() => {
-    const loaded = loadSagas();
-    setSagas(loaded);
-    if (loaded.length === 0) setShowNew(true);
-    else setActiveId(loaded[0].id);
-  }, []);
+Same JSON format as before.`;
 
-  const active = sagas.find((s) => s.id === activeId) ?? null;
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [active?.messages.length, sending]);
-
-  const persist = (updater: (prev: Saga[]) => Saga[]) => {
-    setSagas((prev) => {
-      const next = updater(prev);
-      saveSagas(next);
-      return next;
-    });
-  };
-
-  const handleCreate = async (profile: Profile) => {
-    setError(null);
-    setSending(true);
-    try {
-      const { content } = await chat({
-        data: {
-          profile: {
-            character_name: profile.character_name,
-            world: profile.world,
-            traits: profile.traits,
-            goal: profile.goal,
-          },
-          messages: [{ role: "user", content: "Begin." }],
-        },
-      });
-      const saga: Saga = {
-        id: uid(),
-        title: `${profile.character_name} — ${profile.world}`,
-        profile,
-        messages: [{ id: uid(), role: "assistant", content }],
-        updated_at: Date.now(),
-      };
-      persist((prev) => [saga, ...prev]);
-      setActiveId(saga.id);
-      setShowNew(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to begin simulation");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleSend = async (text?: string) => {
-    if (!active) return;
-    const content = (text ?? input).trim();
-    if (!content || sending) return;
-    setSending(true);
-    setError(null);
-    const userMsg: Msg = { id: uid(), role: "user", content };
-    const updatedMessages = [...active.messages, userMsg];
-    persist((prev) =>
-      prev.map((s) => (s.id === active.id ? { ...s, messages: updatedMessages, updated_at: Date.now() } : s)),
-    );
-    setInput("");
-    try {
-      const { content: reply } = await chat({
-        data: {
-          profile: {
-            character_name: active.profile.character_name,
-            world: active.profile.world,
-            traits: active.profile.traits,
-            goal: active.profile.goal,
-          },
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-        },
-      });
-      persist((prev) =>
-        prev.map((s) =>
-          s.id === active.id
-            ? { ...s, messages: [...updatedMessages, { id: uid(), role: "assistant", content: reply }], updated_at: Date.now() }
-            : s,
-        ),
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed");
-      persist((prev) =>
-        prev.map((s) => (s.id === active.id ? { ...s, messages: active.messages } : s)),
-      );
-      setInput(content);
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    if (!confirm("Delete this saga forever?")) return;
-    persist((prev) => prev.filter((s) => s.id !== id));
-    if (activeId === id) setActiveId(null);
-  };
-
+function StatBar({ label, value, max = 100, color }: { label: string; value: number; max?: number; color: string }) {
+  const pct = Math.min(100, (value / max) * 100);
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col">
-      <SiteNav />
-      <div className="pt-24 flex-1 flex max-w-[1600px] mx-auto w-full">
-        {/* Sidebar */}
-        <aside className="w-72 shrink-0 border-r border-border px-4 py-6 hidden md:flex md:flex-col gap-4">
-          <button
-            onClick={() => setShowNew(true)}
-            className="w-full bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase py-3 hover:bg-[var(--gold-bright)] transition-all"
-          >
-            + New Simulation
-          </button>
-          <div className="text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground pt-2">Your Sagas</div>
-          <div className="flex-1 overflow-y-auto space-y-1">
-            {sagas.length === 0 && (
-              <p className="text-xs text-muted-foreground italic">No sagas yet. Start one.</p>
-            )}
-            {sagas.map((s) => {
-              const isActive = activeId === s.id;
-              const world = WORLDS.find((w) => w.name === s.profile.world);
-              return (
-                <div key={s.id} className={`group flex items-stretch border ${isActive ? "border-[var(--gold)] bg-[var(--gold)]/5" : "border-transparent hover:border-border"} transition-colors`}>
-                  <button onClick={() => setActiveId(s.id)} className="flex-1 text-left px-3 py-3 min-w-0 flex items-center gap-3">
-                    {s.profile.photo ? (
-                      <img src={s.profile.photo} alt="" className="w-8 h-8 object-cover rounded-full border border-[var(--gold)]/40" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-sm">{world?.emoji ?? "✦"}</div>
-                    )}
-                    <div className="min-w-0">
-                      <div className="text-sm truncate">{s.profile.character_name}</div>
-                      <div className="text-[0.6rem] tracking-[0.2em] uppercase text-muted-foreground truncate">{s.profile.world}</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(s.id)}
-                    className="px-2 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition"
-                    aria-label="Delete"
-                  >
-                    ×
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          <p className="text-[0.55rem] tracking-[0.25em] uppercase text-muted-foreground/60 leading-relaxed pt-3 border-t border-border">
-            Sagas saved on this device. No account needed.
-          </p>
-        </aside>
-
-        {/* Main */}
-        <section className="flex-1 min-w-0">
-          {!active ? (
-            <div className="relative flex-1 flex items-center justify-center min-h-[calc(100vh-6rem)] px-8 text-center overflow-hidden">
-              {/* Hero collage background */}
-              <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 opacity-30">
-                {HERO_COLLAGE.map((src, i) => (
-                  <div key={i} className="relative overflow-hidden">
-                    <img src={src} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
-              <div className="relative max-w-md">
-                <p className="text-[0.6rem] tracking-[0.4em] uppercase text-[var(--gold)] mb-4">The Portal Awaits</p>
-                <h1 className="font-display text-5xl font-light leading-tight mb-6">
-                  Explore the life you <span className="italic text-gold-gradient">never lived.</span>
-                </h1>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-                  Four quick taps. Then you're in.
-                </p>
-                <button
-                  onClick={() => setShowNew(true)}
-                  className="inline-block px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]"
-                >
-                  Begin →
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="relative flex flex-col h-[calc(100vh-6rem)]">
-              {(() => {
-                const activeWorld = WORLDS.find((w) => w.name === active.profile.world);
-                return activeWorld?.img ? (
-                  <>
-                    <img
-                      src={activeWorld.img}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/70 to-background pointer-events-none" />
-                  </>
-                ) : null;
-              })()}
-              <header className="relative border-b border-border px-6 md:px-8 py-4 flex items-center gap-4 bg-background/60 backdrop-blur">
-                {active.profile.photo ? (
-                  <img src={active.profile.photo} alt="" className="w-12 h-12 rounded-full object-cover border border-[var(--gold)]/50" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full border border-[var(--gold)]/50 flex items-center justify-center text-xl overflow-hidden">
-                    {(() => {
-                      const w = WORLDS.find((w) => w.name === active.profile.world);
-                      return w?.img ? (
-                        <img src={w.img} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{w?.emoji ?? "✦"}</span>
-                      );
-                    })()}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <p className="text-[0.6rem] tracking-[0.3em] uppercase text-[var(--gold)] truncate">{active.profile.world}</p>
-                  <h1 className="font-display text-2xl font-light truncate">{active.profile.character_name}</h1>
-                </div>
-              </header>
-
-              <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-6">
-                {active.messages.map((m) => (
-                  <MessageBubble key={m.id} message={m} onChoice={handleSend} />
-                ))}
-                {sending && (
-                  <div className="flex gap-2 text-[var(--gold)] text-xs tracking-[0.3em] uppercase animate-pulse">
-                    <span>The world reacts</span>
-                    <span>···</span>
-                  </div>
-                )}
-                {error && <p className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 p-3">{error}</p>}
-              </div>
-
-              <form
-                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="relative border-t border-border p-4 md:px-12 md:py-6 bg-card/60 backdrop-blur"
-              >
-                <div className="flex gap-3 items-end max-w-4xl mx-auto">
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    rows={2}
-                    placeholder="What do you do?"
-                    className="flex-1 bg-background border border-border px-4 py-3 text-sm resize-none focus:border-[var(--gold)] focus:outline-none"
-                    disabled={sending}
-                  />
-                  <button
-                    type="submit"
-                    disabled={sending || !input.trim()}
-                    className="bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase px-6 py-4 hover:bg-[var(--gold-bright)] disabled:opacity-40 transition-all"
-                  >
-                    Act
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-        </section>
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>
+        <span>{label}</span><span>{value}</span>
       </div>
-
-      {showNew && (
-        <NewSimWizard
-          submitting={sending}
-          onClose={() => setShowNew(false)}
-          onCreate={handleCreate}
-        />
-      )}
-    </main>
-  );
-}
-
-function MessageBubble({ message, onChoice }: { message: Msg; onChoice: (text: string) => void }) {
-  if (message.role === "user") {
-    return (
-      <div className="flex justify-end">
-        <div className="max-w-2xl border border-[var(--gold)]/40 bg-[var(--gold)]/5 px-5 py-3 text-sm">
-          {message.content}
-        </div>
+      <div style={{ height: 6, background: "#1f2937", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: color, transition: "width 0.4s" }} />
       </div>
-    );
-  }
-
-  // Parse trailing choices. Accept "A)", "A.", "1.", "1)".
-  const lines = message.content.split("\n");
-  const choices: string[] = [];
-  let bodyEnd = lines.length;
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const m = lines[i].match(/^\s*(?:[A-Z]|\d+)[.)]\s+(.*)/);
-    if (m && choices.length < 6) {
-      choices.unshift(m[1]);
-      bodyEnd = i;
-    } else if (choices.length > 0 && lines[i].trim() === "") {
-      bodyEnd = i;
-    } else if (choices.length > 0) {
-      break;
-    }
-  }
-  const body = choices.length >= 2 ? lines.slice(0, bodyEnd).join("\n") : message.content;
-  const showChoices = choices.length >= 2;
-
-  return (
-    <div className="max-w-3xl">
-      <div className="prose prose-invert prose-sm max-w-none prose-headings:font-display prose-headings:font-light prose-strong:text-[var(--gold)] prose-em:text-[var(--gold-bright)] prose-hr:border-[var(--gold)]/30 text-foreground/90">
-        <ReactMarkdown>{body}</ReactMarkdown>
-      </div>
-      {showChoices && (
-        <div className="mt-5 space-y-2">
-          {choices.map((c, i) => (
-            <button
-              key={i}
-              onClick={() => onChoice(c)}
-              className="block w-full text-left border border-border hover:border-[var(--gold)] hover:bg-[var(--gold)]/5 px-4 py-3 text-sm transition-all"
-            >
-              <span className="text-[var(--gold)] mr-3">{String.fromCharCode(65 + i)})</span>{c}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
 
-/* ---------------- 4-Step Wizard ---------------- */
+function RiskBadge({ risk }: { risk: string }) {
+  const colors: Record<string, string> = { Low: "#16a34a", Medium: "#d97706", High: "#dc2626", Variable: "#7c3aed" };
+  const c = colors[risk] || "#6b7280";
+  return (
+    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, padding: "3px 7px", borderRadius: 4, background: c + "22", color: c, flexShrink: 0 }}>
+      {risk}
+    </span>
+  );
+}
 
-function NewSimWizard({
-  onClose,
-  onCreate,
-  submitting,
-}: {
-  onClose: () => void;
-  onCreate: (p: Profile) => Promise<void>;
-  submitting: boolean;
-}) {
-  const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
-  const [photo, setPhoto] = useState<string | undefined>(undefined);
-  const [world, setWorld] = useState<string | null>(null);
-  const [traits, setTraits] = useState<string[]>([]);
-  const [goal, setGoal] = useState<string | null>(null);
+// ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 
+function Revenio() {
+  const sceneFn = useServerFn(simulationScene);
+  const [screen, setScreen] = useState<"splash" | "create" | "world" | "game">("splash");
+  const [step, setStep] = useState(0);
+  const [player, setPlayer] = useState<Player>({
+    name: "", age: "", traits: [], goal: "", profileImage: null,
+    level: 1, reputation: 0, wealth: 0, skills: {}, relationships: [],
+    inventory: [], achievements: [], titles: [], majorDecisions: [],
+    currentWorld: "", currentFaction: "", storyProgress: 0,
+  });
+  const [scene, setScene] = useState<Scene | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [customInput, setCustomInput] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [statDeltas, setStatDeltas] = useState<{ reputation?: number; wealth?: number; level?: number }>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handlePhoto = (file: File) => {
-    if (file.size > 2_000_000) {
-      alert("Please use an image under 2MB.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => setPhoto(reader.result as string);
-    reader.readAsDataURL(file);
-  };
+  const worldObj = WORLDS.find(w => w.id === player.currentWorld);
 
-  const toggleTrait = (t: string) => {
-    setTraits((prev) => {
-      if (prev.includes(t)) return prev.filter((x) => x !== t);
-      if (prev.length >= 3) return prev;
-      return [...prev, t];
+  function notify(msg: string) {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 2800);
+  }
+
+  function applyStatChanges(changes: NonNullable<Scene["statChanges"]>, s: Scene) {
+    setPlayer(p => {
+      const next = { ...p };
+      if (changes.reputation) next.reputation = Math.max(0, p.reputation + changes.reputation);
+      if (changes.wealth) next.wealth = Math.max(0, p.wealth + changes.wealth);
+      if (changes.level && changes.level > 0) { next.level = p.level + changes.level; notify("⬆ LEVEL UP!"); }
+      if (s.relationshipChanges?.length) {
+        const rel = [...p.relationships];
+        s.relationshipChanges.forEach(rc => {
+          const idx = rel.findIndex(r => r.name === rc.name);
+          if (idx >= 0) rel[idx] = { ...rel[idx], status: rc.status };
+          else rel.push({ name: rc.name, status: rc.status });
+        });
+        next.relationships = rel;
+      }
+      if (s.inventoryUnlocks?.length) next.inventory = [...p.inventory, ...s.inventoryUnlocks];
+      if (s.newAchievements?.length) { next.achievements = [...p.achievements, ...s.newAchievements]; notify("🏆 " + s.newAchievements[0]); }
+      next.storyProgress = p.storyProgress + 1;
+      return next;
     });
+    setStatDeltas(changes);
+    setTimeout(() => setStatDeltas({}), 2000);
+  }
+
+  async function startWorld(world: World) {
+    const updated = { ...player, currentWorld: world.id };
+    setPlayer(updated);
+    setLoading(true);
+    setScreen("game");
+    try {
+      const sys = SYSTEM_PROMPT(updated, world.name);
+      const res = await sceneFn({ data: { systemPrompt: sys, userMessage: `Generate the opening scene for ${player.name} entering ${world.name}. Make it dramatic and immediate. Hook them in 2 sentences.` } });
+      setScene(res.scene as Scene);
+    } catch { notify("Error generating scene. Try again."); }
+    setLoading(false);
+  }
+
+  async function makeChoice(choice: Choice, custom?: string) {
+    if (!scene || !worldObj) return;
+    const text = custom || choice.text;
+    setPlayer(p => ({ ...p, majorDecisions: [...p.majorDecisions, text] }));
+    setLoading(true);
+    setShowCustom(false);
+    setCustomInput("");
+    try {
+      const sys = CHOICE_PROMPT(player, worldObj.name, scene, choice.text, custom);
+      const res = await sceneFn({ data: { systemPrompt: sys, userMessage: `Player chose: "${text}". Generate consequence scene.` } });
+      const nextScene = res.scene as Scene;
+      applyStatChanges(nextScene.statChanges || {}, nextScene);
+      setScene(nextScene);
+    } catch { notify("Error. Try again."); }
+    setLoading(false);
+  }
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPlayer(p => ({ ...p, profileImage: ev.target?.result as string }));
+    reader.readAsDataURL(file);
+  }
+
+  function toggleTrait(t: string) {
+    setPlayer(p => {
+      const has = p.traits.includes(t);
+      if (has) return { ...p, traits: p.traits.filter(x => x !== t) };
+      if (p.traits.length >= 3) return p;
+      return { ...p, traits: [...p.traits, t] };
+    });
+  }
+
+  const canProceed = [
+    player.name.trim().length > 0 && Number(player.age) > 0,
+    player.profileImage !== null,
+    player.traits.length === 3,
+    player.goal !== "",
+  ];
+
+  // ── STYLES ──────────────────────────────────────────────────────────────────
+
+  const base: CSSProperties = {
+    minHeight: "100vh",
+    background: "#080b0f",
+    color: "#f1f5f9",
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    position: "relative",
+    overflow: "hidden",
   };
-
-  const next = () => setStep((s) => Math.min(4, s + 1));
-  const back = () => setStep((s) => Math.max(1, s - 1));
-
-  const canNext =
-    (step === 1 && name.trim().length > 0) ||
-    (step === 2 && !!world) ||
-    (step === 3 && traits.length === 3) ||
-    (step === 4 && !!goal);
-
-  const finish = async () => {
-    if (!world || !goal || traits.length !== 3 || !name.trim()) return;
-    await onCreate({ character_name: name.trim(), world, traits, goal, photo });
+  const glowBg: CSSProperties = {
+    position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
+    background: "radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(6,182,212,0.06) 0%, transparent 60%)",
   };
+  const card: CSSProperties = {
+    background: "rgba(15,20,30,0.95)",
+    border: "1px solid rgba(255,255,255,0.07)",
+    borderRadius: 16,
+    padding: 28,
+    position: "relative",
+    zIndex: 1,
+  };
+  const btn = (color = "#7c3aed", ghost = false): CSSProperties => ({
+    background: ghost ? "transparent" : color,
+    border: ghost ? `1px solid ${color}` : "none",
+    color: ghost ? color : "#fff",
+    padding: "12px 24px",
+    borderRadius: 8,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: 1,
+    transition: "all 0.2s",
+  });
 
-  return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-4 md:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-2xl border border-border bg-card my-8">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-xl z-10"
-          aria-label="Close"
-        >
-          ×
-        </button>
+  // ── SCREENS ─────────────────────────────────────────────────────────────────
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 px-8 pt-8">
-          {[1, 2, 3, 4].map((n) => (
-            <div
-              key={n}
-              className={`h-[2px] flex-1 transition-colors ${n <= step ? "bg-[var(--gold)]" : "bg-border"}`}
-            />
+  if (screen === "splash") return (
+    <div style={base}>
+      <div style={glowBg} />
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "120px 24px", textAlign: "center", position: "relative", zIndex: 1 }}>
+        <p style={{ fontSize: 14, letterSpacing: 4, color: "#64748b", marginBottom: 12 }}>WELCOME TO</p>
+        <h1 style={{ fontSize: 72, fontWeight: 900, margin: 0, background: "linear-gradient(135deg, #a78bfa, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: 2 }}>
+          REVENIO
+        </h1>
+        <p style={{ fontSize: 18, color: "#94a3b8", margin: "24px 0 40px", fontStyle: "italic" }}>Explore the Life You Never Lived.</p>
+        <button style={btn("#7c3aed")} onClick={() => setScreen("create")}>BEGIN YOUR STORY →</button>
+        <div style={{ marginTop: 60, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap" }}>
+          {["8 Worlds","AI-Powered","Choice-Driven","Your Legend"].map(t => (
+            <span key={t} style={{ fontSize: 12, color: "#475569", letterSpacing: 2 }}>• {t}</span>
           ))}
         </div>
-        <p className="px-8 mt-3 text-[0.55rem] tracking-[0.4em] uppercase text-muted-foreground">
-          Step {step} of 4
-        </p>
+      </div>
+    </div>
+  );
 
-        <div className="px-8 pb-8 pt-4 min-h-[420px]">
-          {step === 1 && (
-            <>
-              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">Who are you?</h2>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground mb-2">Name</label>
-                  <input
-                    autoFocus
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && canNext) next(); }}
-                    placeholder="Noah"
-                    className="w-full bg-background border border-border px-4 py-3 text-lg focus:border-[var(--gold)] focus:outline-none"
-                  />
+  if (screen === "create") {
+    const steps = ["Identity","Your Look","Personality","Your Goal"];
+    return (
+      <div style={base}>
+        <div style={glowBg} />
+        <div style={{ maxWidth: 560, margin: "0 auto", padding: "60px 24px" }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+            {steps.map((s, i) => (
+              <div key={s} style={{ flex: 1, textAlign: "center" }}>
+                <div style={{ height: 3, background: i <= step ? "#7c3aed" : "#1f2937", borderRadius: 2, marginBottom: 6 }} />
+                <div style={{ fontSize: 10, letterSpacing: 1, color: i === step ? "#a78bfa" : "#475569" }}>{s.toUpperCase()}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={card}>
+            {step === 0 && (
+              <div>
+                <h2 style={{ margin: "0 0 8px", fontSize: 28 }}>Who are you?</h2>
+                <p style={{ color: "#94a3b8", marginBottom: 24, fontSize: 14 }}>Your name and age define your starting point.</p>
+                <input placeholder="Your name" value={player.name} onChange={e => setPlayer(p => ({ ...p, name: e.target.value }))}
+                  style={{ width: "100%", background: "#111827", border: "1px solid #374151", borderRadius: 8, padding: "12px 16px", color: "#fff", fontSize: 16, fontFamily: "inherit", boxSizing: "border-box", marginBottom: 12 }} />
+                <input placeholder="Your age" type="number" value={player.age} onChange={e => setPlayer(p => ({ ...p, age: e.target.value }))}
+                  style={{ width: "100%", background: "#111827", border: "1px solid #374151", borderRadius: 8, padding: "12px 16px", color: "#fff", fontSize: 16, fontFamily: "inherit", boxSizing: "border-box" }} />
+              </div>
+            )}
+            {step === 1 && (
+              <div style={{ textAlign: "center" }}>
+                <h2 style={{ margin: "0 0 8px", fontSize: 28 }}>Your Look</h2>
+                <p style={{ color: "#94a3b8", marginBottom: 24, fontSize: 14 }}>Upload a photo to personalize your journey.</p>
+                <div onClick={() => fileRef.current?.click()} style={{ width: 120, height: 120, borderRadius: "50%", background: "#111827", border: "2px dashed #374151", margin: "0 auto 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", fontSize: 40 }}>
+                  {player.profileImage && player.profileImage !== "skip" ? <img src={player.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
                 </div>
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
+                <button style={btn("#7c3aed", true)} onClick={() => fileRef.current?.click()}>Upload Photo</button>
+                <p style={{ color: "#475569", fontSize: 12, marginTop: 16 }}>Or skip — your legend speaks louder than your face.</p>
+                {!player.profileImage && (
+                  <button style={{ ...btn("#475569", true), padding: "6px 14px", fontSize: 12 }} onClick={() => setPlayer(p => ({ ...p, profileImage: "skip" }))}>Skip this step</button>
+                )}
+              </div>
+            )}
+            {step === 2 && (
+              <div>
+                <h2 style={{ margin: "0 0 8px", fontSize: 28 }}>Your Traits</h2>
+                <p style={{ color: "#94a3b8", marginBottom: 20, fontSize: 14 }}>Choose exactly 3. These shape every decision.</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {TRAITS.map(t => {
+                    const sel = player.traits.includes(t);
+                    return (
+                      <button key={t} onClick={() => toggleTrait(t)} style={{ padding: "8px 14px", borderRadius: 6, border: sel ? "1px solid #7c3aed" : "1px solid #374151", background: sel ? "rgba(124,58,237,0.2)" : "#111827", color: sel ? "#a78bfa" : "#9ca3af", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p style={{ fontSize: 12, color: "#475569", marginTop: 16 }}>{player.traits.length}/3 selected</p>
+              </div>
+            )}
+            {step === 3 && (
+              <div>
+                <h2 style={{ margin: "0 0 8px", fontSize: 28 }}>Your Goal</h2>
+                <p style={{ color: "#94a3b8", marginBottom: 20, fontSize: 14 }}>What drives you above all else?</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {GOALS.map(g => {
+                    const sel = player.goal === g;
+                    return (
+                      <button key={g} onClick={() => setPlayer(p => ({ ...p, goal: g }))} style={{ textAlign: "left", padding: "14px 18px", borderRadius: 8, border: sel ? "1px solid #7c3aed" : "1px solid #374151", background: sel ? "rgba(124,58,237,0.15)" : "#111827", color: sel ? "#e2e8f0" : "#9ca3af", cursor: "pointer", fontSize: 14, fontFamily: "inherit" }}>
+                        {g}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 24, gap: 12 }}>
+              {step > 0 ? <button style={btn("#475569", true)} onClick={() => setStep(s => s - 1)}>← Back</button> : <div />}
+              {step < 3 ? (
+                <button style={{ ...btn("#7c3aed"), opacity: canProceed[step] ? 1 : 0.4 }} disabled={!canProceed[step]} onClick={() => setStep(s => s + 1)}>Next →</button>
+              ) : (
+                <button style={{ ...btn("#7c3aed"), opacity: canProceed[step] ? 1 : 0.4 }} disabled={!canProceed[step]} onClick={() => setScreen("world")}>Choose Your World →</button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (screen === "world") return (
+    <div style={base}>
+      <div style={glowBg} />
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "60px 24px", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <p style={{ color: "#64748b", letterSpacing: 3, fontSize: 12 }}>Welcome, {player.name}</p>
+          <h1 style={{ fontSize: 42, margin: "8px 0" }}>Choose Your World</h1>
+          <p style={{ color: "#94a3b8", fontSize: 14 }}>Each world is a lens for discovering who you become.</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+          {WORLDS.map(w => (
+            <div key={w.id} onClick={() => startWorld(w)} style={{ ...card, cursor: "pointer", transition: "all 0.25s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = w.color + "88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.transform = "none"; }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <span style={{ fontSize: 32 }}>{w.icon}</span>
                 <div>
-                  <label className="block text-[0.6rem] tracking-[0.3em] uppercase text-muted-foreground mb-2">Photo (optional)</label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      className="w-20 h-20 rounded-full border border-dashed border-border hover:border-[var(--gold)] flex items-center justify-center overflow-hidden transition-colors"
-                    >
-                      {photo ? (
-                        <img src={photo} alt="" className="w-full h-full object-cover" />
+                  <h3 style={{ margin: 0, fontSize: 18 }}>{w.name}</h3>
+                  <p style={{ margin: 0, fontSize: 11, color: w.color, letterSpacing: 1 }}>{w.tag.toUpperCase()}</p>
+                </div>
+              </div>
+              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5, margin: "0 0 12px" }}>{w.desc}</p>
+              <p style={{ color: w.color, fontSize: 12, fontWeight: 700, letterSpacing: 1, margin: 0 }}>Enter World →</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // game screen
+  return (
+    <div style={base}>
+      <div style={glowBg} />
+      {notification && (
+        <div style={{ position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)", background: "rgba(124,58,237,0.95)", color: "#fff", padding: "10px 20px", borderRadius: 8, zIndex: 100, fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>
+          {notification}
+        </div>
+      )}
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px", display: "grid", gridTemplateColumns: "1fr 280px", gap: 16, position: "relative", zIndex: 1 }}>
+        {/* LEFT */}
+        <div>
+          <div style={{ ...card, padding: 16, display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <span style={{ fontSize: 28 }}>{worldObj?.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800 }}>{worldObj?.name}</div>
+              <div style={{ fontSize: 11, color: "#475569" }}>Scene {player.storyProgress + 1} · {player.name}</div>
+            </div>
+            <button style={{ ...btn("#475569", true), padding: "6px 12px", fontSize: 12 }} onClick={() => { setScreen("world"); setScene(null); setPlayer(p => ({ ...p, currentWorld: "", storyProgress: 0, majorDecisions: [] })); }}>
+              ← Worlds
+            </button>
+          </div>
+
+          {loading ? (
+            <div style={{ ...card, textAlign: "center", padding: 60 }}>
+              <div style={{ fontSize: 40, animation: "spin 1.4s linear infinite", display: "inline-block" }}>⟳</div>
+              <p style={{ color: "#64748b", letterSpacing: 2, fontSize: 12, marginTop: 16 }}>GENERATING YOUR STORY...</p>
+              <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+            </div>
+          ) : scene ? (
+            <div>
+              <div style={{ ...card, marginBottom: 16 }}>
+                <h2 style={{ margin: "0 0 12px", fontSize: 24, color: worldObj?.color }}>{scene.sceneTitle}</h2>
+                <p style={{ color: "#e2e8f0", fontSize: 15, lineHeight: 1.7, whiteSpace: "pre-line" }}>{scene.sceneText}</p>
+                {scene.nextSceneHint && (
+                  <p style={{ color: "#475569", fontSize: 12, fontStyle: "italic", marginTop: 16, borderTop: "1px solid #1f2937", paddingTop: 12 }}>
+                    Next: {scene.nextSceneHint}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {scene.choices?.map(choice => (
+                  <div key={choice.id}>
+                    {choice.type === "custom" ? (
+                      showCustom ? (
+                        <div style={{ ...card, padding: 16 }}>
+                          <textarea placeholder="Describe your own plan..." value={customInput} onChange={e => setCustomInput(e.target.value)}
+                            style={{ width: "100%", background: "#111827", border: "1px solid #374151", borderRadius: 8, padding: 12, color: "#fff", fontSize: 14, fontFamily: "inherit", resize: "vertical", minHeight: 80, boxSizing: "border-box" }} />
+                          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                            <button style={{ ...btn("#7c3aed"), flex: 1 }} onClick={() => customInput.trim() && makeChoice(choice, customInput.trim())} disabled={!customInput.trim()}>
+                              Submit My Plan
+                            </button>
+                            <button style={btn("#374151")} onClick={() => setShowCustom(false)}>Cancel</button>
+                          </div>
+                        </div>
                       ) : (
-                        <span className="text-2xl text-muted-foreground">+</span>
-                      )}
-                    </button>
-                    <div className="text-xs text-muted-foreground">
-                      {photo ? (
-                        <button type="button" onClick={() => setPhoto(undefined)} className="hover:text-[var(--gold)] underline">
-                          Remove
+                        <button onClick={() => setShowCustom(true)} style={{ width: "100%", ...card, padding: "14px 18px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px dashed #374151" }}>
+                          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                            <span style={{ width: 24, height: 24, borderRadius: 4, background: "#7c3aed22", color: "#7c3aed", fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>D</span>
+                            <span style={{ color: "#a78bfa", fontSize: 14 }}>{choice.text}</span>
+                          </div>
+                          <RiskBadge risk={choice.risk} />
                         </button>
-                      ) : (
-                        <span>Upload a face for your character.</span>
-                      )}
-                    </div>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handlePhoto(f);
-                      }}
-                    />
+                      )
+                    ) : (
+                      <button onClick={() => makeChoice(choice)} style={{ width: "100%", ...card, padding: "14px 18px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "flex-start", gap: 12 }}>
+                        <span style={{ width: 24, height: 24, borderRadius: 4, background: (worldObj?.color || "#7c3aed") + "22", color: worldObj?.color || "#7c3aed", fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{choice.id}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ color: "#e2e8f0", fontSize: 14, marginBottom: 4 }}>{choice.text}</div>
+                          <div style={{ color: "#475569", fontSize: 12, fontStyle: "italic" }}>{choice.potentialOutcome}</div>
+                        </div>
+                        <RiskBadge risk={choice.risk} />
+                      </button>
+                    )}
                   </div>
-                </div>
+                ))}
               </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">Choose your reality.</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {WORLDS.map((w) => {
-                  const selected = world === w.name;
-                  return (
-                    <button
-                      key={w.name}
-                      type="button"
-                      onClick={() => { setWorld(w.name); }}
-                      className={`group relative text-left border overflow-hidden aspect-[4/3] transition-all ${selected ? "border-[var(--gold)] ring-2 ring-[var(--gold)]/40" : "border-border hover:border-[var(--gold)]/50"}`}
-                    >
-                      {w.img && (
-                        <img
-                          src={w.img}
-                          alt=""
-                          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${selected ? "opacity-80 scale-105" : "opacity-50 group-hover:opacity-75 group-hover:scale-105"}`}
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
-                      <div className="relative h-full flex flex-col justify-end p-4">
-                        <div className="text-xl mb-1">{w.emoji}</div>
-                        <div className={`text-sm font-medium ${selected ? "text-[var(--gold)]" : "text-foreground"}`}>{w.name}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
-              <h2 className="font-display text-3xl md:text-4xl font-light mb-3">What kind of person are you?</h2>
-              <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
-                Pick 3 · {traits.length}/3 selected
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {TRAITS.map((t) => {
-                  const selected = traits.includes(t);
-                  const disabled = !selected && traits.length >= 3;
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleTrait(t)}
-                      disabled={disabled}
-                      className={`px-4 py-2 border text-sm transition-all ${selected
-                        ? "border-[var(--gold)] bg-[var(--gold)]/15 text-[var(--gold)]"
-                        : disabled
-                          ? "border-border opacity-30 cursor-not-allowed"
-                          : "border-border hover:border-[var(--gold)]/60"
-                        }`}
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <h2 className="font-display text-3xl md:text-4xl font-light mb-8">What's your goal?</h2>
-              <div className="space-y-2">
-                {GOALS.map((g) => {
-                  const selected = goal === g;
-                  return (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => setGoal(g)}
-                      className={`block w-full text-left px-4 py-3 border text-sm transition-all ${selected ? "border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]" : "border-border hover:border-[var(--gold)]/60"}`}
-                    >
-                      {g}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
+            </div>
+          ) : null}
         </div>
 
-        {/* Footer nav */}
-        <div className="flex items-center justify-between px-8 py-5 border-t border-border bg-background/40">
-          <button
-            type="button"
-            onClick={back}
-            disabled={step === 1 || submitting}
-            className="text-[0.65rem] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition"
-          >
-            ← Back
-          </button>
-          {step < 4 ? (
-            <button
-              type="button"
-              onClick={next}
-              disabled={!canNext}
-              className="bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase px-6 py-3 hover:bg-[var(--gold-bright)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              Continue →
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={finish}
-              disabled={!canNext || submitting}
-              className="bg-[var(--gold)] text-background text-[0.65rem] tracking-[0.3em] uppercase px-6 py-3 hover:bg-[var(--gold-bright)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            >
-              {submitting ? "Entering…" : "Enter →"}
-            </button>
+        {/* RIGHT */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ ...card, padding: 16, textAlign: "center" }}>
+            <div style={{ width: 60, height: 60, borderRadius: "50%", margin: "0 auto 10px", overflow: "hidden", background: "#111827", border: `2px solid ${worldObj?.color || "#7c3aed"}` }}>
+              {player.profileImage && player.profileImage !== "skip" ? <img src={player.profileImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <div style={{ fontSize: 28, lineHeight: "60px" }}>👤</div>}
+            </div>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>{player.name}</div>
+            <div style={{ fontSize: 11, color: "#475569", marginBottom: 8 }}>Age {player.age} · {player.goal}</div>
+            <div style={{ display: "inline-block", padding: "3px 10px", borderRadius: 20, background: (worldObj?.color || "#7c3aed") + "22", color: worldObj?.color || "#7c3aed", fontSize: 11, fontWeight: 700 }}>
+              LVL {player.level}
+            </div>
+          </div>
+
+          <div style={{ ...card, padding: 16 }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 12 }}>Stats</div>
+            <StatBar label="Reputation" value={player.reputation} max={200} color="#7c3aed" />
+            <StatBar label="Wealth" value={player.wealth} max={1000} color="#f59e0b" />
+            {statDeltas.reputation ? (
+              <div style={{ fontSize: 12, color: statDeltas.reputation > 0 ? "#4ade80" : "#f87171", textAlign: "right" }}>
+                Rep {statDeltas.reputation > 0 ? "+" : ""}{statDeltas.reputation}
+              </div>
+            ) : null}
+          </div>
+
+          <div style={{ ...card, padding: 16 }}>
+            <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 10 }}>Traits</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {player.traits.map(t => (
+                <span key={t} style={{ fontSize: 11, padding: "3px 8px", borderRadius: 4, background: "#1f2937", color: "#94a3b8" }}>{t}</span>
+              ))}
+            </div>
+          </div>
+
+          {player.relationships.length > 0 && (
+            <div style={{ ...card, padding: 16 }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 10 }}>Relations</div>
+              {player.relationships.slice(0, 5).map(r => (
+                <div key={r.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
+                  <span style={{ color: "#9ca3af" }}>{r.name}</span>
+                  <span style={{ color: r.status === "ally" ? "#4ade80" : r.status === "rival" ? "#f87171" : "#6b7280", fontSize: 10 }}>{r.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {player.inventory.length > 0 && (
+            <div style={{ ...card, padding: 16 }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 10 }}>Inventory</div>
+              {player.inventory.slice(0, 4).map((item, i) => (
+                <div key={i} style={{ fontSize: 12, color: "#9ca3af", marginBottom: 4 }}>· {item}</div>
+              ))}
+            </div>
+          )}
+
+          {player.majorDecisions.length > 0 && (
+            <div style={{ ...card, padding: 16 }}>
+              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 10 }}>Story ({player.storyProgress} scenes)</div>
+              {player.majorDecisions.slice(-3).map((d, i) => (
+                <div key={i} style={{ fontSize: 11, color: "#64748b", marginBottom: 4, fontStyle: "italic" }}>"{d.length > 50 ? d.slice(0, 50) + "…" : d}"</div>
+              ))}
+            </div>
           )}
         </div>
       </div>
