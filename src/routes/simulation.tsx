@@ -1,615 +1,608 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { simulationScene } from "@/lib/simulation.functions";
-import { SiteNav } from "@/components/SiteNav";
-import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/simulation")({
+  component: SimulationPage,
   head: () => ({
     meta: [
-      { title: "Revenio Simulation — Build Your Legend" },
-      { name: "description", content: "Step into AI-powered worlds and live the legend you never lived." },
+      { title: "Revenio Simulation — Live Your Alternate Life" },
+      { name: "description", content: "Choose a world, build your legend. AI-powered alternate life simulation." },
     ],
   }),
-  component: SimulationPage,
 });
 
-// ─── WORLD LORE ───────────────────────────────────────────────────────────────
-const WORLD_LORE: Record<string, any> = {
-  arcane: {
-    factions: ["House Aetheris (knowledge & strategy)", "House Drakemore (courage & honor)", "House Umbra (ambition & cunning)", "House Sylvara (nature & creativity)"],
-    rivals: ["Cassian Vael — top student, ruthless and calculating", "Lyra Ashwood — prodigy from House Sylvara, secretly kind", "Mordecai Thane — bully from House Umbra, connected and dangerous"],
-    npcs: ["Headmaster Orin — wise but hides secrets", "Professor Serath — strict, respects only results", "The Groundskeeper — knows every secret passage"],
-    events: ["A forbidden spell was used last night", "A student disappeared from the east tower", "The annual dueling tournament is announced", "A dark artifact was found in the library", "Someone is stealing from the potion stores"],
-    tone: "mysterious, magical, politically charged school life",
-    currency: "Arcane Marks",
-    sceneTypes: ["class challenge", "duel", "house politics", "forbidden discovery", "secret mission", "rivalry confrontation", "mentor moment", "dangerous experiment"],
-  },
-  galactic: {
-    factions: ["Vanguard Alliance (explorers & diplomats)", "Iron Dominion (military & order)", "Nova Syndicate (traders & smugglers)", "Celestial Order (mystics & ancient knowledge)"],
-    rivals: ["Commander Hex — Iron Dominion enforcer, wants you eliminated", "Zara Voss — Nova Syndicate pilot, charismatic and untrustworthy", "The Ghost — unknown operative who keeps appearing"],
-    npcs: ["Admiral Crane — old veteran, sees potential in you", "Kai — ship mechanic, loyal and street-smart", "Oracle-7 — ancient AI that speaks in riddles"],
-    events: ["A distress signal from the outer rim", "A planet is about to be seized by Iron Dominion", "Smuggled cargo was found on your ship", "A bounty has been placed on someone in your crew", "Emperor Vexis made a public announcement"],
-    tone: "gritty space opera, high stakes, political intrigue",
-    currency: "Credits",
-    sceneTypes: ["space combat", "faction negotiation", "planet exploration", "crew conflict", "smuggling run", "discovery", "ambush", "alliance decision"],
-  },
-  hero: {
-    factions: ["Titan Academy (strength heroes)", "Sentinel Academy (protectors)", "Nexus Institute (tech & intelligence)", "Phoenix Academy (elite combat)"],
-    rivals: ["Blaze — fire-powered showoff, media favorite", "Ironclad — strength-based hero, despises your style", "The Null — villain slowly removing heroes' powers"],
-    npcs: ["Director Vane — runs Phoenix Academy, ruthless pragmatist", "Mira Chen — journalist always nearby", "Coach Sato — trainer who believes in you when no one else does"],
-    events: ["A major villain attack downtown", "A hero was exposed as corrupt", "The Hero Rankings just updated", "A civilian recorded your last mission", "A new villain team formed"],
-    tone: "superhero drama, public pressure, identity crisis, spectacular action",
-    currency: "Hero Points",
-    sceneTypes: ["combat mission", "press conference", "training session", "civilian rescue", "rivalry clash", "identity challenge", "team conflict", "moral dilemma"],
-  },
-  dragon: {
-    factions: ["Emberhold (dragon riders & warriors)", "Frostmere (northern ice clans)", "Thornvale (archers & beast tamers)", "Goldcrest (royalty & diplomats)"],
-    rivals: ["Lord Varek — Emberhold general, sees you as a threat", "Lady Sera — Goldcrest diplomat, plays every side", "Kael the Burned — former dragon rider, bitter and vengeful"],
-    npcs: ["Elder Dwyn — oldest rider, knows where the last dragon eggs are", "Tomas — your squire, fiercely loyal", "The Dragon Seer — blind oracle who predicts fire"],
-    events: ["King Malakar's army crossed the northern pass", "A dragon was seen circling the capital", "Harvest taxes caused riots in Thornvale", "A lost dragon egg was discovered", "Two kingdoms are on the brink of war"],
-    tone: "epic medieval fantasy, war strategy, power and consequence",
-    currency: "Gold Crowns",
-    sceneTypes: ["battle command", "kingdom negotiation", "dragon encounter", "political intrigue", "siege warfare", "alliance building", "betrayal reveal", "moral ruling"],
-  },
-  champions: {
-    factions: ["Crimson United (historic club, pressure & tradition)", "Royal Blue (elite technical academy)", "Blackstone FC (defensive discipline)", "Golden City Academy (wealthy & modern)", "Phoenix Athletic (underdog energy)"],
-    rivals: ["Luca Moretti — elite striker, arrogant and flashy", "Mateo Silva — wonderkid midfielder, technical genius", "Kieran Blake — aggressive defender, physically dominant", "Adrian Vega — the best of your generation, your ultimate measure"],
-    npcs: ["Coach Reyes — tough but fair, believes in you", "Agent Torres — your agent, loyal but greedy", "Dani — childhood friend who kept you grounded", "The Press — always watching, always judging"],
-    events: ["Transfer window opens tomorrow", "A doping scandal rocked the league", "Your stats leaked to the media", "A rival club made a huge offer for you", "The national team selectors are watching tonight"],
-    tone: "sports drama, pressure, sacrifice, fame and identity",
-    currency: "Contract Value",
-    sceneTypes: ["match moment", "training decision", "transfer negotiation", "media pressure", "rivalry confrontation", "personal sacrifice", "team conflict", "career crossroads"],
-  },
-  shadow: {
-    factions: ["Night Ravens (stealth operatives)", "Phantom Circle (spies & deception)", "Iron Blades (mercenaries)", "Whisper Network (information brokers)"],
-    rivals: ["The Jackal — rival operative, two steps ahead", "Director Lyons — agency head who wants you controlled", "Cipher — unknown hacker, knows everything about you"],
-    npcs: ["Handler Rook — your contact, trustworthy until he isn't", "Vera — an asset turned ally, dangerous secrets", "The Fixer — cleans up problems, for a price"],
-    events: ["A mole was discovered in the guild", "A senator was assassinated", "Classified files were leaked", "A rival guild is moving into your territory", "The Black Regent made a public appearance"],
-    tone: "spy thriller, paranoia, betrayal, moral ambiguity, power in shadows",
-    currency: "Influence",
-    sceneTypes: ["infiltration", "interrogation", "double-cross", "intel extraction", "safe house crisis", "trust test", "assassination decision", "faction war"],
-  },
-  neon: {
-    factions: ["Helix Industries (technology)", "NovaCore (energy)", "Synapse Systems (AI)", "Apex Dynamics (military tech)"],
-    rivals: ["Director Kron — richest man in the city, wants to merge humanity with AI", "Nova Reyes — corporate climber, ruthless and brilliant", "Ghost Protocol — rogue AI that's been watching you"],
-    npcs: ["Jax — street-level fixer, old school loyalty", "Dr. Ito — scientist who built things she regrets", "The Broker — trades in secrets, not money"],
-    events: ["Synapse Systems released a new mind-interface", "Corporate enforcers raided the lower districts", "A blackout hit sector 7 for 72 hours", "A whistleblower went public", "Director Kron announced the Merger Initiative"],
-    tone: "cyberpunk, corporate dystopia, tech identity, rebellion vs control",
-    currency: "Crypto",
-    sceneTypes: ["corporate heist", "street conflict", "tech upgrade", "faction negotiation", "exposure risk", "underground alliance", "system hack", "moral crossroads"],
-  },
-  odyssey: {
-    factions: ["Dawnseekers (heroes)", "Moonwardens (mystics)", "Stormforged (warriors)", "Celestial Keepers (guardians of relics)"],
-    rivals: ["The Eternal King — immortal ruler between realities", "Theron the Fallen — hero turned traitor, knows all your weaknesses", "The Mimic — creature that takes your form"],
-    npcs: ["Seer Elara — ancient guide, speaks in half-truths", "Brennan — fellow traveler, heart of gold, terrible judgment", "The Oracle — can answer one question, always has a cost"],
-    events: ["A mythical creature was spotted near the village", "An ancient temple opened for the first time in centuries", "The stars aligned in a forbidden pattern", "A legendary weapon resurfaced", "The Eternal King's shadow was seen crossing the moon"],
-    tone: "mythological epic, destiny vs free will, trials and transformation",
-    currency: "Relics",
-    sceneTypes: ["mythic trial", "creature encounter", "ancient discovery", "legendary battle", "divine test", "realm crossing", "prophecy moment", "sacrifice decision"],
-  },
-};
-
-const TENSION_LEVELS = ["calm", "building", "tense", "crisis"];
-
-function getNextSceneType(worldId: string, history: any[], tension: number) {
-  const lore = WORLD_LORE[worldId];
-  if (!lore) return "encounter";
-  const used = history.slice(-4).map((h) => h.sceneType).filter(Boolean);
-  const available = lore.sceneTypes.filter((s: string) => !used.includes(s));
-  const pool = available.length > 0 ? available : lore.sceneTypes;
-  if (tension >= 2 && Math.random() > 0.4) {
-    const dramatic = pool.filter((s: string) => /conflict|battle|crisis|confront|combat|betrayal|sacrifice|war|decision/.test(s));
-    if (dramatic.length > 0) return dramatic[Math.floor(Math.random() * dramatic.length)];
-  }
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function buildPrompt(player: any, worldName: string, worldId: string, sceneType: string, tension: number, storyHistory: any[], isOpening: boolean) {
-  const lore = WORLD_LORE[worldId] || {};
-  const tensionWord = TENSION_LEVELS[tension] || "building";
-  const recentDecisions = storyHistory.slice(-5).map((h) => `Scene "${h.title}": player chose "${h.choice}"`).join("\n") || "none yet";
-  const activeRelationships = player.relationships.map((r: any) => `${r.name} (${r.status})`).join(", ") || "none yet";
-  const events = lore.events || ["something stirs"];
-
-  return `You are the Revenio Simulation Engine — an AI storyteller generating unique, dynamic life-simulation scenes.
-
-=== PLAYER ===
-Name: ${player.name} | Age: ${player.age} | Level: ${player.level}
-Traits: ${player.traits.join(", ")}
-Goal: ${player.goal}
-World: ${worldName} | Reputation: ${player.reputation} | Wealth: ${player.wealth}
-Current faction: ${player.currentFaction || "unaffiliated"}
-Relationships: ${activeRelationships}
-Inventory: ${player.inventory.join(", ") || "nothing yet"}
-
-=== STORY MEMORY (last 5 decisions) ===
-${recentDecisions}
-
-=== WORLD CONTEXT ===
-Factions: ${(lore.factions || []).join(" | ")}
-Active rivals: ${(lore.rivals || []).join(" | ")}
-Key NPCs: ${(lore.npcs || []).join(" | ")}
-World event: ${events[Math.floor(Math.random() * events.length)]}
-Currency: ${lore.currency || "gold"}
-World tone: ${lore.tone || "dramatic"}
-
-=== THIS SCENE ===
-Type: ${sceneType}
-Narrative tension: ${tensionWord}
-${isOpening ? "This is the OPENING scene. Hook immediately. Drop them into action." : "This is a CONSEQUENCE scene — build directly on prior decisions."}
-
-=== STRICT RULES ===
-1. sceneText: 2-4 SHORT punchy sentences. NO lore dumps. Show action, show stakes, name an NPC or rival when relevant.
-2. Make this scene feel DIFFERENT from recent ones.
-3. Let the player's TRAITS actively shape the scene.
-4. Choices must feel meaningfully different.
-5. Choice D must always be: "Create your own plan..." (verbatim).
-6. statChanges: small integers, can be NEGATIVE.
-7. If tension is "crisis" or "tense", something is genuinely at stake.
-8. Return ONLY raw JSON. No markdown. No backticks.
-
-=== REQUIRED JSON FORMAT ===
-{
-  "sceneTitle": "short dramatic title max 5 words",
-  "sceneText": "2-4 punchy sentences. Name NPCs. Show stakes.",
-  "sceneType": "${sceneType}",
-  "tension": "${tensionWord}",
-  "choices": [
-    {"id":"A","text":"safe/strategic choice","type":"safe","risk":"Low","potentialOutcome":"brief hint"},
-    {"id":"B","text":"bold/risky choice","type":"risky","risk":"High","potentialOutcome":"brief hint"},
-    {"id":"C","text":"emotional/loyalty choice","type":"loyalty","risk":"Medium","potentialOutcome":"brief hint"},
-    {"id":"D","text":"Create your own plan...","type":"custom","risk":"Variable","potentialOutcome":"Custom outcome"}
-  ],
-  "statChanges": {"reputation": 0, "wealth": 0, "level": 0},
-  "relationshipChanges": [],
-  "inventoryUnlocks": [],
-  "newAchievements": [],
-  "factionChange": "",
-  "nextSceneHint": "one sentence teaser for what comes next"
-}`;
-}
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const WORLDS = [
+  { id: "champions", name: "Champions Legacy", emoji: "⚽", tag: "Sports Career", color: "#e85d04", img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&q=80", question: "What would I sacrifice to become the greatest?", desc: "Rise from unknown youth to global sporting legend." },
+  { id: "arcane", name: "Arcane Academy", emoji: "✨", tag: "Magic School", color: "#7c3aed", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80", question: "What kind of person would I become with power?", desc: "Enter the world's greatest magic academy." },
+  { id: "galactic", name: "Galactic Frontier", emoji: "🚀", tag: "Space Adventure", color: "#0ea5e9", img: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800&q=80", question: "Would I choose freedom, order, or rebellion?", desc: "Navigate a galaxy of factions, destiny, and conflict." },
+  { id: "dragon", name: "Dragonfall Kingdoms", emoji: "🐉", tag: "Medieval Fantasy", color: "#dc2626", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80", question: "What kind of leader would I become?", desc: "Rule kingdoms, tame dragons, shape a realm." },
+  { id: "hero", name: "Hero Nexus", emoji: "⚡", tag: "Superhero", color: "#f59e0b", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80", question: "Would I use power for fame or responsibility?", desc: "Discover powers and decide what kind of hero you are." },
+  { id: "shadow", name: "Shadow Guild", emoji: "🕶️", tag: "Spy Thriller", color: "#6b7280", img: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=800&q=80", question: "Would I stay loyal when betrayal benefits me?", desc: "Join a secret network of spies and power brokers." },
+  { id: "neon", name: "Neon Domination", emoji: "🤖", tag: "Cyberpunk", color: "#06b6d4", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80", question: "Would I control the system or fight it?", desc: "Rise through a mega-city ruled by AI and corporations." },
+  { id: "odyssey", name: "Eternal Odyssey", emoji: "⚔️", tag: "Mythological", color: "#d97706", img: "https://images.unsplash.com/photo-1548532928-b34e3be62fc6?w=800&q=80", question: "Would I follow destiny or create my own?", desc: "Journey through mythical realms and ancient trials." },
+];
 
 const TRAITS = ["Ambitious", "Loyal", "Brave", "Competitive", "Intelligent", "Creative", "Confident", "Curious", "Ruthless", "Charismatic"];
 const GOALS = ["Become a Legend", "Gain Power", "Build an Empire", "Become Rich", "Save the World", "Discover the Unknown"];
-const WORLDS = [
-  { id: "arcane", name: "Arcane Academy", icon: "🔮", tag: "Magic & Power", color: "#7c3aed", desc: "Enter the world's greatest magic school. What kind of power will you seek?" },
-  { id: "galactic", name: "Galactic Frontier", icon: "🚀", tag: "Space & Rebellion", color: "#0ea5e9", desc: "A galaxy of factions, starships, and destiny awaits your command." },
-  { id: "hero", name: "Hero Nexus", icon: "⚡", tag: "Power & Identity", color: "#f59e0b", desc: "You just got powers. The city is watching. What kind of hero will you be?" },
-  { id: "dragon", name: "Dragonfall Kingdoms", icon: "🐉", tag: "War & Legacy", color: "#dc2626", desc: "Dragons, kingdoms, armies, betrayal. Who will you become as a ruler?" },
-  { id: "champions", name: "Champions Legacy", icon: "⚽", tag: "Glory & Sacrifice", color: "#16a34a", desc: "Start unknown. Become the greatest athlete the world has ever seen." },
-  { id: "shadow", name: "Shadow Guild", icon: "🗡️", tag: "Secrets & Betrayal", color: "#6b7280", desc: "A hidden network of spies and power brokers. Trust no one." },
-  { id: "neon", name: "Neon Domination", icon: "🤖", tag: "Tech & Control", color: "#06b6d4", desc: "A mega-city ruled by AI and corporations. Fight it or own it." },
-  { id: "odyssey", name: "Eternal Odyssey", icon: "⚔️", tag: "Myth & Destiny", color: "#d97706", desc: "Mythical realms, ancient trials, legendary creatures. Write your epic." },
-];
-const RISK_COLOR: Record<string, string> = { Low: "#16a34a", Medium: "#d97706", High: "#dc2626", Variable: "#7c3aed" };
 
-function StatBar({ label, value, max = 200, color }: { label: string; value: number; max?: number; color: string }) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>
-        <span>{label}</span><span>{value}</span>
-      </div>
-      <div style={{ height: 6, background: "#1e293b", borderRadius: 3, overflow: "hidden" }}>
-        <div style={{ width: `${pct}%`, height: "100%", background: color, transition: "width 0.4s" }} />
-      </div>
-    </div>
-  );
-}
-function Badge({ label, color }: { label: string; color: string }) {
-  return <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 4, background: color + "22", color, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</span>;
-}
-function TensionBar({ tension }: { tension: string }) {
-  const levels = ["calm", "building", "tense", "crisis"];
-  const colors = ["#16a34a", "#d97706", "#dc2626", "#7c3aed"];
-  const idx = levels.indexOf(tension);
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10, color: "#64748b" }}>
-      <span style={{ letterSpacing: 1.5 }}>TENSION</span>
-      {levels.map((_, i) => (
-        <div key={i} style={{ width: 14, height: 4, borderRadius: 2, background: i <= idx ? colors[Math.max(0, idx)] : "#1e293b" }} />
-      ))}
-      <span style={{ color: idx >= 0 ? colors[idx] : "#475569", marginLeft: 4, fontWeight: 700 }}>{tension}</span>
-    </div>
-  );
+const WORLD_SYSTEM_PROMPTS: Record<string, string> = {
+  champions: `You are the AI narrator for "Champions Legacy" in Revenio — a sports career life simulation. The player is a young unknown athlete rising toward greatness. Teams: Crimson United, Royal Blue Academy, Blackstone FC, Golden City Academy, Phoenix Athletic. Rivals: Luca Moretti, Mateo Silva, Kieran Blake, Jules Laurent, ultimate rival Adrian Vega. Attributes: Speed, Skill, Shooting, Passing, Leadership, Stamina. Currency = Career Credits. Soccer ONLY.`,
+  arcane: `You are the AI narrator for "Arcane Academy" — a magic school life simulation. Houses: Aetheris, Drakemore, Umbra, Sylvara. Villain: The Hollow Mage. Skills: Spellcasting, Potions, Dueling, Arcane Theory, Wandcraft. Currency = Arcane Coins.`,
+  galactic: `You are the AI narrator for "Galactic Frontier" — a Star Wars-style space adventure. Factions: Vanguard Alliance, Iron Dominion, Nova Syndicate, Celestial Order. Villain: Emperor Vexis. Skills: Piloting, Combat, Diplomacy, Navigation, Engineering. Currency = Credits.`,
+  dragon: `You are the AI narrator for "Dragonfall Kingdoms" — a Game of Thrones-style medieval kingdom simulation. Kingdoms: Emberhold, Frostmere, Thornvale, Goldcrest. Villain: King Malakar. Skills: Combat, Leadership, Diplomacy, Dragon Taming, Strategy. Currency = Gold.`,
+  hero: `You are the AI narrator for "Hero Nexus" — a Marvel-style superhero simulation. Academies: Titan, Sentinel, Nexus Institute, Phoenix. Villain: The Null. Skills: Power Control, Combat, PR, Strategy, Tech. Currency = Hero Credits.`,
+  shadow: `You are the AI narrator for "Shadow Guild" — an Assassin's Creed-style secret order. Branches: Night Ravens, Phantom Circle, Iron Blades, Whisper Network. Villain: The Black Regent. Skills: Stealth, Deception, Combat, Hacking, Persuasion. Currency = Black Coins.`,
+  neon: `You are the AI narrator for "Neon Domination" — a cyberpunk mega-city simulation. Corps: Helix Industries, NovaCore, Synapse Systems, Apex Dynamics. Villain: Director Kron. Skills: Hacking, Combat, Persuasion, Cybernetics, Business. Currency = NeoCredits.`,
+  odyssey: `You are the AI narrator for "Eternal Odyssey" — a Percy Jackson-style mythological simulation. Orders: Dawnseekers, Moonwardens, Stormforged, Celestial Keepers. Villain: The Eternal King. Skills: Combat, Wisdom, Exploration, Ancient Lore, Leadership. Currency = Ancient Gold.`,
+};
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+type Player = {
+  name: string;
+  age: string;
+  traits: string[];
+  goal: string;
+  level: number;
+  reputation: number;
+  wealth: number;
+  skills: Record<string, number>;
+  currentFaction: string;
+};
+
+type Choice = { id: string; text: string; risk: string; potentialOutcome: string };
+type Scene = {
+  sceneTitle: string;
+  sceneText: string;
+  atmosphere?: string;
+  choices: Choice[];
+  statChanges?: { reputation?: number; wealth?: number; level?: number };
+  skillChanges?: Record<string, number>;
+  newAchievements?: string[];
+  nextSceneHint?: string;
+};
+
+type HistEntry = { title: string; choiceMade: string };
+
+// ─── PROMPT BUILDERS ──────────────────────────────────────────────────────────
+function buildSystem(player: Player, worldId: string, history: HistEntry[]) {
+  const ctx = WORLD_SYSTEM_PROMPTS[worldId] || "";
+  const hist = history.length > 0
+    ? `\n\nRecent story:\n${history.slice(-3).map(h => `Scene: ${h.title} | Choice: ${h.choiceMade}`).join("\n")}`
+    : "";
+  return `${ctx}
+
+Player profile:
+- Name: ${player.name}, Age: ${player.age}
+- Traits: ${player.traits.join(", ")}
+- Goal: ${player.goal}
+- Level: ${player.level} | Reputation: ${player.reputation} | Wealth: ${player.wealth}
+- Skills: ${JSON.stringify(player.skills)}
+- Faction: ${player.currentFaction || "None yet"}
+${hist}
+
+CRITICAL RULES:
+1. Return ONLY valid JSON. No markdown, no fences.
+2. sceneText: 2-4 punchy sentences. Show action.
+3. Always exactly 4 choices: A (safe), B (bold/risky), C (loyalty/emotional), D (custom plan).
+4. Stat changes small (1-5).
+5. Teen-friendly but dramatic.
+6. Use the player's name (${player.name}). Reference their traits/goal naturally.`;
 }
 
+function buildUserMessage(player: Player, sceneHint: string) {
+  return `Generate the next scene. ${sceneHint ? `Setup: ${sceneHint}` : "Generate an exciting OPENING scene for a brand new player just entering this world."}
+
+Return this exact JSON structure:
+{
+  "sceneTitle": "short dramatic title",
+  "sceneText": "2-4 punchy sentences personal to ${player.name}",
+  "atmosphere": "tense|exciting|mysterious|dangerous|triumphant",
+  "choices": [
+    {"id":"A","text":"safe strategic option (10-15 words)","risk":"Low","potentialOutcome":"brief outcome"},
+    {"id":"B","text":"bold risky option (10-15 words)","risk":"High","potentialOutcome":"brief outcome"},
+    {"id":"C","text":"loyalty/emotional option (10-15 words)","risk":"Medium","potentialOutcome":"brief outcome"},
+    {"id":"D","text":"Create your own plan...","risk":"Variable","potentialOutcome":"Custom outcome"}
+  ],
+  "statChanges": {"reputation": 0, "wealth": 0, "level": 0},
+  "skillChanges": {},
+  "newAchievements": [],
+  "nextSceneHint": "one intriguing sentence"
+}`;
+}
+
+function buildCustomUser(player: Player, customChoice: string, scene: Scene) {
+  return `The player chose: "${customChoice}"
+
+Current scene: ${scene.sceneTitle} — ${scene.sceneText}
+
+Generate the consequence as JSON with the SAME structure (sceneTitle, sceneText (2-4 sentences), atmosphere, 4 choices A/B/C/D where D is "Create your own plan...", statChanges, skillChanges, newAchievements, nextSceneHint). Return ONLY valid JSON.`;
+}
+
+// ─── PAGE ─────────────────────────────────────────────────────────────────────
 function SimulationPage() {
-  const runScene = useServerFn(simulationScene);
-  const [screen, setScreen] = useState<"splash" | "create" | "world" | "game">("splash");
-  const [step, setStep] = useState(0);
-  const [player, setPlayer] = useState<any>({
-    name: "", age: "", traits: [], goal: "", profileImage: null,
-    level: 1, reputation: 0, wealth: 0,
-    relationships: [], inventory: [], achievements: [],
-    majorDecisions: [], storyProgress: 0, currentWorld: "", currentFaction: "",
-  });
-  const [scene, setScene] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const [customOpen, setCustomOpen] = useState(false);
-  const [customText, setCustomText] = useState("");
-  const [statFlash, setStatFlash] = useState<any>({});
-  const [storyHistory, setStoryHistory] = useState<any[]>([]);
-  const [tension, setTension] = useState(0);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [screen, setScreen] = useState<"splash" | "create" | "worlds" | "sim">("splash");
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [worldId, setWorldId] = useState<string | null>(null);
 
-  const worldObj = WORLDS.find((w) => w.id === player.currentWorld);
+  if (screen === "splash") return <SplashScreen onStart={() => setScreen("create")} />;
+  if (screen === "create") return <CharacterCreation onComplete={(p) => { setPlayer(p); setScreen("worlds"); }} />;
+  if (screen === "worlds" && player) return <WorldSelect player={player} onSelect={(w) => { setWorldId(w); setScreen("sim"); }} />;
+  if (screen === "sim" && player && worldId) return <SimulationEngine player={player} worldId={worldId} onUpdatePlayer={setPlayer} onBack={() => setScreen("worlds")} />;
+  return null;
+}
 
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2800);
-  }
+// ─── SPLASH ───────────────────────────────────────────────────────────────────
+function SplashScreen({ onStart }: { onStart: () => void }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 100); return () => clearTimeout(t); }, []);
 
-  function applyScene(nextScene: any, choiceText: string) {
-    const ch = nextScene.statChanges || {};
-    setStatFlash(ch);
-    setTimeout(() => setStatFlash({}), 2400);
-    const tMap: any = { calm: 0, building: 1, tense: 2, crisis: 3 };
-    const newTension = tMap[nextScene.tension] ?? Math.min(3, tension + (Math.random() > 0.6 ? 1 : 0));
-    setTension(newTension);
-    setStoryHistory((h) => [...h, { title: nextScene.sceneTitle, choice: choiceText || "—", sceneType: nextScene.sceneType, tension: nextScene.tension }]);
-    setPlayer((p: any) => {
-      const next = { ...p, storyProgress: p.storyProgress + 1 };
-      if (ch.reputation) next.reputation = Math.max(0, p.reputation + ch.reputation);
-      if (ch.wealth) next.wealth = Math.max(0, p.wealth + ch.wealth);
-      if (ch.level > 0) { next.level = p.level + 1; showToast("⬆ LEVEL UP!"); }
-      if (nextScene.factionChange) next.currentFaction = nextScene.factionChange;
-      if (nextScene.relationshipChanges?.length) {
-        const rel = [...p.relationships];
-        nextScene.relationshipChanges.forEach((rc: any) => {
-          const idx = rel.findIndex((r: any) => r.name === rc.name);
-          if (idx >= 0) rel[idx] = { ...rel[idx], status: rc.status };
-          else rel.push({ name: rc.name, status: rc.status });
-        });
-        next.relationships = rel;
-      }
-      if (nextScene.inventoryUnlocks?.length) next.inventory = [...p.inventory, ...nextScene.inventoryUnlocks];
-      if (nextScene.newAchievements?.length) {
-        next.achievements = [...p.achievements, ...nextScene.newAchievements];
-        showToast("🏆 " + nextScene.newAchievements[0]);
-      }
-      return next;
-    });
-    setScene(nextScene);
-  }
-
-  async function generateScene(world: any, currentPlayer: any, history: any[], currentTension: number, isOpening: boolean, choiceText: string) {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const sceneType = getNextSceneType(world.id, history, currentTension);
-      const sys = buildPrompt(currentPlayer, world.name, world.id, sceneType, currentTension, history, isOpening);
-      const userMsg = isOpening
-        ? `Generate the opening scene. ${currentPlayer.name} just entered ${world.name}. Make it immediate and gripping.`
-        : `Player chose: "${choiceText}". Generate the consequence scene of type "${sceneType}". Build directly on what just happened.`;
-      const res = await runScene({ data: { systemPrompt: sys, userMessage: userMsg } });
-      applyScene(res.scene, choiceText);
-    } catch (e: any) {
-      setErrorMsg(e?.message || "Scene generation failed");
-    }
-    setLoading(false);
-  }
-
-  async function makeChoice(choice: any, custom?: string) {
-    const choiceLabel = custom || choice.text;
-    const updatedPlayer = { ...player, majorDecisions: [...player.majorDecisions, choiceLabel] };
-    setPlayer(updatedPlayer);
-    setCustomOpen(false);
-    setCustomText("");
-    const newTension = Math.min(3, tension + (choice.risk === "High" ? 1 : choice.risk === "Low" ? -1 : 0));
-    setTension(Math.max(0, newTension));
-    await generateScene(worldObj, updatedPlayer, storyHistory, newTension, false, choiceLabel);
-  }
-
-  function startWorld(world: any) {
-    const updatedPlayer = { ...player, currentWorld: world.id, storyProgress: 0, majorDecisions: [], relationships: [], inventory: [], currentFaction: "" };
-    setPlayer(updatedPlayer);
-    setScene(null);
-    setStoryHistory([]);
-    setTension(0);
-    setScreen("game");
-    generateScene(world, updatedPlayer, [], 0, true, "");
-  }
-
-  function toggleTrait(t: string) {
-    setPlayer((p: any) => {
-      if (p.traits.includes(t)) return { ...p, traits: p.traits.filter((x: string) => x !== t) };
-      if (p.traits.length >= 3) return p;
-      return { ...p, traits: [...p.traits, t] };
-    });
-  }
-
-  const PAGE: React.CSSProperties = { minHeight: "100vh", background: "#070a0e", color: "#f1f5f9", fontFamily: "'Georgia', serif", boxSizing: "border-box" };
-  const CARD: React.CSSProperties = { background: "rgba(13,18,28,0.96)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: 20 };
-  const BTN = (bg = "#7c3aed", ghost = false): React.CSSProperties => ({ background: ghost ? "transparent" : bg, border: ghost ? `1px solid ${bg}` : "none", color: ghost ? bg : "#fff", padding: "11px 22px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 700, letterSpacing: 0.8, transition: "opacity 0.2s" });
-  const canProceed = [!!(player.name.trim() && Number(player.age) > 0), player.profileImage !== null, player.traits.length === 3, player.goal !== ""];
-
-  if (screen === "splash") return (
-    <div style={PAGE}>
-      <SiteNav />
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
-        <div style={{ fontSize: 12, letterSpacing: 6, color: "#7c3aed", marginBottom: 12 }}>WELCOME TO</div>
-        <h1 style={{ fontSize: 64, fontWeight: 900, margin: "0 0 16px", letterSpacing: -2 }}>REVENIO</h1>
-        <p style={{ fontSize: 18, color: "#94a3b8", marginBottom: 36 }}>Explore the Life You Never Lived.</p>
-        <button style={BTN("#7c3aed")} onClick={() => setScreen("create")}>BEGIN YOUR STORY →</button>
-        <div style={{ marginTop: 60, display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", color: "#475569", fontSize: 12 }}>
-          {["8 Worlds", "AI-Powered", "Every Run Unique", "Your Legend"].map((t) => <span key={t}>• {t}</span>)}
-        </div>
+  return (
+    <div style={{ minHeight: "100vh", overflowY: "auto", background: "#050508", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1rem", textAlign: "center", position: "relative", boxSizing: "border-box" }}>
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+        {[...Array(30)].map((_, i) => (
+          <div key={i} style={{
+            position: "absolute",
+            width: Math.random() * 3 + 1 + "px", height: Math.random() * 3 + 1 + "px",
+            borderRadius: "50%", background: "white",
+            left: Math.random() * 100 + "%", top: Math.random() * 100 + "%",
+            opacity: Math.random() * 0.7 + 0.1,
+            animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out infinite alternate`,
+            animationDelay: Math.random() * 3 + "s",
+          }} />
+        ))}
       </div>
-      <SiteFooter />
+      <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(30px)", transition: "all 1s cubic-bezier(0.16,1,0.3,1)", position: "relative", zIndex: 1, maxWidth: "440px", width: "100%" }}>
+        <div style={{ fontSize: "clamp(2.5rem, 8vw, 4rem)", marginBottom: "1rem", letterSpacing: "-0.05em", fontFamily: "Georgia, serif" }}>
+          <span style={{ background: "linear-gradient(135deg,#fff 0%, #a78bfa 50%, #f472b6 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>REVENIO</span>
+        </div>
+        <p style={{ color: "#a78bfa", fontSize: "1rem", fontStyle: "italic", marginBottom: "0.5rem", letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: "Georgia, serif" }}>Explore the Life You Never Lived</p>
+        <p style={{ color: "#6b7280", fontSize: "0.9rem", marginBottom: "3rem" }}>An AI-powered alternate life simulation. 8 worlds. Infinite choices.<br /><em style={{ color: "#d1d5db" }}>Who could you become?</em></p>
+        <button onClick={onStart} style={{ background: "linear-gradient(135deg,#7c3aed,#db2777)", border: "none", borderRadius: "50px", padding: "1rem 3rem", color: "white", fontSize: "1.05rem", fontWeight: 700, cursor: "pointer", letterSpacing: "0.05em", boxShadow: "0 0 40px rgba(124,58,237,0.4)" }}>
+          Begin Your Journey →
+        </button>
+      </div>
+      <style>{`@keyframes twinkle { from { opacity: 0.1; } to { opacity: 0.8; } }`}</style>
     </div>
   );
+}
 
-  if (screen === "create") {
-    const STEPS = ["Identity", "Your Look", "Personality", "Your Goal"];
-    return (
-      <div style={PAGE}>
-        <SiteNav />
-        <div style={{ maxWidth: 560, margin: "0 auto", padding: "40px 20px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
-            {STEPS.map((s, i) => (
-              <div key={s} style={{ flex: 1, textAlign: "center" }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: i <= step ? "#7c3aed" : "#1e293b", margin: "0 auto 6px" }} />
-                <div style={{ fontSize: 9, letterSpacing: 1.5, color: i <= step ? "#a78bfa" : "#475569" }}>{s.toUpperCase()}</div>
+// ─── CHARACTER CREATION ───────────────────────────────────────────────────────
+function CharacterCreation({ onComplete }: { onComplete: (p: Player) => void }) {
+  const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [traits, setTraits] = useState<string[]>([]);
+  const [goal, setGoal] = useState("");
+  const [visible, setVisible] = useState(true);
+
+  const advance = (n: number) => { setVisible(false); setTimeout(() => { setStep(n); setVisible(true); }, 250); };
+  const toggleTrait = (t: string) => {
+    if (traits.includes(t)) setTraits(traits.filter(x => x !== t));
+    else if (traits.length < 3) setTraits([...traits, t]);
+  };
+  const finish = () => onComplete({
+    name: name || "Hero", age: age || "18", traits, goal,
+    level: 1, reputation: 0, wealth: 500, skills: {}, currentFaction: "",
+  });
+
+  const stepLabels = ["Identity", "Traits", "Goal"];
+
+  return (
+    <div style={{ minHeight: "100vh", overflowY: "auto", background: "#050508", display: "flex", flexDirection: "column", alignItems: "center", padding: "2rem 1rem", boxSizing: "border-box" }}>
+      <div style={{ width: "100%", maxWidth: "440px" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem", paddingTop: "1rem" }}>
+          <div style={{ fontSize: "1.8rem", fontFamily: "Georgia,serif", background: "linear-gradient(135deg,#a78bfa,#f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>REVENIO</div>
+          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginTop: "1rem", flexWrap: "wrap" }}>
+            {stepLabels.map((l, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <div style={{ width: 24, height: 24, borderRadius: "50%", background: i <= step ? "linear-gradient(135deg,#7c3aed,#db2777)" : "#374151", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", color: "white", fontWeight: 700 }}>{i + 1}</div>
+                <span style={{ fontSize: "0.75rem", color: i === step ? "#a78bfa" : "#6b7280" }}>{l}</span>
+                {i < 2 && <div style={{ width: 20, height: 1, background: "#374151" }} />}
               </div>
             ))}
           </div>
-          <div style={CARD}>
-            {step === 0 && (
-              <div>
-                <h2 style={{ marginTop: 0 }}>Who are you?</h2>
-                <p style={{ color: "#94a3b8", fontSize: 13 }}>Your name and age define your starting point.</p>
-                <input placeholder="Your name" value={player.name} onChange={(e) => setPlayer((p: any) => ({ ...p, name: e.target.value }))}
-                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334151", borderRadius: 8, padding: "11px 14px", color: "#fff", fontSize: 15, fontFamily: "inherit", boxSizing: "border-box", marginBottom: 10, outline: "none" }} />
-                <input placeholder="Your age" type="number" value={player.age} onChange={(e) => setPlayer((p: any) => ({ ...p, age: e.target.value }))}
-                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334151", borderRadius: 8, padding: "11px 14px", color: "#fff", fontSize: 15, fontFamily: "inherit", boxSizing: "border-box", outline: "none" }} />
-              </div>
-            )}
-            {step === 1 && (
-              <div style={{ textAlign: "center" }}>
-                <h2 style={{ marginTop: 0 }}>Your Look</h2>
-                <p style={{ color: "#94a3b8", fontSize: 13 }}>Upload a photo to personalize your journey.</p>
-                <div onClick={() => fileRef.current?.click()} style={{ width: 110, height: 110, borderRadius: "50%", margin: "0 auto 14px", cursor: "pointer", background: "#0f172a", border: "2px dashed #334151", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", fontSize: 36 }}>
-                  {player.profileImage && player.profileImage !== "skip" ? <img src={player.profileImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "👤"}
-                </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = (ev) => setPlayer((p: any) => ({ ...p, profileImage: ev.target?.result })); r.readAsDataURL(f); }} />
-                <button style={BTN("#7c3aed")} onClick={() => fileRef.current?.click()}>Upload Photo</button>
-                <div style={{ marginTop: 12 }}>
-                  <button style={{ background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontSize: 12 }} onClick={() => setPlayer((p: any) => ({ ...p, profileImage: "skip" }))}>Skip this step</button>
-                </div>
-              </div>
-            )}
-            {step === 2 && (
-              <div>
-                <h2 style={{ marginTop: 0 }}>Your Traits</h2>
-                <p style={{ color: "#94a3b8", fontSize: 13 }}>Choose exactly 3. These shape every scene.</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {TRAITS.map((t) => {
-                    const sel = player.traits.includes(t);
-                    return <button key={t} onClick={() => toggleTrait(t)} style={{ padding: "7px 13px", borderRadius: 6, fontFamily: "inherit", fontSize: 13, cursor: "pointer", transition: "all 0.18s", border: sel ? "1px solid #7c3aed" : "1px solid #1e293b", background: sel ? "rgba(124,58,237,0.18)" : "#0f172a", color: sel ? "#a78bfa" : "#64748b" }}>{t}</button>;
-                  })}
-                </div>
-                <p style={{ color: "#475569", fontSize: 11, marginTop: 10 }}>{player.traits.length}/3 selected</p>
-              </div>
-            )}
-            {step === 3 && (
-              <div>
-                <h2 style={{ marginTop: 0 }}>Your Goal</h2>
-                <p style={{ color: "#94a3b8", fontSize: 13 }}>What drives you above all else?</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {GOALS.map((g) => {
-                    const sel = player.goal === g;
-                    return <button key={g} onClick={() => setPlayer((p: any) => ({ ...p, goal: g }))} style={{ textAlign: "left", padding: "13px 16px", borderRadius: 8, fontFamily: "inherit", fontSize: 14, cursor: "pointer", transition: "all 0.18s", border: sel ? "1px solid #7c3aed" : "1px solid #1e293b", background: sel ? "rgba(124,58,237,0.14)" : "#0f172a", color: sel ? "#e2e8f0" : "#64748b" }}>{g}</button>;
-                  })}
-                </div>
-              </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22 }}>
-              {step > 0 ? <button style={BTN("#475569", true)} onClick={() => setStep((s) => s - 1)}>← Back</button> : <div />}
-              {step < 3
-                ? <button style={{ ...BTN("#7c3aed"), opacity: canProceed[step] ? 1 : 0.4 }} disabled={!canProceed[step]} onClick={() => canProceed[step] && setStep((s) => s + 1)}>Next →</button>
-                : <button style={{ ...BTN("#7c3aed"), opacity: canProceed[3] ? 1 : 0.4 }} disabled={!canProceed[3]} onClick={() => canProceed[3] && setScreen("world")}>Choose Your World →</button>}
-            </div>
-          </div>
         </div>
-        <SiteFooter />
-      </div>
-    );
-  }
 
-  if (screen === "world") return (
-    <div style={PAGE}>
-      <SiteNav />
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 20px" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 11, letterSpacing: 3, color: "#7c3aed" }}>READY, {player.name?.toUpperCase()}</div>
-          <h1 style={{ fontSize: 36, margin: "8px 0" }}>Choose Your World</h1>
-          <p style={{ color: "#94a3b8" }}>Each world explores a different version of you.</p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
-          {WORLDS.map((w) => (
-            <div key={w.id} onClick={() => startWorld(w)}
-              style={{ ...CARD, cursor: "pointer", transition: "transform 0.2s, border-color 0.2s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = w.color + "80"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.transform = "none"; }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
-                <div style={{ fontSize: 32 }}>{w.icon}</div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 16 }}>{w.name}</div>
-                  <div style={{ fontSize: 11, color: w.color, letterSpacing: 1 }}>{w.tag}</div>
-                </div>
+        <div style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(15px)", transition: "all 0.3s ease" }}>
+          {step === 0 && (
+            <div>
+              <h2 style={{ color: "white", fontSize: "1.6rem", fontFamily: "Georgia,serif", marginBottom: "0.5rem" }}>Who are you?</h2>
+              <p style={{ color: "#9ca3af", marginBottom: "2rem" }}>Every legend starts with a name.</p>
+              <div style={{ marginBottom: "1rem" }}>
+                <label style={{ color: "#d1d5db", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Your Name</label>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="Enter your name..."
+                  style={{ width: "100%", padding: "0.9rem 1rem", background: "#1a1a2e", border: "1px solid #374151", borderRadius: 10, color: "white", fontSize: "1rem", outline: "none", boxSizing: "border-box" }} />
               </div>
-              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.5, margin: 0 }}>{w.desc}</p>
-              <div style={{ marginTop: 12, fontSize: 12, color: w.color, fontWeight: 700 }}>Enter World →</div>
+              <div style={{ marginBottom: "2rem" }}>
+                <label style={{ color: "#d1d5db", fontSize: "0.85rem", display: "block", marginBottom: "0.4rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Your Age</label>
+                <input value={age} onChange={e => setAge(e.target.value)} placeholder="18" type="number"
+                  style={{ width: "100%", padding: "0.9rem 1rem", background: "#1a1a2e", border: "1px solid #374151", borderRadius: 10, color: "white", fontSize: "1rem", outline: "none", boxSizing: "border-box" }} />
+              </div>
+              <button onClick={() => advance(1)} disabled={!name.trim()}
+                style={{ width: "100%", padding: "1rem", background: name.trim() ? "linear-gradient(135deg,#7c3aed,#db2777)" : "#374151", border: "none", borderRadius: 10, color: "white", fontSize: "1rem", fontWeight: 700, cursor: name.trim() ? "pointer" : "not-allowed" }}>
+                Continue →
+              </button>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div>
+              <h2 style={{ color: "white", fontSize: "1.6rem", fontFamily: "Georgia,serif", marginBottom: "0.5rem" }}>Choose 3 Traits</h2>
+              <p style={{ color: "#9ca3af", marginBottom: "1.5rem" }}>These shape how the world responds to you.</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", marginBottom: "2rem" }}>
+                {TRAITS.map(t => (
+                  <button key={t} onClick={() => toggleTrait(t)} style={{
+                    padding: "0.6rem 1.2rem", borderRadius: 50,
+                    border: `1px solid ${traits.includes(t) ? "#7c3aed" : "#374151"}`,
+                    background: traits.includes(t) ? "rgba(124,58,237,0.2)" : "transparent",
+                    color: traits.includes(t) ? "#a78bfa" : "#9ca3af",
+                    cursor: "pointer", fontSize: "0.9rem", fontWeight: traits.includes(t) ? 700 : 400,
+                  }}>{t}</button>
+                ))}
+              </div>
+              <p style={{ color: "#6b7280", fontSize: "0.8rem", marginBottom: "1.5rem" }}>{traits.length}/3 selected</p>
+              <button onClick={() => advance(2)} disabled={traits.length !== 3}
+                style={{ width: "100%", padding: "1rem", background: traits.length === 3 ? "linear-gradient(135deg,#7c3aed,#db2777)" : "#374151", border: "none", borderRadius: 10, color: "white", fontSize: "1rem", fontWeight: 700, cursor: traits.length === 3 ? "pointer" : "not-allowed" }}>
+                Continue →
+              </button>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h2 style={{ color: "white", fontSize: "1.6rem", fontFamily: "Georgia,serif", marginBottom: "0.5rem" }}>What drives you?</h2>
+              <p style={{ color: "#9ca3af", marginBottom: "1.5rem" }}>Your ultimate ambition across all worlds.</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "2rem" }}>
+                {GOALS.map(g => (
+                  <button key={g} onClick={() => setGoal(g)} style={{
+                    padding: "1rem 1.25rem", borderRadius: 12,
+                    border: `1px solid ${goal === g ? "#7c3aed" : "#374151"}`,
+                    background: goal === g ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.02)",
+                    color: goal === g ? "#e9d5ff" : "#d1d5db",
+                    cursor: "pointer", fontSize: "1rem", textAlign: "left", fontWeight: goal === g ? 700 : 400,
+                  }}>{g === goal ? "✓ " : ""}{g}</button>
+                ))}
+              </div>
+              <button onClick={finish} disabled={!goal}
+                style={{ width: "100%", padding: "1rem", background: goal ? "linear-gradient(135deg,#7c3aed,#db2777)" : "#374151", border: "none", borderRadius: 10, color: "white", fontSize: "1rem", fontWeight: 700, cursor: goal ? "pointer" : "not-allowed" }}>
+                Enter the Multiverse →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── WORLD SELECT ─────────────────────────────────────────────────────────────
+function WorldSelect({ player, onSelect }: { player: Player; onSelect: (id: string) => void }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  return (
+    <div style={{ minHeight: "100vh", overflowY: "auto", background: "#050508", padding: "2rem 1rem", boxSizing: "border-box" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "2.5rem", paddingTop: "1rem" }}>
+          <div style={{ fontSize: "1.8rem", fontFamily: "Georgia,serif", background: "linear-gradient(135deg,#a78bfa,#f472b6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>REVENIO</div>
+          <h1 style={{ color: "white", fontSize: "2rem", fontFamily: "Georgia,serif", margin: "1rem 0 0.5rem" }}>Choose Your World</h1>
+          <p style={{ color: "#9ca3af" }}>Welcome, <strong style={{ color: "#a78bfa" }}>{player.name}</strong>. Your goal: <em style={{ color: "#f472b6" }}>{player.goal}</em>.</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
+          {WORLDS.map((w, i) => (
+            <div key={w.id}
+              onMouseEnter={() => setHovered(w.id)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => onSelect(w.id)}
+              style={{
+                borderRadius: 16, overflow: "hidden", cursor: "pointer",
+                border: `1px solid ${hovered === w.id ? w.color : "#1f2937"}`,
+                transform: hovered === w.id ? "translateY(-4px)" : "translateY(0)",
+                transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+                boxShadow: hovered === w.id ? `0 20px 40px rgba(0,0,0,0.5), 0 0 30px ${w.color}30` : "none",
+                background: "#0d0d1a",
+                animation: `fadeUp 0.5s ease both`,
+                animationDelay: `${i * 0.07}s`,
+              }}>
+              <div style={{ position: "relative", height: 160, overflow: "hidden" }}>
+                <img src={w.img} alt={w.name} style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.5)", transition: "transform 0.4s", transform: hovered === w.id ? "scale(1.05)" : "scale(1)" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${w.color}60, transparent)` }} />
+                <div style={{ position: "absolute", top: "1rem", left: "1rem", background: "rgba(0,0,0,0.5)", borderRadius: 50, padding: "0.25rem 0.75rem", fontSize: "0.75rem", color: w.color, border: `1px solid ${w.color}50` }}>{w.tag}</div>
+                <div style={{ position: "absolute", bottom: "1rem", left: "1rem", fontSize: "2rem" }}>{w.emoji}</div>
+              </div>
+              <div style={{ padding: "1.25rem" }}>
+                <h3 style={{ color: "white", margin: "0 0 0.5rem", fontSize: "1.1rem", fontFamily: "Georgia,serif" }}>{w.name}</h3>
+                <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0 0 0.75rem", lineHeight: 1.4 }}>{w.desc}</p>
+                <p style={{ color: w.color, fontSize: "0.8rem", fontStyle: "italic", margin: 0 }}>"{w.question}"</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
-      <SiteFooter />
+      <style>{`@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }`}</style>
     </div>
   );
+}
 
-  // GAME
+// ─── STAT BAR ─────────────────────────────────────────────────────────────────
+function StatBar({ label, value, max = 100, color = "#7c3aed" }: { label: string; value: number; max?: number; color?: string }) {
   return (
-    <div style={PAGE}>
-      <SiteNav />
-      {toast && (
-        <div style={{ position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)", background: "#7c3aed", color: "#fff", padding: "10px 18px", borderRadius: 8, zIndex: 50, fontWeight: 700, fontSize: 13 }}>{toast}</div>
+    <div style={{ marginBottom: "0.6rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+        <span style={{ color: "#9ca3af", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</span>
+        <span style={{ color: "white", fontSize: "0.75rem", fontWeight: 700 }}>{value}</span>
+      </div>
+      <div style={{ height: 4, background: "#1f2937", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${Math.min(100, (value / max) * 100)}%`, background: color, borderRadius: 2, transition: "width 0.6s cubic-bezier(0.16,1,0.3,1)" }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── SIMULATION ENGINE ────────────────────────────────────────────────────────
+function SimulationEngine({ player, worldId, onUpdatePlayer, onBack }: {
+  player: Player; worldId: string; onUpdatePlayer: (p: Player) => void; onBack: () => void;
+}) {
+  const world = WORLDS.find(w => w.id === worldId)!;
+  const callScene = useServerFn(simulationScene);
+  const [scene, setScene] = useState<Scene | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [choosing, setChoosing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showCustom, setShowCustom] = useState(false);
+  const [customText, setCustomText] = useState("");
+  const [nextHint, setNextHint] = useState("");
+  const [history, setHistory] = useState<HistEntry[]>([]);
+  const [sceneVisible, setSceneVisible] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const didLoadRef = useRef(false);
+
+  const loadScene = async (hint = "", hist: HistEntry[] = history) => {
+    setLoading(true);
+    setSceneVisible(false);
+    setError(null);
+    setShowCustom(false);
+    setCustomText("");
+    try {
+      const { scene: s } = await callScene({
+        data: {
+          systemPrompt: buildSystem(player, worldId, hist),
+          userMessage: buildUserMessage(player, hint),
+        },
+      });
+      setScene(s as Scene);
+      setTimeout(() => setSceneVisible(true), 100);
+    } catch {
+      setError("The multiverse glitched. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (didLoadRef.current) return;
+    didLoadRef.current = true;
+    loadScene();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const applyStatChanges = (changes?: Scene["statChanges"], skillChanges?: Record<string, number>) => {
+    const updated = { ...player };
+    if (changes) {
+      if (changes.reputation) updated.reputation = Math.max(0, updated.reputation + changes.reputation);
+      if (changes.wealth) updated.wealth = Math.max(0, updated.wealth + changes.wealth);
+      if (changes.level) updated.level = Math.max(1, updated.level + changes.level);
+    }
+    if (skillChanges) {
+      updated.skills = { ...updated.skills };
+      Object.entries(skillChanges).forEach(([k, v]) => {
+        updated.skills[k] = Math.min(100, (updated.skills[k] || 0) + v);
+      });
+    }
+    return updated;
+  };
+
+  const makeChoice = async (choice: Choice) => {
+    if (choosing || !scene) return;
+    setChoosing(true);
+    const newHistory = [...history, { title: scene.sceneTitle, choiceMade: choice.text }];
+    setHistory(newHistory);
+    const updated = applyStatChanges(scene.statChanges, scene.skillChanges);
+    onUpdatePlayer(updated);
+
+    if (choice.id === "D") {
+      setShowCustom(true);
+      setChoosing(false);
+      return;
+    }
+
+    setNextHint(scene.nextSceneHint || "");
+    if (scene.newAchievements?.length) {
+      setNotification(`🏆 Achievement Unlocked: ${scene.newAchievements[0]}`);
+      setTimeout(() => setNotification(null), 3000);
+    }
+    await loadScene(scene.nextSceneHint || "", newHistory);
+    setChoosing(false);
+  };
+
+  const submitCustom = async () => {
+    if (!customText.trim() || choosing || !scene) return;
+    setChoosing(true);
+    setShowCustom(false);
+    try {
+      setLoading(true);
+      setSceneVisible(false);
+      const { scene: s } = await callScene({
+        data: {
+          systemPrompt: buildSystem(player, worldId, history),
+          userMessage: buildCustomUser(player, customText, scene),
+        },
+      });
+      const newHistory = [...history, { title: scene.sceneTitle, choiceMade: customText }];
+      setHistory(newHistory);
+      const sc = s as Scene;
+      const updated = applyStatChanges(sc.statChanges, sc.skillChanges);
+      onUpdatePlayer(updated);
+      setScene(sc);
+      setTimeout(() => setSceneVisible(true), 100);
+    } catch {
+      setError("Custom choice failed. Try again.");
+    } finally {
+      setLoading(false);
+      setChoosing(false);
+      setCustomText("");
+    }
+  };
+
+  const atmColors: Record<string, string> = { tense: "#ef4444", exciting: "#f59e0b", mysterious: "#8b5cf6", dangerous: "#dc2626", triumphant: "#10b981" };
+  const atmColor = scene && scene.atmosphere ? (atmColors[scene.atmosphere] || world.color) : world.color;
+
+  return (
+    <div style={{ minHeight: "100vh", overflowY: "auto", background: "#050508", boxSizing: "border-box" }}>
+      {/* Sticky top bar */}
+      <div style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)", borderBottom: "1px solid #1f2937", padding: "0.75rem 1rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50, boxSizing: "border-box" }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#9ca3af", cursor: "pointer", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>← {world.name}</button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <span style={{ color: "#a78bfa", fontSize: "0.8rem", fontWeight: 700 }}>Lv.{player.level}</span>
+          <span style={{ color: "#f472b6", fontSize: "0.8rem" }}>⭐ {player.reputation}</span>
+          <span style={{ color: "#fbbf24", fontSize: "0.8rem" }}>💰 {player.wealth}</span>
+          <button onClick={() => setShowStats(!showStats)} style={{ background: showStats ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.05)", border: "1px solid #374151", borderRadius: 6, padding: "0.3rem 0.6rem", color: "#d1d5db", cursor: "pointer", fontSize: "0.8rem" }}>Stats</button>
+        </div>
+      </div>
+
+      {notification && (
+        <div style={{ background: "rgba(16,185,129,0.2)", border: "1px solid #10b981", color: "#6ee7b7", padding: "0.75rem 1rem", textAlign: "center", fontSize: "0.9rem" }}>{notification}</div>
       )}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 16px", display: "flex", gap: 16, flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 520px", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
-          <div style={{ ...CARD, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 30 }}>{worldObj?.icon}</div>
-            <div style={{ flex: 1, minWidth: 140 }}>
-              <div style={{ fontWeight: 800 }}>{worldObj?.name}</div>
-              <div style={{ fontSize: 11, color: "#64748b" }}>Scene {player.storyProgress + 1} · {player.name}</div>
-            </div>
-            <TensionBar tension={TENSION_LEVELS[tension]} />
-            <button style={BTN("#475569", true)} onClick={() => { setScreen("world"); setScene(null); }}>← Worlds</button>
-          </div>
 
-          {errorMsg && (
-            <div style={{ ...CARD, borderColor: "#dc2626" }}>
-              <div style={{ color: "#f87171", fontWeight: 700, marginBottom: 6 }}>⚠ Scene generation failed</div>
-              <div style={{ color: "#94a3b8", fontSize: 12, marginBottom: 10 }}>{errorMsg}</div>
-              <button style={BTN("#dc2626")} onClick={() => worldObj && generateScene(worldObj, player, storyHistory, tension, scene === null, "retry")}>Retry</button>
+      <div style={{ maxWidth: 720, margin: "0 auto", width: "100%", padding: "1.5rem 1rem 4rem", boxSizing: "border-box" }}>
+        {showStats && (
+          <div style={{ background: "#0d0d1a", border: "1px solid #1f2937", borderRadius: 12, padding: "1.25rem", marginBottom: "1.5rem" }}>
+            <h3 style={{ color: "white", margin: "0 0 1rem", fontFamily: "Georgia,serif", fontSize: "1rem" }}>{player.name}'s Profile</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem 1.5rem" }}>
+              <StatBar label="Reputation" value={player.reputation} max={500} color="#7c3aed" />
+              <StatBar label="Wealth" value={player.wealth} max={10000} color="#f59e0b" />
+              {Object.entries(player.skills || {}).slice(0, 6).map(([k, v]) => (
+                <StatBar key={k} label={k} value={v} max={100} color={world.color} />
+              ))}
             </div>
-          )}
-
-          {loading && (
-            <div style={{ ...CARD, textAlign: "center", padding: 40 }}>
-              <div style={{ fontSize: 32, animation: "rev-spin 1s linear infinite", display: "inline-block" }}>⟳</div>
-              <div style={{ color: "#94a3b8", marginTop: 10 }}>Generating your story…</div>
-              <style>{`@keyframes rev-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+            <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              {player.traits.map(t => (
+                <span key={t} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid #7c3aed", borderRadius: 50, padding: "0.2rem 0.7rem", color: "#a78bfa", fontSize: "0.75rem" }}>{t}</span>
+              ))}
             </div>
-          )}
-
-          {!loading && scene && (
-            <>
-              <div style={CARD}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
-                  <h2 style={{ margin: 0, fontSize: 22 }}>{scene.sceneTitle}</h2>
-                  {scene.sceneType && <Badge label={scene.sceneType} color={worldObj?.color || "#7c3aed"} />}
-                </div>
-                <p style={{ color: "#cbd5e1", fontSize: 15, lineHeight: 1.65, margin: 0 }}>{scene.sceneText}</p>
-                {scene.nextSceneHint && (
-                  <div style={{ marginTop: 12, fontSize: 11, color: "#64748b", fontStyle: "italic" }}>Next: {scene.nextSceneHint}</div>
-                )}
+            {history.length > 0 && (
+              <div style={{ marginTop: "1rem", borderTop: "1px solid #1f2937", paddingTop: "1rem" }}>
+                <p style={{ color: "#6b7280", fontSize: "0.75rem", margin: "0 0 0.5rem", textTransform: "uppercase", letterSpacing: "0.1em" }}>Story so far</p>
+                {history.slice(-3).map((h, i) => (
+                  <p key={i} style={{ color: "#9ca3af", fontSize: "0.8rem", margin: "0.25rem 0" }}>▸ {h.choiceMade}</p>
+                ))}
               </div>
+            )}
+          </div>
+        )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {(scene.choices || []).map((choice: any) => {
-                  const isCustom = choice.type === "custom";
-                  const wc = worldObj?.color || "#7c3aed";
-                  if (isCustom) {
-                    return (
-                      <div key={choice.id}>
-                        {customOpen ? (
-                          <div style={CARD}>
-                            <textarea placeholder="Describe your plan…" value={customText} onChange={(e) => setCustomText(e.target.value)}
-                              style={{ width: "100%", background: "#0f172a", border: "1px solid #334151", borderRadius: 8, padding: 11, color: "#fff", fontSize: 13, fontFamily: "inherit", resize: "vertical", minHeight: 72, boxSizing: "border-box", outline: "none" }} />
-                            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                              <button style={{ ...BTN("#7c3aed"), flex: 1 }} onClick={() => customText.trim() && makeChoice(choice, customText.trim())} disabled={!customText.trim()}>Submit My Plan →</button>
-                              <button style={BTN("#334151")} onClick={() => { setCustomOpen(false); setCustomText(""); }}>Cancel</button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button onClick={() => setCustomOpen(true)}
-                            style={{ width: "100%", ...CARD, padding: "13px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px dashed #334151" }}>
-                            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                              <span style={{ width: 22, height: 22, borderRadius: 4, background: "#7c3aed22", color: "#7c3aed", fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>D</span>
-                              <span style={{ color: "#a78bfa", fontSize: 13 }}>{choice.text}</span>
-                            </div>
-                            <Badge label={choice.risk} color={RISK_COLOR[choice.risk] || "#7c3aed"} />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  }
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1.5rem", padding: "4rem 0" }}>
+            <div style={{ width: 48, height: 48, border: `3px solid ${world.color}30`, borderTop: `3px solid ${world.color}`, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <p style={{ color: "#6b7280", fontSize: "0.9rem", textAlign: "center" }}>{nextHint ? `"${nextHint}"` : "The multiverse is generating your story..."}</p>
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
+            <p style={{ color: "#ef4444", marginBottom: "1rem" }}>{error}</p>
+            <button onClick={() => loadScene(nextHint)} style={{ background: world.color, border: "none", borderRadius: 8, padding: "0.75rem 1.5rem", color: "white", cursor: "pointer", fontWeight: 700 }}>Try Again</button>
+          </div>
+        ) : scene && (
+          <div ref={sceneRef} style={{ opacity: sceneVisible ? 1 : 0, transform: sceneVisible ? "translateY(0)" : "translateY(20px)", transition: "all 0.5s cubic-bezier(0.16,1,0.3,1)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+              <div style={{ width: 40, height: 40, borderRadius: 8, overflow: "hidden", flexShrink: 0 }}>
+                <img src={world.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ color: world.color, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: 0 }}>{world.name} · Scene {history.length + 1}</p>
+                <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0 }}>Traits: {player.traits.join(" · ")}</p>
+              </div>
+              <div style={{ marginLeft: "auto", background: `${atmColor}20`, border: `1px solid ${atmColor}50`, borderRadius: 50, padding: "0.2rem 0.75rem", color: atmColor, fontSize: "0.75rem", textTransform: "capitalize" }}>
+                {scene.atmosphere || "dramatic"}
+              </div>
+            </div>
+
+            <div style={{ background: "#0d0d1a", border: `1px solid ${atmColor}30`, borderRadius: 16, padding: "1.75rem", marginBottom: "1.5rem", position: "relative", overflow: "hidden", boxSizing: "border-box" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${atmColor}, transparent)` }} />
+              <h2 style={{ color: "white", fontFamily: "Georgia,serif", fontSize: "1.35rem", margin: "0 0 1rem", lineHeight: 1.3 }}>{scene.sceneTitle}</h2>
+              <p style={{ color: "#e2e8f0", lineHeight: 1.7, margin: 0, fontSize: "1rem", whiteSpace: "pre-wrap" }}>{scene.sceneText}</p>
+              {scene.statChanges && Object.values(scene.statChanges).some(v => v !== 0) && (
+                <div style={{ marginTop: "1.25rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                  {Object.entries(scene.statChanges).map(([k, v]) => v !== 0 ? (
+                    <span key={k} style={{ background: v > 0 ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)", border: `1px solid ${v > 0 ? "#10b981" : "#ef4444"}30`, borderRadius: 50, padding: "0.2rem 0.7rem", color: v > 0 ? "#6ee7b7" : "#fca5a5", fontSize: "0.75rem" }}>
+                      {v > 0 ? "+" : ""}{v} {k}
+                    </span>
+                  ) : null)}
+                </div>
+              )}
+            </div>
+
+            {!showCustom ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <p style={{ color: "#6b7280", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 0.25rem" }}>What do you do?</p>
+                {scene.choices?.map((c) => {
+                  const riskColor = ({ Low: "#10b981", Medium: "#f59e0b", High: "#ef4444", Variable: "#8b5cf6" } as Record<string, string>)[c.risk] || "#9ca3af";
+                  const isCustom = c.id === "D";
                   return (
-                    <button key={choice.id} onClick={() => makeChoice(choice)}
-                      style={{ width: "100%", ...CARD, padding: "13px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "flex-start", gap: 10, transition: "border-color 0.18s, background 0.18s" }}>
-                      <span style={{ width: 22, height: 22, borderRadius: 4, background: wc + "22", color: wc, fontSize: 11, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>{choice.id}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ color: "#e2e8f0", fontSize: 13, marginBottom: 3 }}>{choice.text}</div>
-                        <div style={{ color: "#475569", fontSize: 11, fontStyle: "italic" }}>{choice.potentialOutcome}</div>
+                    <button key={c.id} onClick={() => makeChoice(c)} disabled={choosing}
+                      style={{
+                        background: isCustom ? "rgba(124,58,237,0.08)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${isCustom ? "#7c3aed50" : "#1f2937"}`,
+                        borderRadius: 12, padding: "1rem 1.1rem",
+                        color: "white", cursor: choosing ? "not-allowed" : "pointer",
+                        textAlign: "left", width: "100%", opacity: choosing ? 0.6 : 1,
+                        transition: "all 0.2s", display: "flex", alignItems: "flex-start", gap: "0.75rem",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <span style={{ width: 24, height: 24, borderRadius: 6, background: isCustom ? "#7c3aed" : "#1f2937", color: isCustom ? "white" : "#9ca3af", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 700, flexShrink: 0 }}>{c.id}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: "0 0 0.3rem", fontSize: "0.95rem", lineHeight: 1.4 }}>{c.text}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                          <span style={{ color: riskColor, fontSize: "0.75rem", fontWeight: 700 }}>{c.risk} Risk</span>
+                          {!isCustom && <span style={{ color: "#6b7280", fontSize: "0.75rem" }}>→ {c.potentialOutcome}</span>}
+                        </div>
                       </div>
-                      <Badge label={choice.risk} color={RISK_COLOR[choice.risk] || "#7c3aed"} />
                     </button>
                   );
                 })}
               </div>
-            </>
-          )}
-        </div>
-
-        <div style={{ flex: "1 1 240px", maxWidth: 280, display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ ...CARD, textAlign: "center" }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", margin: "0 auto 10px", overflow: "hidden", background: "#0f172a", border: `2px solid ${worldObj?.color || "#7c3aed"}` }}>
-              {player.profileImage && player.profileImage !== "skip" ? <img src={player.profileImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : <div style={{ fontSize: 24, lineHeight: "56px" }}>👤</div>}
-            </div>
-            <div style={{ fontWeight: 800, fontSize: 14 }}>{player.name}</div>
-            <div style={{ fontSize: 11, color: "#475569", marginBottom: 8 }}>Age {player.age} · {player.goal}</div>
-            <Badge label={`LVL ${player.level}`} color={worldObj?.color || "#7c3aed"} />
-            {player.currentFaction && <div style={{ marginTop: 6, fontSize: 11, color: "#64748b" }}>{player.currentFaction}</div>}
-          </div>
-
-          <div style={CARD}>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 10 }}>Stats</div>
-            <StatBar label="Reputation" value={player.reputation} max={200} color="#7c3aed" />
-            <StatBar label="Wealth" value={player.wealth} max={1000} color="#f59e0b" />
-            {statFlash.reputation !== undefined && statFlash.reputation !== 0 && (
-              <div style={{ fontSize: 11, color: statFlash.reputation > 0 ? "#4ade80" : "#f87171", textAlign: "right", marginTop: 2 }}>Rep {statFlash.reputation > 0 ? "+" : ""}{statFlash.reputation}</div>
+            ) : (
+              <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid #7c3aed50", borderRadius: 12, padding: "1.25rem", boxSizing: "border-box" }}>
+                <p style={{ color: "#a78bfa", fontSize: "0.9rem", margin: "0 0 0.75rem", fontWeight: 700 }}>Create your own plan...</p>
+                <textarea value={customText} onChange={e => setCustomText(e.target.value)}
+                  placeholder="What does your character do? Be specific..."
+                  rows={3} style={{ width: "100%", background: "#0d0d1a", border: "1px solid #374151", borderRadius: 8, color: "white", padding: "0.75rem", fontSize: "0.95rem", resize: "vertical", outline: "none", boxSizing: "border-box", fontFamily: "inherit" }} />
+                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem" }}>
+                  <button onClick={submitCustom} disabled={!customText.trim()}
+                    style={{ flex: 1, padding: "0.75rem", background: "linear-gradient(135deg,#7c3aed,#db2777)", border: "none", borderRadius: 8, color: "white", cursor: customText.trim() ? "pointer" : "not-allowed", fontWeight: 700 }}>
+                    Execute Plan →
+                  </button>
+                  <button onClick={() => setShowCustom(false)}
+                    style={{ padding: "0.75rem 1rem", background: "none", border: "1px solid #374151", borderRadius: 8, color: "#9ca3af", cursor: "pointer" }}>
+                    Back
+                  </button>
+                </div>
+              </div>
             )}
-            {statFlash.wealth !== undefined && statFlash.wealth !== 0 && (
-              <div style={{ fontSize: 11, color: statFlash.wealth > 0 ? "#4ade80" : "#f87171", textAlign: "right" }}>Wealth {statFlash.wealth > 0 ? "+" : ""}{statFlash.wealth}</div>
+
+            {scene.nextSceneHint && !showCustom && (
+              <p style={{ color: "#4b5563", fontSize: "0.8rem", textAlign: "center", marginTop: "1.25rem", fontStyle: "italic" }}>Next: {scene.nextSceneHint}</p>
             )}
           </div>
-
-          <div style={CARD}>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 8 }}>Traits</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {player.traits.map((t: string) => <span key={t} style={{ fontSize: 11, padding: "2px 7px", borderRadius: 4, background: "#1e293b", color: "#94a3b8" }}>{t}</span>)}
-            </div>
-          </div>
-
-          {player.relationships.length > 0 && (
-            <div style={CARD}>
-              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 8 }}>Relationships</div>
-              {player.relationships.slice(0, 5).map((r: any) => (
-                <div key={r.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
-                  <span style={{ color: "#9ca3af" }}>{r.name}</span>
-                  <span style={{ fontSize: 10, color: r.status === "ally" ? "#4ade80" : r.status === "rival" ? "#f87171" : "#64748b" }}>{r.status}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {player.inventory.length > 0 && (
-            <div style={CARD}>
-              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 8 }}>Inventory</div>
-              {player.inventory.slice(0, 5).map((item: string, i: number) => <div key={i} style={{ fontSize: 12, color: "#9ca3af", marginBottom: 3 }}>· {item}</div>)}
-            </div>
-          )}
-
-          {storyHistory.length > 0 && (
-            <div style={CARD}>
-              <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", textTransform: "uppercase", marginBottom: 8 }}>Story Log · {player.storyProgress} scenes</div>
-              {storyHistory.slice(-4).map((h, i, arr) => (
-                <div key={i} style={{ marginBottom: 8, paddingBottom: 8, borderBottom: i < arr.length - 1 ? "1px solid #1e293b" : "none" }}>
-                  <div style={{ fontSize: 11, color: "#64748b", fontStyle: "italic", lineHeight: 1.5 }}>"{h.title}"</div>
-                  <div style={{ fontSize: 10, color: "#334155", marginTop: 2 }}>→ {h.choice.length > 40 ? h.choice.slice(0, 40) + "…" : h.choice}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-      <SiteFooter />
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
