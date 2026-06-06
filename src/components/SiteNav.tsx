@@ -1,7 +1,15 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { RevenioLogo, RevenioWordmark } from "@/components/RevenioLogo";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export function SiteNav() {
   const router = useRouter();
