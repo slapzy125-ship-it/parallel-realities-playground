@@ -354,7 +354,7 @@ function SimulationPage() {
   const [notifications, setNotifications] = useState<{ text: string; bad?: boolean }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingAct, setPendingAct] = useState<typeof STORY_ACTS[number] | null>(null);
+  const [pendingAct, setPendingAct] = useState<Act | null>(null);
   const [historyOpen, setHistoryOpen] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState<"left" | "right" | null>(null);
   const [customText, setCustomText] = useState("");
@@ -485,7 +485,7 @@ function SimulationPage() {
     const justFinished = updated.storyProgress - 1; // storyProgress was incremented after last scene
     const finishedAct = STORY_ACTS.find(a => justFinished === a.range[1]);
     if (finishedAct && finishedAct.id < 5) {
-      setPendingAct(STORY_ACTS[finishedAct.id] as typeof STORY_ACTS[number]); // next act
+      setPendingAct(STORY_ACTS[finishedAct.id]); // next act
       // store the choice to send after transition
       void choice;
       const userMsg = `The player chose: "${choice.text}" (${choice.type}, risk ${choice.risk}). Continue the story into Act ${finishedAct.id + 1}.`;
@@ -676,7 +676,7 @@ function GameView(props: {
   notifications: { text: string; bad?: boolean }[]; isLoading: boolean; error: string | null;
   historyOpen: boolean; setHistoryOpen: (f: (b: boolean) => boolean) => void;
   sidebarOpen: "left" | "right" | null; setSidebarOpen: (s: "left" | "right" | null) => void;
-  pendingAct: typeof STORY_ACTS[number] | null; continueAfterAct: () => void;
+  pendingAct: Act | null; continueAfterAct: () => void;
   onChoice: (c: Choice) => void; customText: string; setCustomText: (s: string) => void;
   submitCustom: () => void; onSave: () => void; onRetry: () => void;
   onSeeLegacy: () => void;
