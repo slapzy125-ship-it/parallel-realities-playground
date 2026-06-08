@@ -1,4 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
+type Choice = { id: string; text: string; type: string; risk: string; hint: string };
+type Scene = {
+  sceneTitle: string;
+  sceneText: string;
+  choices: Choice[];
+  statChanges?: Record<string, number>;
+  xpGained?: number;
+  relationshipChanges?: { name: string; change: number; dir: string }[];
+  newsUpdates?: string[];
+  isFinalScene?: boolean;
+  legacyTitle?: string;
+  legacyEnding?: string;
+};
+type Msg = { role: "user" | "assistant"; content: string };
 
 type Screen = "splash" | "creation" | "worldselect" | "game";
 
@@ -60,6 +75,16 @@ export default function App() {
   const [traits, setTraits] = useState<string[]>([]);
   const [goal, setGoal] = useState<string>("");
   const [world, setWorld] = useState<typeof WORLDS[number] | null>(null);
+
+  const [scene, setScene] = useState<Scene | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errMsg, setErrMsg] = useState<string>("");
+  const [history, setHistory] = useState<Msg[]>([]);
+  const [liveStats, setLiveStats] = useState<Record<string, number>>({});
+  const [liveRels, setLiveRels] = useState<{ name: string; type: string; val: number; dir: string }[]>([]);
+  const [liveNews, setLiveNews] = useState<string[]>([]);
+  const [xp, setXp] = useState(0);
+  const initRef = useRef(false);
 
   const toggleTrait = (t: string) => {
     setTraits(prev =>
@@ -186,15 +211,83 @@ export default function App() {
 
   // GAME SCREEN
   const w = world!;
-  const xp = 0;
   const xpMax = 100;
-  const level = 1;
-  const stats = Object.entries(w.startStat);
+  const level = Math.floor(xp / xpMax) + 1;
+  const xpInLevel = xp % xpMax;
+  const stats = Object.entries(liveStats);
   const quests = w.startQuests;
-  const rels = w.startRels;
+  const rels = liveRels;
   const items = w.startItems;
-  const news = w.startNews;
+  const news = liveNews;
   const slots = 8;
+
+  const callAI = async (userMsg: string | null) => {
+    setLoading(true);
+    setErrMsg("");
+    const systemPrompt = `You are the game master for REVENIO. WORLD: ${w.name}. VILLAIN: ${w.villain}. PLAYER: ${name}, traits: ${traits.join(", ")}, goal: ${goal}. STATS: ${JSON.stringify(liveStats)}. Respond ONLY with this JSON no markdown no backticks: {"sceneTitle":"title","sceneText":"60-80 words present tense","choices":[{"id":"A","text":"choice","type":"bold","risk":"Low","hint":"hint"},{"id":"B","text":"choice","type":"strategic","risk":"Medium","hint":"hint"},{"id":"C","text":"choice","type":"loyal","risk":"High","hint":"hint"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["headline"],"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`;
+    const conversationHistory: Msg[] = userMsg
+      ? [...history, { role: "user", content: userMsg }]
+      : [{ role: "user", content: "Begin the story." }];
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: conversationHistory,
+        }),
+      });
+      const data = await response.json();
+      const raw = (data.content || []).map((c: any) => c.text || "").join("");
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("No JSON in response");
+      const parsed: Scene = JSON.parse(match[0]);
+      setScene(parsed);
+      setHistory([...conversationHistory, { role: "assistant", content: raw }]);
+
+      if (parsed.statChanges) {
+        setLiveStats(prev => {
+          const next = { ...prev };
+          for (const [k, v] of Object.entries(parsed.statChanges!)) {
+            if (k in next) next[k] = Math.max(0, next[k] + v);
+          }
+          return next;
+        });
+      }
+      if (parsed.xpGained) setXp(p => p + parsed.xpGained!);
+      if (parsed.relationshipChanges) {
+        setLiveRels(prev => prev.map(r => {
+          const upd = parsed.relationshipChanges!.find(x => x.name === r.name);
+          return upd ? { ...r, val: Math.max(0, Math.min(100, r.val + upd.change)), dir: upd.dir } : r;
+        }));
+      }
+      if (parsed.newsUpdates?.length) {
+        setLiveNews(prev => [...parsed.newsUpdates!, ...prev].slice(0, 6));
+      }
+    } catch (e: any) {
+      setErrMsg(e?.message || "AI request failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (screen !== "game" || !world || initRef.current) return;
+    initRef.current = true;
+    setLiveStats({ ...world.startStat } as unknown as Record<string, number>);
+    setLiveRels(world.startRels.map(r => ({ ...r })));
+    setLiveNews([...world.startNews]);
+    callAI(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, world]);
+
+  const onChoice = (c: Choice) => {
+    if (loading) return;
+    callAI(`I choose ${c.id}: ${c.text}`);
+  };
+
 
   const panel: React.CSSProperties = {
     background: PANEL,
@@ -232,8 +325,8 @@ export default function App() {
           letterSpacing: "0.2em", color: GOLD,
         }}>LVL {level}</div>
         <div style={{ flex: 1, minWidth: 120, maxWidth: 280 }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 4 }}>XP {xp}/{xpMax}</div>
-          <Bar value={xp} max={xpMax} />
+          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 4 }}>XP {xpInLevel}/{xpMax}</div>
+          <Bar value={xpInLevel} max={xpMax} />
         </div>
         <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Save</button>
         <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Menu</button>
@@ -284,25 +377,63 @@ export default function App() {
         </aside>
 
         {/* MAIN AREA */}
-        <main style={{ ...panel, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                width: 48, height: 48, margin: "0 auto",
-                border: `3px solid ${BORDER}`,
-                borderTopColor: GOLD,
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            <p style={{ marginTop: 20, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#9a8550" }}>
-              Weaving Your Story
-            </p>
-            <p style={{ marginTop: 8, fontSize: 11, color: "#6a5a30", fontFamily: "serif" }}>
-              {w.icon} {w.name}
-            </p>
-          </div>
+        <main style={{ ...panel, minHeight: 400, display: "flex", flexDirection: "column" }}>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          {loading && (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  width: 48, height: 48, margin: "0 auto",
+                  border: `3px solid ${BORDER}`, borderTopColor: GOLD,
+                  borderRadius: "50%", animation: "spin 1s linear infinite",
+                }} />
+                <p style={{ marginTop: 20, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#9a8550" }}>
+                  Weaving Your Story
+                </p>
+              </div>
+            </div>
+          )}
+          {!loading && errMsg && (
+            <div style={{ padding: 20, textAlign: "center" }}>
+              <p style={{ color: "#c0392b", fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase" }}>Story Interrupted</p>
+              <p style={{ color: "#9a8550", fontSize: 12, marginTop: 8, fontFamily: "serif" }}>{errMsg}</p>
+              <button onClick={() => callAI(null)} style={{ ...btnBase, marginTop: 16, fontSize: 11 }}>Retry</button>
+            </div>
+          )}
+          {!loading && !errMsg && scene && (
+            <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#9a8550" }}>Scene</div>
+                <h2 style={{ margin: "6px 0 0", fontSize: 24, color: GOLD, letterSpacing: "0.1em" }}>{scene.sceneTitle}</h2>
+              </div>
+              <p style={{ fontFamily: "serif", color: "#d8c891", fontSize: 16, lineHeight: 1.7, margin: 0 }}>
+                {scene.sceneText}
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginTop: 8 }}>
+                {scene.choices.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => onChoice(c)}
+                    style={{
+                      background: "transparent", color: GOLD,
+                      border: `1px solid ${BORDER}`, padding: 12,
+                      fontFamily: "Cinzel, serif", cursor: "pointer",
+                      textAlign: "left", transition: "all 0.2s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 6 }}>
+                      <span>{c.id} · {c.type.toUpperCase()}</span>
+                      <span>RISK: {c.risk}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: GOLD, marginBottom: 6 }}>{c.text}</div>
+                    <div style={{ fontSize: 11, color: "#6a5a30", fontFamily: "serif", fontStyle: "italic" }}>{c.hint}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </main>
 
         {/* RIGHT SIDEBAR */}
