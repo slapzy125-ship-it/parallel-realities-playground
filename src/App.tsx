@@ -276,7 +276,7 @@ export default function App() {
   useEffect(() => {
     if (screen !== "game" || !world || initRef.current) return;
     initRef.current = true;
-    setLiveStats({ ...world.startStat } as Record<string, number>);
+    setLiveStats({ ...world.startStat } as unknown as Record<string, number>);
     setLiveRels(world.startRels.map(r => ({ ...r })));
     setLiveNews([...world.startNews]);
     callAI(null);
