@@ -420,13 +420,14 @@ function notifColor(k: Notif['kind']) {
 // ─── GAME SCREEN ──────────────────────────────────────────────────────────────
 function GameScreen({
   player, setPlayer, scene, setScene, history, setHistory,
-  loading, callAI, onSave, onEndChapter, onMenu,
+  loading, callAI, error, onRetry, onSave, onEndChapter, onMenu,
 }: {
   player: PlayerState; setPlayer: (p:PlayerState)=>void;
   scene: Scene | null; setScene: (s:Scene|null)=>void;
   history: Msg[]; setHistory: (m:Msg[])=>void;
   loading: boolean;
   callAI: (userMsg: string) => Promise<void>;
+  error: string | null; onRetry: ()=>void;
   onSave: ()=>void; onEndChapter: ()=>void; onMenu: ()=>void;
 }) {
   const [notifs, setNotifs] = useState<Notif[]>([]);
@@ -582,15 +583,28 @@ function GameScreen({
             </div>
             {loading && !scene ? (
               <LoadingState />
+            ) : error && !scene ? (
+              <div style={{ textAlign:"center", padding: 30 }}>
+                <h2 style={{ fontFamily: FONT_HEAD, fontSize: 24, color: C.red, margin: 0, marginBottom: 10, letterSpacing:".15em" }}>THE RIFT TREMBLES</h2>
+                <p style={{ color: C.muted, marginBottom: 20, lineHeight: 1.6 }}>A force disrupts the simulation. The story flickers…</p>
+                <GoldButton onClick={onRetry}>Retry</GoldButton>
+              </div>
             ) : scene ? (
               <>
                 <h2 style={{ fontFamily: FONT_HEAD, fontSize: 28, color: C.gold, margin: 0, marginBottom: 14, letterSpacing:".05em" }}>{scene.sceneTitle}</h2>
                 <p style={{ fontSize: 16, lineHeight: 1.7, color: C.text, margin: 0 }}>{scene.sceneText}</p>
+                {error && (
+                  <div style={{ marginTop: 14, padding: 10, background: `${C.red}15`, border:`1px solid ${C.red}40`, color: C.red, fontSize: 12, display:"flex", justifyContent:"space-between", alignItems:"center", gap: 12 }}>
+                    <span>Last action failed. {error.slice(0, 120)}</span>
+                    <GhostButton onClick={onRetry} style={{ padding:"6px 14px", fontSize: 10 }}>Retry</GhostButton>
+                  </div>
+                )}
               </>
             ) : (
               <div style={{ color: C.muted }}>No scene loaded.</div>
             )}
           </div>
+
 
           {/* loading overlay */}
           {loading && scene && <LoadingState />}
@@ -791,6 +805,8 @@ function SimulationPage() {
   const [scene, setScene] = useState<Scene | null>(null);
   const [history, setHistory] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUserMsg, setLastUserMsg] = useState<string | null>(null);
   const [pending, setPending] = useState<{ name:string;age:number;traits:string[];goal:string } | null>(null);
 
   useEffect(() => {
@@ -810,6 +826,8 @@ function SimulationPage() {
     const p = playerOverride ?? player;
     if (!p) return;
     setLoading(true);
+    setError(null);
+    setLastUserMsg(userMsg);
     try {
       const trimmedHistory = history.slice(-20);
       const conversationContext = trimmedHistory.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
@@ -819,7 +837,10 @@ function SimulationPage() {
 
       const res = await callScene({ data: { systemPrompt: buildSystemPrompt(p), userMessage: fullUserMsg } });
       const s = res.scene as Scene;
-      if (!s || !s.choices) { setLoading(false); return; }
+      if (!s || !s.choices) {
+        setError("The story flickered. The scene could not form.");
+        return;
+      }
 
       // Apply
       const np: PlayerState = { ...p };
@@ -872,11 +893,16 @@ function SimulationPage() {
       save(np, newHistory, s);
     } catch (e: any) {
       console.error(e);
-      alert(`AI error: ${e?.message ?? "unknown"}`);
+      setError(e?.message ?? "The rift trembles. The story flickers.");
     } finally {
       setLoading(false);
     }
   }, [player, history, callScene, save]);
+
+  const retryLast = useCallback(() => {
+    if (lastUserMsg) callAI(lastUserMsg);
+    else callAI("Continue the story from where we left off.");
+  }, [lastUserMsg, callAI]);
 
   // ── Splash actions
   const beginNew = () => setScreen("create");
@@ -933,6 +959,7 @@ function SimulationPage() {
         scene={scene} setScene={setScene}
         history={history} setHistory={setHistory}
         loading={loading} callAI={callAI}
+        error={error} onRetry={retryLast}
         onSave={goSave} onEndChapter={goEndChapter} onMenu={goMenu}
       />
     );
