@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteNav } from "@/components/SiteNav";
 import { RevenioLogo, RevenioWordmark } from "@/components/RevenioLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -74,10 +75,11 @@ function Auth() {
 
   return (
     <main className="relative min-h-screen flex flex-col bg-background text-foreground">
+      <SiteNav />
       {/* Subtle radial gold backdrop */}
       <div className="absolute inset-0 bg-[var(--gradient-radial-gold)] opacity-30 pointer-events-none" />
 
-      <header className="relative z-10 px-6 py-6 border-b border-border">
+      <header className="relative z-10 px-6 pt-28 pb-6 border-b border-border">
         <Link to="/" className="inline-flex items-center gap-3">
           <RevenioLogo size={28} />
           <RevenioWordmark className="text-base" />
