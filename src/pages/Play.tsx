@@ -1,5 +1,11 @@
 import { useState, useRef } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import { useSubscription } from '@/hooks/useSubscription'
+import { useServerFn } from '@tanstack/react-start'
+import { getTodaySimulationCount } from '@/utils/payments.functions'
+
+const FREE_WORLDS = ['arcane', 'champions']
+const FREE_DAILY_LIMIT = 1
 
 const G:any = {
   app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px'},
@@ -179,7 +185,27 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     setScreen('worldselect')
   }
 
+  const { tier, isActive, userId } = useSubscription()
+  const fetchTodayCount = useServerFn(getTodaySimulationCount)
+
   const handleSelectWorld = async (w:any) => {
+    // Tier gating
+    if (!isActive && !FREE_WORLDS.includes(w.id)) {
+      alert(`"${w.name}" is a premium world. Upgrade to Revenio Legend or Infinite to unlock all 8 worlds.`)
+      window.location.href = '/experience'
+      return
+    }
+    // Free daily simulation limit
+    if (!isActive && userId) {
+      try {
+        const { count } = await fetchTodayCount()
+        if (count >= FREE_DAILY_LIMIT) {
+          alert(`Free plan is limited to ${FREE_DAILY_LIMIT} simulation per day. Upgrade to Legend or Infinite for unlimited play.`)
+          window.location.href = '/experience'
+          return
+        }
+      } catch (e) { console.error(e) }
+    }
     const fresh = {
       ...defaultPlayer(),
       name:player.name,age:player.age,traits:player.traits,goal:player.goal,
