@@ -812,6 +812,8 @@ function SimulationPage() {
     const p = playerOverride ?? player;
     if (!p) return;
     setLoading(true);
+    setError(null);
+    setLastUserMsg(userMsg);
     try {
       const trimmedHistory = history.slice(-20);
       const conversationContext = trimmedHistory.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
@@ -821,7 +823,10 @@ function SimulationPage() {
 
       const res = await callScene({ data: { systemPrompt: buildSystemPrompt(p), userMessage: fullUserMsg } });
       const s = res.scene as Scene;
-      if (!s || !s.choices) { setLoading(false); return; }
+      if (!s || !s.choices) {
+        setError("The story flickered. The scene could not form.");
+        return;
+      }
 
       // Apply
       const np: PlayerState = { ...p };
@@ -874,11 +879,16 @@ function SimulationPage() {
       save(np, newHistory, s);
     } catch (e: any) {
       console.error(e);
-      alert(`AI error: ${e?.message ?? "unknown"}`);
+      setError(e?.message ?? "The rift trembles. The story flickers.");
     } finally {
       setLoading(false);
     }
   }, [player, history, callScene, save]);
+
+  const retryLast = useCallback(() => {
+    if (lastUserMsg) callAI(lastUserMsg);
+    else callAI("Continue the story from where we left off.");
+  }, [lastUserMsg, callAI]);
 
   // ── Splash actions
   const beginNew = () => setScreen("create");
