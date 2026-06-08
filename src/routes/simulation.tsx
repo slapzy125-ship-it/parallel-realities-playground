@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { simulationScene } from "@/lib/simulation.functions";
@@ -470,6 +470,7 @@ function SimulationEngine({ player, worldId, onUpdatePlayer, onBack }: {
           <span style={{ color: "#f472b6", fontSize: "0.8rem" }}>⭐ {player.reputation}</span>
           <span style={{ color: "#fbbf24", fontSize: "0.8rem" }}>💰 {player.wealth}</span>
           <button onClick={() => setShowStats(!showStats)} style={{ background: showStats ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.05)", border: "1px solid #374151", borderRadius: 6, padding: "0.3rem 0.6rem", color: "#d1d5db", cursor: "pointer", fontSize: "0.8rem" }}>Stats</button>
+          <Link to="/" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid #ef444450", borderRadius: 6, padding: "0.3rem 0.6rem", color: "#fca5a5", fontSize: "0.8rem", textDecoration: "none", cursor: "pointer" }}>Exit</Link>
         </div>
       </div>
 
