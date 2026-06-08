@@ -640,6 +640,6 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
 
   }
 
-  return <div style={{...G.app, ...G.center}}>{fonts}<div style={G.gold}>Loading...</div></div>
+  return null
 
 }
