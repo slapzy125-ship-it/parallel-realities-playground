@@ -60,6 +60,10 @@ export default function Play() {
   const [hasError, setHasError] = useState(false)
   const [sceneHistory, setSceneHistory] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [notifs, setNotifs] = useState<any[]>([])
+  const [nextAct, setNextAct] = useState<any>(null)
+  const [showTransition, setShowTransition] = useState(false)
+  const [saveMsg, setSaveMsg] = useState('')
   const historyRef = useRef<any[]>([])
 
   const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
