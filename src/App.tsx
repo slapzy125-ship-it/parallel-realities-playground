@@ -184,14 +184,175 @@ export default function App() {
     );
   }
 
+  // GAME SCREEN
+  const w = world!;
+  const xp = 0;
+  const xpMax = 100;
+  const level = 1;
+  const stats = Object.entries(w.startStat);
+  const quests = w.startQuests;
+  const rels = w.startRels;
+  const items = w.startItems;
+  const news = w.startNews;
+  const slots = 8;
+
+  const panel: React.CSSProperties = {
+    background: PANEL,
+    border: `1px solid ${BORDER}`,
+    padding: 14,
+  };
+  const sectionLabel: React.CSSProperties = {
+    fontSize: 10,
+    letterSpacing: "0.25em",
+    textTransform: "uppercase",
+    color: "#9a8550",
+    marginBottom: 10,
+  };
+  const Bar = ({ value, max = 100, color = GOLD }: { value: number; max?: number; color?: string }) => (
+    <div style={{ height: 6, background: "#1a1408", border: `1px solid ${BORDER}`, position: "relative" }}>
+      <div style={{ width: `${Math.min(100, (value / max) * 100)}%`, height: "100%", background: color }} />
+    </div>
+  );
+
   return (
-    <div style={{ ...shell, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ textAlign: "center" }}>
-        <Logo size="clamp(2rem, 5vw, 3rem)" />
-        <p style={{ marginTop: 24, letterSpacing: "0.3em", textTransform: "uppercase", fontSize: 14 }}>Game Loading</p>
-          {world && <p style={{ marginTop: 12, color: "#9a8550", fontSize: 12 }}>
-            {name} · {world.name} · {goal}
-          </p>}
+    <div style={{ ...shell, display: "flex", flexDirection: "column" }}>
+      {/* TOPBAR */}
+      <div style={{
+        position: "sticky", top: 0, zIndex: 10,
+        background: BLACK, borderBottom: `1px solid ${BORDER}`,
+        display: "flex", alignItems: "center", gap: 16, padding: "10px 16px",
+      }}>
+        <div style={{ fontFamily: "Cinzel, serif", color: GOLD, fontSize: 16, letterSpacing: "0.25em", textTransform: "uppercase" }}>
+          REVENIO
+        </div>
+        <div style={{ width: 1, height: 24, background: BORDER }} />
+        <div style={{ fontSize: 13, letterSpacing: "0.15em", textTransform: "uppercase" }}>{name}</div>
+        <div style={{
+          border: `1px solid ${GOLD}`, padding: "2px 8px", fontSize: 11,
+          letterSpacing: "0.2em", color: GOLD,
+        }}>LVL {level}</div>
+        <div style={{ flex: 1, minWidth: 120, maxWidth: 280 }}>
+          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 4 }}>XP {xp}/{xpMax}</div>
+          <Bar value={xp} max={xpMax} />
+        </div>
+        <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Save</button>
+        <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Menu</button>
+      </div>
+
+      {/* BODY: 3 COLUMNS */}
+      <div style={{
+        flex: 1,
+        display: "grid",
+        gridTemplateColumns: "220px 1fr 240px",
+        gap: 14,
+        padding: 14,
+      }}>
+        {/* LEFT SIDEBAR */}
+        <aside style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <section style={panel}>
+            <div style={sectionLabel}>Stats</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {stats.map(([k, v]) => (
+                <div key={k}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4, color: GOLD }}>
+                    <span style={{ letterSpacing: "0.1em" }}>{k}</span>
+                    <span style={{ color: "#9a8550" }}>{v as number}</span>
+                  </div>
+                  <Bar value={v as number} max={100} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section style={panel}>
+            <div style={sectionLabel}>Quests</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {quests.map(q => (
+                <div key={q.name} style={{ borderLeft: `2px solid ${GOLD}`, paddingLeft: 8 }}>
+                  <div style={{ fontSize: 12, color: GOLD, letterSpacing: "0.05em" }}>{q.name}</div>
+                  <div style={{ fontSize: 11, color: "#9a8550", fontFamily: "serif", marginTop: 2 }}>{q.desc}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section style={panel}>
+            <div style={sectionLabel}>Story Progress</div>
+            <div style={{ fontSize: 12, color: GOLD, letterSpacing: "0.15em", textTransform: "uppercase" }}>Act 1</div>
+            <div style={{ fontSize: 11, color: "#9a8550", marginTop: 2, fontFamily: "serif" }}>The Beginning</div>
+          </section>
+        </aside>
+
+        {/* MAIN AREA */}
+        <main style={{ ...panel, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                width: 48, height: 48, margin: "0 auto",
+                border: `3px solid ${BORDER}`,
+                borderTopColor: GOLD,
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <p style={{ marginTop: 20, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#9a8550" }}>
+              Weaving Your Story
+            </p>
+            <p style={{ marginTop: 8, fontSize: 11, color: "#6a5a30", fontFamily: "serif" }}>
+              {w.icon} {w.name}
+            </p>
+          </div>
+        </main>
+
+        {/* RIGHT SIDEBAR */}
+        <aside style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <section style={panel}>
+            <div style={sectionLabel}>Relationships</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {rels.map(r => (
+                <div key={r.name}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+                    <span style={{ color: GOLD }}>{r.name}</span>
+                    <span style={{ color: "#9a8550", fontSize: 10 }}>{r.type}</span>
+                  </div>
+                  <Bar value={r.val} color={r.dir === "rival" ? "#c0392b" : "#4a9d5a"} />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section style={panel}>
+            <div style={sectionLabel}>Inventory</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+              {Array.from({ length: slots }).map((_, i) => (
+                <div key={i} style={{
+                  aspectRatio: "1",
+                  border: `1px solid ${BORDER}`,
+                  background: "#0d0a04",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18,
+                }}>
+                  {items[i] ? items[i].split(" ")[0] : ""}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section style={panel}>
+            <div style={sectionLabel}>News Feed</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {news.map((n, i) => (
+                <div key={i} style={{
+                  fontSize: 11, color: "#9a8550", fontFamily: "serif",
+                  lineHeight: 1.5, borderLeft: `2px solid ${BORDER}`, paddingLeft: 8,
+                }}>
+                  {n}
+                </div>
+              ))}
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   );
