@@ -154,5 +154,26 @@ export default function Play() {
     </div>
   )
 
+  if (screen === 'worldselect') return (
+    <div style={{...G.app,padding:'30px 20px'}}>
+      {fonts}
+      <div style={{textAlign:'center',marginBottom:'32px'}}>
+        <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'8px'}}>CHAPTER II</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:'28px',fontWeight:700,letterSpacing:'2px'}}>CHOOSE YOUR WORLD</div>
+        <div style={{...G.muted,fontSize:'13px',marginTop:'6px',letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'16px',maxWidth:'960px',margin:'0 auto'}}>
+        {WORLDS.map(w=>[
+          <div key={w.id} onClick={()=>handleSelectWorld(w)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',padding:'20px',cursor:'pointer',borderRadius:'2px',transition:'border-color .2s'}} onMouseEnter={e=>(e.currentTarget.style.borderColor='#D4A843')} onMouseLeave={e=>(e.currentTarget.style.borderColor='#2A2A3A')}>
+            <div style={{fontSize:'28px',marginBottom:'10px'}}>{w.icon}</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:'15px',fontWeight:700,color:'#D4A843',marginBottom:'6px',letterSpacing:'1px'}}>{w.name}</div>
+            <div style={{...G.muted,fontSize:'12px',lineHeight:1.5}}>{w.desc}</div>
+            <div style={{...G.muted,fontSize:'10px',letterSpacing:'2px',marginTop:'8px',borderTop:'1px solid #2A2A3A',paddingTop:'8px'}}>{w.theme}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return <div style={{...G.app, ...G.center}}>{fonts}<div style={G.gold}>Loading...</div></div>
 }
