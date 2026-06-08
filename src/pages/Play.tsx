@@ -378,7 +378,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
             <div style={G.surface}>
               <div style={G.sideLabel}>STORY PROGRESS</div>
               <div style={{color:'#F0C060',fontWeight:700,fontSize:'14px'}}>Act {act.id}: {act.name}</div>
-              <div style={{...G.muted,fontSize:'11px',marginTop:'4px'}}>{act.desc}</div>
+              <div style={{...G.muted,fontSize:'11px',marginTop:'4px'}}>{(act as any).desc||''}</div>
               <div style={{height:'6px',background:'#0F0F14',borderRadius:'2px',overflow:'hidden',marginTop:'10px'}}>
                 <div style={{width:`${actPct}%`,height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)'}} />
               </div>
