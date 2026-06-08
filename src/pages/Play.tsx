@@ -8,19 +8,38 @@ const FREE_WORLDS = ['arcane', 'champions']
 const FREE_DAILY_LIMIT = 1
 
 const G:any = {
-  app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px'},
+  app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px',WebkitTextSizeAdjust:'100%',WebkitTapHighlightColor:'transparent'},
   center:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',gap:'16px'},
   gold:{color:'#D4A843'},
   gold2:{color:'#F0C060'},
   muted:{color:'#7A7A8A'},
   surface:{background:'#1A1A24',border:'1px solid #2A2A3A',borderRadius:'2px',padding:'20px'},
   sideLabel:{color:'#D4A843',fontSize:'9px',letterSpacing:'4px',borderBottom:'1px solid #2A2A3A',paddingBottom:'6px',marginBottom:'10px'},
-  input:{width:'100%',background:'#1A1A24',border:'1px solid #3A3A4A',color:'#E8E4D8',padding:'12px 16px',fontFamily:"'Rajdhani',sans-serif",fontSize:'16px',outline:'none',borderRadius:'2px',boxSizing:'border-box'},
+  input:{width:'100%',background:'#1A1A24',border:'1px solid #3A3A4A',color:'#E8E4D8',padding:'12px 16px',fontFamily:"'Rajdhani',sans-serif",fontSize:'16px',outline:'none',borderRadius:'2px',boxSizing:'border-box',WebkitAppearance:'none',appearance:'none'},
   label:{display:'block',color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'8px'},
-  btnGold:{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',border:'none',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px'},
-  btnGhost:{background:'transparent',color:'#D4A843',border:'1px solid #8B6914',fontFamily:"'Rajdhani',sans-serif",fontWeight:600,padding:'10px 32px',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px'},
-  topbar:{background:'#0F0F14',borderBottom:'1px solid #2A2A3A',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100},
+  btnGold:{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 32px',border:'none',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',WebkitAppearance:'none',appearance:'none',minHeight:'44px'},
+  btnGhost:{background:'transparent',color:'#D4A843',border:'1px solid #8B6914',fontFamily:"'Rajdhani',sans-serif",fontWeight:600,padding:'10px 20px',cursor:'pointer',letterSpacing:'2px',fontSize:'13px',borderRadius:'2px',WebkitAppearance:'none',appearance:'none',minHeight:'40px'},
+  topbar:{background:'#0F0F14',borderBottom:'1px solid #2A2A3A',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100,flexWrap:'wrap',gap:'10px'},
 }
+
+const RESPONSIVE_CSS = `
+@keyframes spin{to{transform:rotate(360deg)}}
+.rv-game-grid{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;padding:16px;max-width:1400px;margin:0 auto;}
+.rv-traits-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.rv-worlds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;max-width:960px;margin:0 auto;}
+@media (max-width: 900px){
+  .rv-game-grid{grid-template-columns:1fr;padding:12px;gap:12px;}
+  .rv-game-grid > div:first-child{order:2;}
+  .rv-game-grid > div:nth-child(2){order:1;}
+  .rv-game-grid > div:last-child{order:3;}
+  .rv-topbar-center{display:none !important;}
+  .rv-traits-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width: 480px){
+  .rv-worlds-grid{grid-template-columns:1fr;}
+  .rv-traits-grid{grid-template-columns:repeat(2,1fr);}
+}
+`
 
 const defaultPlayer = () => ({
   name:'',age:18,traits:[] as string[],goal:'',
@@ -319,7 +338,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     }catch{alert('Could not load.')}
   }
 
-  const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
+  const fonts = <><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/><style>{RESPONSIVE_CSS}</style></>
 
   if (screen === 'splash') return (
     <div style={{...G.app, ...G.center}}>
@@ -349,7 +368,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         </div>
         <div style={{marginBottom:'20px'}}>
           <label style={G.label}>CHOOSE 3 TRAITS <span style={G.muted}>({player.traits.length}/3)</span></label>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'8px'}}>
+          <div className="rv-traits-grid">
             {TRAITS.map(t=>(
               <button key={t} onClick={()=>toggleTrait(t)} style={{background:player.traits.includes(t)?'#8B6914':'#1A1A24',border:`1px solid ${player.traits.includes(t)?'#D4A843':'#3A3A4A'}`,color:player.traits.includes(t)?'#F0C060':'#7A7A8A',padding:'8px 4px',cursor:'pointer',fontFamily:"'Rajdhani',sans-serif",fontSize:'12px',fontWeight:600,letterSpacing:'1px',borderRadius:'2px'}}>{t}</button>
             ))}
@@ -376,7 +395,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         <div style={{fontFamily:"'Cinzel',serif",fontSize:'28px',fontWeight:700,letterSpacing:'2px'}}>CHOOSE YOUR WORLD</div>
         <div style={{...G.muted,fontSize:'13px',marginTop:'6px',letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'16px',maxWidth:'960px',margin:'0 auto'}}>
+      <div className="rv-worlds-grid">
         {WORLDS.map(w=>(
           <div key={w.id} onClick={()=>handleSelectWorld(w)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',padding:'20px',cursor:'pointer',borderRadius:'2px',transition:'border-color .2s'}} onMouseEnter={e=>(e.currentTarget.style.borderColor='#D4A843')} onMouseLeave={e=>(e.currentTarget.style.borderColor='#2A2A3A')}>
             <div style={{fontSize:'28px',marginBottom:'10px'}}>{w.icon}</div>
@@ -408,11 +427,11 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     return (
       <div style={G.app}>
         {fonts}
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{RESPONSIVE_CSS}</style>
 
         <div style={G.topbar}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,color:'#D4A843',letterSpacing:'3px'}}>REVENIO</div>
-          <div style={{display:'flex',alignItems:'center',gap:'16px',flex:1,justifyContent:'center'}}>
+          <div className="rv-topbar-center" style={{display:'flex',alignItems:'center',gap:'16px',flex:1,justifyContent:'center'}}>
             <div style={{color:'#F0C060',fontWeight:700,letterSpacing:'1px'}}>{player.name}</div>
             <div style={{...G.muted,fontSize:'11px',letterSpacing:'2px'}}>LVL {player.level}</div>
             <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:'180px'}}>
@@ -428,7 +447,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
           </div>
         </div>
 
-        <div style={{display:'grid',gridTemplateColumns:'260px 1fr 260px',gap:'16px',padding:'16px',maxWidth:'1400px',margin:'0 auto'}}>
+        <div className="rv-game-grid">
           <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
             <div style={G.surface}>
               <div style={G.sideLabel}>STORY PROGRESS</div>
