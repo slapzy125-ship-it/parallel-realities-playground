@@ -185,7 +185,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     setScreen('worldselect')
   }
 
-  const { tier, isActive, userId } = useSubscription()
+  const { isActive, userId } = useSubscription()
   const fetchTodayCount = useServerFn(getTodaySimulationCount)
 
   const handleSelectWorld = async (w:any) => {
