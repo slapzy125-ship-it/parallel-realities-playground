@@ -65,7 +65,7 @@ export default function Play() {
     setScreen('worldselect')
   }
 
-  const callAI = async (prompt:string, player:any, world:any) => {
+  const callAI = async (prompt:string, player:any, world:any):Promise<any> => {
     // TODO: AI integration
     return null
   }
