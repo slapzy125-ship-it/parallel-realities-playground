@@ -47,9 +47,30 @@ const features = [
 ];
 
 function Experience() {
+  const { openCheckout, loading } = usePaddleCheckout();
+  const { tier, isActive } = useSubscription();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      toast.success("Welcome aboard! Your subscription is being activated.");
+      window.history.replaceState({}, "", "/experience");
+    }
+  }, []);
+
+  const handleSubscribe = (priceId: string, tierName: "legend" | "infinite") => {
+    if (isActive && tier === tierName) {
+      toast.info(`You're already on Revenio ${tierName === "legend" ? "Legend" : "Infinite"}.`);
+      return;
+    }
+    openCheckout({ priceId });
+  };
+
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+      <PaymentTestModeBanner />
       <SiteNav />
+
 
       {/* Hero */}
       <section className="relative pt-40 pb-20 px-6 text-center">
