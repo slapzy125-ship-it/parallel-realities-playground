@@ -325,8 +325,8 @@ export default function App() {
           letterSpacing: "0.2em", color: GOLD,
         }}>LVL {level}</div>
         <div style={{ flex: 1, minWidth: 120, maxWidth: 280 }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 4 }}>XP {xp}/{xpMax}</div>
-          <Bar value={xp} max={xpMax} />
+          <div style={{ fontSize: 9, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 4 }}>XP {xpInLevel}/{xpMax}</div>
+          <Bar value={xpInLevel} max={xpMax} />
         </div>
         <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Save</button>
         <button style={{ ...btnBase, padding: "6px 14px", fontSize: 11 }}>Menu</button>
