@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { supabase } from '@/integrations/supabase/client'
 
 const G:any = {
   app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px'},
@@ -120,18 +121,16 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
 
     historyRef.current.push({role:'user',content:msg})
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:historyRef.current})
+      const { data, error } = await supabase.functions.invoke('ai-scene', {
+        body: { system, messages: historyRef.current }
       })
-      const data = await res.json()
-      const raw = (data.content||[]).map((c:any)=>c.text||'').join('')
+      if (error) throw error
+      const raw = (data.content || []).map((c: any) => c.text || '').join('')
       const match = raw.match(/\{[\s\S]*\}/)
-      if(!match) throw new Error('no json')
+      if (!match) throw new Error('no json')
       const result = JSON.parse(match[0])
       historyRef.current.push({role:'assistant',content:raw})
-      if(historyRef.current.length>20) historyRef.current=historyRef.current.slice(-20)
+      if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20)
       return result
     } catch(e) {
       historyRef.current.pop()
