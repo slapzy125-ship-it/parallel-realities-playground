@@ -65,6 +65,46 @@ export default function Play() {
     setScreen('worldselect')
   }
 
+  const callAI = async (prompt:string, player:any, world:any) => {
+    // TODO: AI integration
+    return null
+  }
+
+  const handleSelectWorld = async (w:any) => {
+    const fresh = {
+      ...defaultPlayer(),
+      name:player.name,age:player.age,traits:player.traits,goal:player.goal,
+      currentWorld:w.id,currentLocation:w.locations?.[0]??'',
+      skills:{...w.startStat},
+      relationships:w.startRels.map((r:any)=>({...r})),
+      inventory:[...w.startItems],
+      quests:w.startQuests.map((q:any)=>({...q,done:false})),
+      newsHistory:[...w.startNews],
+      worldState:{sceneCount:0},
+    }
+    setPlayer(fresh)
+    setWorld(w)
+    setScene(null)
+    setHasError(false)
+    setSceneHistory([])
+    historyRef.current=[]
+    setScreen('game')
+    setLoading(true)
+    const openers:Record<string,string> = {
+      arcane:`${player.name} (traits: ${player.traits.join(', ')}, goal: ${player.goal}) receives their acceptance letter to Arcane Academy. First day. Great Hall. Sorting Ceremony. Prof. Aldric watches warmly. Kira Voss sneers from across the room. Create the opening scene ending with the Sorting choice.`,
+      champions:`${player.name} arrives at their first trial match. Coach Ramos watches from the sideline. Luca Moretti warms up on the opposite team eyeing ${player.name} with contempt. Create the opening scene ending with a choice about how to play.`,
+      galactic:`${player.name} is handed the controls of a scout ship for the first time. Commander Lyra is in the co-pilot seat. A distress signal appears on radar. Admiral Kross's warship is also responding. Create the dramatic opening scene.`,
+      hero:`${player.name} reports to Hero HQ for their first assignment. Director Crane briefs them on a downtown incident. Shadow Wolf is already at the scene showing off. Create the opening scene.`,
+      dragonfall:`${player.name} enters the tournament arena to prove their worth. Lord Eryn watches proudly. Lord Kael's champion stands across the field sneering. A dragon circles overhead. Create the opening scene.`,
+      shadow:`${player.name} receives their first contract from Handler Zero in a dimly lit safe house. The job sounds simple but The Fox was also offered the same contract. Create the opening scene.`,
+      neon:`${player.name} sits in front of three screens preparing their first hack. Sable is on comms. Director Kron's security system is the target. Failure means exposure. Create the opening scene.`,
+      odyssey:`${player.name} stands before the Oracle Temple. Sage Pyrene speaks in riddles. General Vorn's soldiers block the gates demanding tribute. Create the opening scene.`,
+    }
+    const result = await callAI(openers[w.id]??`${player.name} enters ${w.name}. Create a dramatic opening scene.`, fresh, w)
+    if(result){setScene(result);setSceneHistory([result.sceneTitle])}else{setHasError(true)}
+    setLoading(false)
+  }
+
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
 
   if (screen === 'splash') return (
