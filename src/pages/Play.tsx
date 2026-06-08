@@ -334,5 +334,191 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     </div>
   )
 
+  if(screen==='game'){
+    const act = getAct(player.storyProgress)
+    const sceneInAct = player.storyProgress - act.range[0] + 1
+    const totalInAct = act.range[1] - act.range[0] + 1
+    const actPct = Math.round(((sceneInAct-1)/totalInAct)*100)
+
+    if(showTransition && nextAct) return (
+      <div style={{...G.app, ...G.center, padding:'40px', textAlign:'center'}}>
+        {fonts}
+        <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px'}}>ACT {nextAct.id} OF 5</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:'48px',fontWeight:900,color:'#F0C060',letterSpacing:'4px'}}>{nextAct.name}</div>
+        <div style={{...G.muted,maxWidth:'600px',fontSize:'15px',lineHeight:1.7}}>{nextAct.desc}</div>
+        <button style={G.btnGold} onClick={()=>setShowTransition(false)}>CONTINUE YOUR LEGEND</button>
+      </div>
+    )
+
+    return (
+      <div style={G.app}>
+        {fonts}
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
+        <div style={G.topbar}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,color:'#D4A843',letterSpacing:'3px'}}>REVENIO</div>
+          <div style={{display:'flex',alignItems:'center',gap:'16px',flex:1,justifyContent:'center'}}>
+            <div style={{color:'#F0C060',fontWeight:700,letterSpacing:'1px'}}>{player.name}</div>
+            <div style={{...G.muted,fontSize:'11px',letterSpacing:'2px'}}>LVL {player.level}</div>
+            <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:'180px'}}>
+              <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'2px'}}>XP</div>
+              <div style={{flex:1,height:'6px',background:'#1A1A24',borderRadius:'2px',overflow:'hidden'}}>
+                <div style={{width:`${(player.xp/player.xpNext)*100}%`,height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)'}} />
+              </div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:'8px'}}>
+            <button style={G.btnGhost} onClick={handleSave}>{saveMsg||'SAVE'}</button>
+            <button style={G.btnGhost} onClick={()=>setScreen('worldselect')}>MENU</button>
+          </div>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'260px 1fr 260px',gap:'16px',padding:'16px',maxWidth:'1400px',margin:'0 auto'}}>
+          <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={G.surface}>
+              <div style={G.sideLabel}>STORY PROGRESS</div>
+              <div style={{color:'#F0C060',fontWeight:700,fontSize:'14px'}}>Act {act.id}: {act.name}</div>
+              <div style={{...G.muted,fontSize:'11px',marginTop:'4px'}}>{act.desc}</div>
+              <div style={{height:'6px',background:'#0F0F14',borderRadius:'2px',overflow:'hidden',marginTop:'10px'}}>
+                <div style={{width:`${actPct}%`,height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)'}} />
+              </div>
+              <div style={{...G.muted,fontSize:'10px',marginTop:'6px',letterSpacing:'2px'}}>Scene {Math.max(1,sceneInAct)} of {totalInAct}</div>
+            </div>
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>STATS</div>
+              {Object.entries(player.skills).map(([k,v])=>(
+                <div key={k} style={{marginBottom:'8px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:'11px',color:'#E8E4D8'}}>{k}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
+                    <div style={{flex:1,height:'4px',background:'#0F0F14',borderRadius:'2px',overflow:'hidden'}}>
+                      <div style={{width:`${Math.min(100,Number(v))}%`,height:'100%',background:'#D4A843'}} />
+                    </div>
+                    <div style={{color:'#F0C060',fontSize:'10px',width:'24px',textAlign:'right'}}>{Math.round(Number(v))}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>QUESTS</div>
+              {player.quests.filter((q:any)=>!q.done).slice(0,3).map((q:any,i:number)=>(
+                <div key={i} style={{marginBottom:'10px',paddingBottom:'8px',borderBottom:'1px solid #2A2A3A'}}>
+                  <div style={{color:'#F0C060',fontSize:'12px',fontWeight:700}}>{q.name}</div>
+                  <div style={{...G.muted,fontSize:'11px',marginTop:'2px'}}>{q.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={G.surface}>
+              <div style={{...G.sideLabel,cursor:'pointer'}} onClick={()=>setHistoryOpen(h=>!h)}>STORY SO FAR {historyOpen?'▲':'▼'}</div>
+              {historyOpen && sceneHistory.slice(-5).reverse().map((t,i)=>(
+                <div key={i} style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>·{t}</div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+              {notifs.length>0 && (
+                <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+                  {notifs.map((n,i)=>{
+                    const colors:any={pos:'rgba(39,174,96,.15)',neg:'rgba(192,57,43,.15)',xp:'rgba(212,168,67,.15)',ach:'rgba(41,128,185,.15)',item:'rgba(212,168,67,.15)',quest:'rgba(142,68,173,.15)'}
+                    const borders:any={pos:'rgba(39,174,96,.4)',neg:'rgba(192,57,43,.4)',xp:'rgba(212,168,67,.4)',ach:'rgba(41,128,185,.4)',item:'rgba(212,168,67,.4)',quest:'rgba(142,68,173,.4)'}
+                    const textc:any={pos:'#27AE60',neg:'#E74C3C',xp:'#F0C060',ach:'#5DADE2',item:'#F0C060',quest:'#BB8FCE'}
+                    return <div key={i} style={{background:colors[n.kind]||colors.pos,border:`1px solid ${borders[n.kind]||borders.pos}`,color:textc[n.kind]||textc.pos,padding:'6px 12px',fontSize:'11px',letterSpacing:'1px',borderRadius:'2px'}}>{n.text}</div>
+                  })}
+                </div>
+              )}
+
+              {loading && (
+                <div style={{...G.surface,...G.center,padding:'60px',gap:'16px'}}>
+                  <div style={{width:'32px',height:'32px',border:'3px solid #2A2A3A',borderTopColor:'#D4A843',borderRadius:'50%',animation:'spin 1s linear infinite'}} />
+                  <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px'}}>GENERATING YOUR FATE...</div>
+                </div>
+              )}
+
+              {hasError && !loading && (
+                <div style={{...G.surface,textAlign:'center',padding:'40px'}}>
+                  <div style={{color:'#E74C3C',fontSize:'14px',letterSpacing:'3px',fontWeight:700}}>THE RIFT TREMBLES</div>
+                  <div style={{...G.muted,fontSize:'12px',margin:'10px 0 20px'}}>The simulation faltered. Your legend continues.</div>
+                  <button style={G.btnGold} onClick={handleRetry}>RETRY</button>
+                </div>
+              )}
+
+              {scene && !loading && !hasError && (
+                <>
+                  <div style={G.surface}>
+                    <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'3px',marginBottom:'8px'}}>{world?.name?.toUpperCase()} · ACT {act.id}</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:'22px',fontWeight:700,color:'#F0C060',marginBottom:'14px',letterSpacing:'1px'}}>{scene.sceneTitle}</div>
+                    <div style={{color:'#E8E4D8',fontSize:'15px',lineHeight:1.8,whiteSpace:'pre-wrap'}}>{scene.sceneText}</div>
+                  </div>
+
+                  {scene.isFinalScene ? (
+                    <div style={{...G.surface,textAlign:'center',padding:'40px'}}>
+                      <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px'}}>YOUR LEGEND IS WRITTEN</div>
+                      <div style={{color:'#E8E4D8',fontSize:'14px',lineHeight:1.7,margin:'16px 0'}}>{scene.legacyEnding}</div>
+                      <div style={{fontFamily:"'Cinzel',serif",fontSize:'24px',color:'#F0C060',fontWeight:700,letterSpacing:'2px',marginBottom:'20px'}}>{scene.legacyTitle}</div>
+                      <button style={G.btnGold} onClick={()=>setScreen('legacy')}>SEE YOUR LEGACY</button>
+                    </div>
+                  ) : (
+                    <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+                      {(scene.choices||[]).map((c:any,i:number)=>(
+                        <button key={i} onClick={()=>handleChoice(c)} disabled={loading} style={{background:'#1A1A24',border:'1px solid #3A3A4A',color:'#E8E4D8',padding:'14px 16px',cursor:loading?'not-allowed':'pointer',textAlign:'left',fontFamily:"'Rajdhani',sans-serif",fontSize:'14px',fontWeight:600,display:'flex',flexDirection:'column',gap:'4px',letterSpacing:'.5px',borderRadius:'2px',opacity:loading?0.5:1}} onMouseEnter={e=>{if(!loading){e.currentTarget.style.borderColor='#D4A843';e.currentTarget.style.color='#F0C060'}}} onMouseLeave={e=>{e.currentTarget.style.borderColor='#3A3A4A';e.currentTarget.style.color='#E8E4D8'}}>
+                          <span style={{color:'#D4A843',fontSize:'10px',letterSpacing:'2px'}}>[{c.type?.toUpperCase()}]</span>
+                          <span>{c.text}</span>
+                          <span style={{...G.muted,fontSize:'11px'}}>Risk: {c.risk} · {c.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={G.surface}>
+              <div style={G.sideLabel}>RELATIONSHIPS</div>
+              {player.relationships.slice(0,5).map((r:any,i:number)=>{
+                const initials=r.name.split(' ').map((x:string)=>x[0]).join('').substring(0,2)
+                return (
+                  <div key={i} style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}}>
+                    <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'#2A2A3A',display:'flex',alignItems:'center',justifyContent:'center',color:'#D4A843',fontSize:'11px',fontWeight:700}}>{initials}</div>
+                    <div style={{flex:1}}>
+                      <div style={{color:'#E8E4D8',fontSize:'12px',fontWeight:700}}>{r.name}</div>
+                      <div style={{...G.muted,fontSize:'10px',letterSpacing:'1px'}}>{r.type||r.dir} · {r.val}%</div>
+                      <div style={{height:'3px',background:'#0F0F14',borderRadius:'2px',overflow:'hidden',marginTop:'3px'}}>
+                        <div style={{width:`${Math.max(0,Math.min(100,Number(r.val)))}%`,height:'100%',background:Number(r.val)>=0?'#27AE60':'#E74C3C'}} />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>INVENTORY</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'6px'}}>
+                {Array.from({length:8},(_,i)=>(
+                  <div key={i} style={{aspectRatio:'1',background:'#0F0F14',border:'1px solid #2A2A3A',borderRadius:'2px',display:'flex',alignItems:'center',justifyContent:'center',color:player.inventory[i]?'#F0C060':'#3A3A4A',fontSize:'10px',padding:'2px',textAlign:'center'}}>
+                    {player.inventory[i]?player.inventory[i].split(' ')[0]:'·'}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>NEWS FEED</div>
+              {player.newsHistory.slice(-5).reverse().map((n:string,i:number)=>(
+                <div key={i} style={{...G.muted,fontSize:'11px',marginBottom:'6px',lineHeight:1.4}}>📰 {n}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return <div style={{...G.app, ...G.center}}>{fonts}<div style={G.gold}>Loading...</div></div>
 }
