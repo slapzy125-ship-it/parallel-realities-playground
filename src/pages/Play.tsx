@@ -71,7 +71,7 @@ export default function Play() {
   const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
     const p = playerOverride ?? player
     const w = worldOverride ?? world
-    if(!w) return null
+    if(!w) { console.log('NO WORLD'); return null }
     const act = getAct(p.storyProgress)
     const sceneInAct = p.storyProgress - act.range[0] + 1
     const totalInAct = act.range[1] - act.range[0] + 1
@@ -121,18 +121,24 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
 
     historyRef.current.push({role:'user',content:msg})
     try {
+      console.log('Calling edge function...')
       const { data, error } = await supabase.functions.invoke('ai-scene', {
         body: { system, messages: historyRef.current }
       })
+      console.log('Response data:', data)
+      console.log('Response error:', error)
       if (error) throw error
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
+      console.log('Raw text:', raw)
       const match = raw.match(/\{[\s\S]*\}/)
-      if (!match) throw new Error('no json')
+      if (!match) throw new Error('no json found in response')
       const result = JSON.parse(match[0])
+      console.log('Parsed scene:', result)
       historyRef.current.push({role:'assistant',content:raw})
       if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20)
       return result
     } catch(e) {
+      console.log('ERROR in callAI:', e)
       historyRef.current.pop()
       return null
     }
