@@ -1,968 +1,914 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef, useCallback, CSSProperties } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { simulationScene } from "@/lib/simulation.functions";
 
 export const Route = createFileRoute("/simulation")({
   component: SimulationPage,
-  head: () => ({
-    meta: [
-      { title: "Revenio — Explore the Life You Never Lived" },
-      { name: "description", content: "AI-powered alternate-life simulation. Choose a world. Build your legend." },
-    ],
-  }),
 });
 
-// ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
-const C = {
-  gold: "#D4A843", gold2: "#F0C060", gold3: "#8B6914",
-  bg: "#0A0A0C", bg2: "#0F0F14",
-  surface: "#1A1A24", surface2: "#20202E",
-  text: "#E8E4D8", muted: "#7A7A8A",
-  border: "#2A2A3A", border2: "#3A3A4A",
-  green: "#4ade80", red: "#f87171", purple: "#a78bfa", blue: "#60a5fa", amber: "#fbbf24",
+// ─── CONSTANTS ──────────────────────────────────────────────────────────────
+const TRAITS = ["Ambitious", "Loyal", "Brave", "Competitive", "Intelligent", "Creative", "Confident", "Curious", "Ruthless", "Charismatic"];
+const GOALS = ["Become a Legend", "Gain Power", "Build an Empire", "Become Rich", "Save the World", "Discover the Unknown"];
+
+type World = {
+  id: string;
+  name: string;
+  icon: string;
+  tag: string;
+  theme: string;
+  villain: string;
+  factions: string[];
 };
 
-const FONT_HEAD = "'Cinzel', serif";
-const FONT_BODY = "'Rajdhani', sans-serif";
-const FONT_NUM = "'Orbitron', sans-serif";
-
-const CLIP = "polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)";
-
-// ─── DATA ─────────────────────────────────────────────────────────────────────
-const TRAITS = ["Ambitious","Loyal","Brave","Competitive","Intelligent","Creative","Confident","Curious","Ruthless","Charismatic"];
-const GOALS = ["Become a Legend","Gain Power","Build an Empire","Become Rich","Save the World","Discover the Unknown"];
-
-type WorldDef = {
-  id: string; name: string; icon: string; desc: string; theme: string;
-  factions: string[]; villain: string;
-  startStat: Record<string, number>;
-  locations: string[]; startItems: string[];
-  startQuests: { name: string; desc: string }[];
-  startRels: { name: string; type: string; val: number; dir: "friend"|"rival"|"neutral" }[];
-  startNews: string[];
-};
-
-const WORLDS: WorldDef[] = [
-  { id:'arcane', name:'Arcane Academy', icon:'🔮',
-    desc:"Enter the world's greatest magical academy. Wield power, forge alliances, face the Hollow Mage.",
-    theme:'MAGIC · POWER · RIVALRY',
-    factions:['House Aetheris','House Drakemore','House Umbra','House Sylvara'],
-    villain:'The Hollow Mage',
-    startStat:{ Spellcasting:20, Knowledge:20, Courage:15, Control:15, HousePoints:0 },
-    locations:['Courtyard','Great Hall','Dormitories','Dueling Arena','Forbidden Library','Potion Hall'],
-    startItems:['📚 Spellbook'],
-    startQuests:[{ name:'Choose Your House', desc:'Attend the Sorting Ceremony tonight.' }],
-    startRels:[{ name:'Prof. Aldric', type:'Mentor', val:60, dir:'friend' },{ name:'Kira Voss', type:'Rival', val:30, dir:'rival' }],
-    startNews:['The Hollow Mage was sighted near the east tower.','House championship begins next month.','New forbidden tomes discovered in the archive.'] },
-  { id:'champions', name:'Champions Legacy', icon:'⚽',
-    desc:'From unknown youth to global icon. Train, compete, and become the greatest athlete ever.',
-    theme:'FAME · SACRIFICE · RIVALRY',
-    factions:['Crimson United','Royal Blue Academy','Blackstone FC','Golden City Academy'],
-    villain:'Adrian Vega',
-    startStat:{ Overall:45, Speed:40, Skill:38, Shooting:35, Passing:40, Stamina:60 },
-    locations:['Training Ground','Stadium','Gym','Scout Event','Press Room','Academy HQ'],
-    startItems:['👟 Academy Boots'],
-    startQuests:[{ name:'First Trial', desc:"Impress the coaches at tomorrow's trial match." }],
-    startRels:[{ name:'Coach Ramos', type:'Coach', val:50, dir:'friend' },{ name:'Luca Moretti', type:'Rival', val:20, dir:'rival' }],
-    startNews:['Adrian Vega signs record deal with Golden City.','Youth tournament registrations now open.','Scouts from Royal Blue spotted in the region.'] },
-  { id:'galactic', name:'Galactic Frontier', icon:'🚀',
-    desc:'Command a starship, choose your faction, and carve a legend across the stars.',
-    theme:'FREEDOM · REBELLION · ORDER',
-    factions:['Vanguard Alliance','Iron Dominion','Nova Syndicate','Celestial Order'],
-    villain:'Emperor Vexis',
-    startStat:{ Piloting:30, Combat:25, Diplomacy:20, CrewLoyalty:50, Credits:1000, GalacticRep:0 },
-    locations:['Bridge','Hangar','Trade Station','Combat Zone','Celestial Ruins',"Emperor's Domain"],
-    startItems:['⚔️ Energy Saber'],
-    startQuests:[{ name:'First Voyage', desc:'Plot a course and establish your first alliance.' }],
-    startRels:[{ name:'Commander Lyra', type:'Ally', val:60, dir:'friend' },{ name:'Admiral Kross', type:'Enemy', val:10, dir:'rival' }],
-    startNews:['Emperor Vexis expands territory into Sector 7.','Vanguard Alliance seeks new pilots.','Mysterious signal detected from the outer rim.'] },
-  { id:'hero', name:'Hero Nexus', icon:'⚡',
-    desc:'Rise from rookie to #1 hero. Master your powers, earn public trust, face The Null.',
-    theme:'POWER · FAME · SACRIFICE',
-    factions:['Titan Academy','Sentinel Academy','Nexus Institute','Phoenix Academy'],
-    villain:'The Null',
-    startStat:{ Power:30, Control:20, Courage:35, PublicTrust:40, HeroRank:99, Teamwork:30 },
-    locations:['Training Hall','City Center','Hero HQ','Crisis Zone','Media Plaza','Villain Lair'],
-    startItems:['🦸 Hero Suit'],
-    startQuests:[{ name:'First Mission', desc:'Respond to the distress call downtown.' }],
-    startRels:[{ name:'Director Crane', type:'Handler', val:55, dir:'friend' },{ name:'Shadow Wolf', type:'Rival', val:25, dir:'rival' }],
-    startNews:['The Null disables three heroes in downtown incident.','Hero Rankings updated — top spot still open.','New hero academy accepting applications.'] },
-  { id:'dragonfall', name:'Dragonfall Kingdoms', icon:'🐉',
-    desc:'Command armies, bond with dragons, and claim the throne of the realm.',
-    theme:'LEGACY · POWER · LOYALTY',
-    factions:['Emberhold','Frostmere','Thornvale','Goldcrest'],
-    villain:'King Malakar',
-    startStat:{ Leadership:25, ArmyStrength:30, DragonBond:10, Diplomacy:20, Territory:1, Gold:500 },
-    locations:['Throne Room','Battleground','Dragon Eyrie','Trade Port','Rival Kingdom','Ancient Ruins'],
-    startItems:['🗡️ Dragonsteel Blade'],
-    startQuests:[{ name:'Prove Your Worth', desc:'Win the Regional Tournament to claim your title.' }],
-    startRels:[{ name:'Lord Eryn', type:'Advisor', val:65, dir:'friend' },{ name:'Lord Kael', type:'Rival', val:20, dir:'rival' }],
-    startNews:["King Malakar invades Thornvale's northern border.",'Dragon eggs discovered near the Crystal Peaks.','Goldcrest seeks new alliance partners.'] },
-  { id:'shadow', name:'Shadow Guild', icon:'🗡️',
-    desc:'Rise through secret ranks, control the city, survive betrayal. Trust no one.',
-    theme:'DECEPTION · POWER · LOYALTY',
-    factions:['Night Ravens','Phantom Circle','Iron Blades','Whisper Network'],
-    villain:'The Black Regent',
-    startStat:{ Stealth:30, Influence:15, Trust:50, Resources:200, Reputation:0, DistrictControl:0 },
-    locations:['Safe House','Black Market','City Hall','Rival Territory','The Vault',"Regent's Tower"],
-    startItems:['🗡️ Shadow Blades'],
-    startQuests:[{ name:'First Contract', desc:'Complete your initiation mission for the guild.' }],
-    startRels:[{ name:'Handler Zero', type:'Contact', val:60, dir:'friend' },{ name:'The Fox', type:'Rival', val:15, dir:'rival' }],
-    startNews:['The Black Regent tightens grip on east district.','A double agent was discovered in the Phantom Circle.','New bounty posted — identity unknown.'] },
-  { id:'neon', name:'Neon Domination', icon:'🌆',
-    desc:'In a cyberpunk future, hack the system, build corporate power, and dominate the city.',
-    theme:'WEALTH · TECH · CONTROL',
-    factions:['Helix Industries','NovaCore','Synapse Systems','Apex Dynamics'],
-    villain:'Director Kron',
-    startStat:{ Wealth:5000, Influence:10, Cybernetics:5, Hacking:20, CorporatePower:0, StreetRep:30 },
-    locations:['Corporate HQ','Neon Markets','Server Farm','Street Level',"Director's Tower",'Underground'],
-    startItems:['🕶️ Cyber Visor'],
-    startQuests:[{ name:'First Hack', desc:'Breach the rival server and steal their prototype data.' }],
-    startRels:[{ name:'Sable', type:'Ally', val:55, dir:'friend' },{ name:'Dir. Kron', type:'Enemy', val:5, dir:'rival' }],
-    startNews:['Director Kron announces citywide AI surveillance.','Helix Industries stock hits record high.','Underground resistance grows in Sector 9.'] },
-  { id:'odyssey', name:'Eternal Odyssey', icon:'⚔️',
-    desc:"Answer destiny's call, claim mythic relics, and face the immortal Eternal King.",
-    theme:'DESTINY · COURAGE · DISCOVERY',
-    factions:['Dawnseekers','Moonwardens','Stormforged','Celestial Keepers'],
-    villain:'The Eternal King',
-    startStat:{ Courage:30, Wisdom:25, Strength:35, ArtifactPower:0, MythicRep:0, Exploration:10 },
-    locations:['Oracle Temple','Ancient Ruins','Colosseum','Mystic Forest',"Titan's Peak",'Eternal Gate'],
-    startItems:['🛡️ Bronze Spear'],
-    startQuests:[{ name:'The First Trial', desc:"Complete the Oracle's trial and receive your mythic title." }],
-    startRels:[{ name:'Sage Pyrene', type:'Oracle', val:70, dir:'friend' },{ name:'General Vorn', type:'Enemy', val:10, dir:'rival' }],
-    startNews:['The Eternal King stirs beyond the Rift.','Celestial Keepers seek a new champion.',"Rare artifact discovered near the Titan's Peak."] },
+const WORLDS: World[] = [
+  { id: "arcane", name: "Arcane Academy", icon: "🔮", tag: "Magic & Sorcery", theme: "Wizarding academy of moving staircases and forbidden spells", villain: "The Hollow Mage", factions: ["House Aetheris", "House Drakemore", "House Umbra", "House Sylvara"] },
+  { id: "champions", name: "Champions Legacy", icon: "⚽", tag: "Sports Career", theme: "Soccer career mode — academies, transfers, trophies", villain: "Adrian Vega", factions: ["Crimson United", "Royal Blue", "Blackstone FC", "Golden City"] },
+  { id: "galactic", name: "Galactic Frontier", icon: "🚀", tag: "Sci-Fi Galaxy", theme: "Star-faring frontier of energy sabers, smugglers, and empires", villain: "Emperor Vexis", factions: ["Vanguard Alliance", "Iron Dominion", "Nova Syndicate", "Celestial Order"] },
+  { id: "hero", name: "Hero Nexus", icon: "🦸", tag: "Superhero City", theme: "Modern city of secret identities and super-teams", villain: "The Null", factions: ["Titan", "Sentinel", "Nexus Institute", "Phoenix"] },
+  { id: "dragonfall", name: "Dragonfall Kingdoms", icon: "🐉", tag: "Medieval Fantasy", theme: "Scheming great houses, dragons, iron thrones", villain: "King Malakar", factions: ["Emberhold", "Frostmere", "Thornvale", "Goldcrest"] },
+  { id: "shadow", name: "Shadow Guild", icon: "🗡️", tag: "Assassin Order", theme: "Hooded assassins, rooftop parkour, secret brotherhoods", villain: "The Black Regent", factions: ["Night Ravens", "Phantom Circle", "Iron Blades", "Whisper Network"] },
+  { id: "neon", name: "Neon Domination", icon: "🌃", tag: "Cyberpunk", theme: "Neon megacity of corps, netrunners, and cyberware", villain: "Director Kron", factions: ["Helix Industries", "NovaCore", "Synapse Systems", "Apex Dynamics"] },
+  { id: "odyssey", name: "Eternal Odyssey", icon: "⚡", tag: "Modern Myth", theme: "Demigods, oracles, monsters bleeding into the modern world", villain: "The Eternal King", factions: ["Dawnseekers", "Moonwardens", "Stormforged", "Celestial Keepers"] },
 ];
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
-type Rel = { name:string; type:string; val:number; dir:'friend'|'rival'|'neutral' };
-type Quest = { name:string; desc:string; done:boolean };
-type Choice = { id:string; text:string; type:string; risk:string; hint:string };
+type Act = { id: number; name: string; range: [number, number]; desc: string };
+const STORY_ACTS: Act[] = [
+  { id: 1, name: "The Beginning", range: [0, 4], desc: "Your story starts here." },
+  { id: 2, name: "Rising Tension", range: [5, 9], desc: "The world reacts to you." },
+  { id: 3, name: "The Crisis", range: [10, 14], desc: "Everything is at stake." },
+  { id: 4, name: "Confrontation", range: [15, 19], desc: "Face your greatest challenge." },
+  { id: 5, name: "The Legend", range: [20, 24], desc: "Your legacy is decided." },
+];
+
+const getCurrentAct = (progress: number) =>
+  STORY_ACTS.find(a => progress >= a.range[0] && progress <= a.range[1]) ?? STORY_ACTS[4];
+
+// ─── TYPES ──────────────────────────────────────────────────────────────────
+type Relationship = { name: string; val: number; dir: "friend" | "rival" | "neutral" };
+type Quest = { name: string; done: boolean };
+type Choice = { id: string; text: string; type: string; risk: string; hint: string };
 type Scene = {
-  sceneTitle:string; sceneText:string; choices:Choice[];
-  statChanges?:Record<string,number>; xpGained?:number; reputationChange?:number;
-  relationshipChanges?:{ name:string; change:number; dir?:Rel['dir']; newEvent?:string }[];
-  inventoryUnlocks?:string[]; questUpdates?:Quest[]; newQuests?:Quest[];
-  newAchievements?:string[]; newsUpdates?:string[]; worldStateUpdates?:Record<string,unknown>;
-  nextSceneHint?:string;
+  sceneTitle: string;
+  sceneText: string;
+  choices: Choice[];
+  statChanges?: Record<string, number>;
+  xpGained?: number;
+  reputationChange?: number;
+  relationshipChanges?: { name: string; change: number; dir: "friend" | "rival" | "neutral" }[];
+  inventoryUnlocks?: string[];
+  questUpdates?: { name: string; done?: boolean }[];
+  newQuests?: string[];
+  newAchievements?: string[];
+  newsUpdates?: string[];
+  worldStateUpdates?: Record<string, unknown>;
+  isFinalScene?: boolean;
+  legacyTitle?: string;
+  legacyEnding?: string;
 };
-type Msg = { role:'user'|'assistant'; content:string };
+
 type PlayerState = {
-  name:string; age:number; traits:string[]; goal:string;
-  level:number; xp:number; xpNext:number; reputation:number;
-  currentWorld:string; currentLocation:string; currentFaction:string;
-  skills:Record<string,number>; relationships:Rel[]; inventory:string[];
-  quests:Quest[]; achievements:string[]; majorDecisions:string[];
-  storyProgress:number; worldState:Record<string,unknown>; newsHistory:string[];
+  name: string;
+  age: number;
+  traits: string[];
+  goal: string;
+  level: number;
+  xp: number;
+  reputation: number;
+  skills: Record<string, number>;
+  inventory: string[];
+  relationships: Relationship[];
+  quests: Quest[];
+  achievements: string[];
+  majorDecisions: string[];
+  storyProgress: number;
 };
-type Notif = { id:number; kind:'stat+'|'stat-'|'xp'|'level'|'item'|'quest'|'ach'|'rel+'|'rel-'; text:string };
-type SaveBlob = { player:PlayerState; history:Msg[]; scene:Scene|null };
 
-const SAVE_KEY = "revenio_save";
+const xpForLevel = (lvl: number) => Math.floor(100 * Math.pow(1.5, lvl - 1));
 
-// ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
-function buildSystemPrompt(p: PlayerState): string {
-  const w = WORLDS.find(x => x.id === p.currentWorld)!;
-  return `You are the AI game master for REVENIO, an alternate-life simulation game.
+const emptyPlayer = (): PlayerState => ({
+  name: "", age: 18, traits: [], goal: "",
+  level: 1, xp: 0, reputation: 0,
+  skills: { Courage: 5, Intellect: 5, Charisma: 5, Cunning: 5 },
+  inventory: [], relationships: [], quests: [],
+  achievements: [], majorDecisions: [], storyProgress: 0,
+});
 
-CURRENT WORLD: ${w.name}
-VILLAIN: ${w.villain}
-FACTIONS: ${w.factions.join(', ')}
-LOCATIONS: ${w.locations.join(', ')}
+// ─── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+const buildSystemPrompt = (player: PlayerState, world: World): string => {
+  const act = getCurrentAct(player.storyProgress);
+  const sceneInAct = player.storyProgress - act.range[0] + 1;
+  const totalInAct = act.range[1] - act.range[0] + 1;
+
+  return `You are the game master for REVENIO, a linear alternate-life simulation game.
+
+WORLD: ${world.name}
+THEME: ${world.theme}
+VILLAIN: ${world.villain}
+FACTIONS: ${world.factions.join(", ")}
 
 PLAYER:
-- Name: ${p.name}, Age: ${p.age}
-- Traits: ${p.traits.join(', ')}
-- Goal: ${p.goal}
-- Level: ${p.level}, XP: ${p.xp}/${p.xpNext}
-- Current Location: ${p.currentLocation}
-- Stats: ${JSON.stringify(p.skills)}
-- Relationships: ${JSON.stringify(p.relationships)}
-- Active Quests: ${JSON.stringify(p.quests.filter(q => !q.done))}
-- Inventory: ${p.inventory.join(', ')}
-- Major Decisions: ${p.majorDecisions.slice(-3).join(', ')}
-- Story Progress: ${p.storyProgress}
+- Name: ${player.name}, Age: ${player.age}
+- Traits: ${player.traits.join(", ")}
+- Goal: ${player.goal}
+- Level: ${player.level}
+- Stats: ${JSON.stringify(player.skills)}
+- Relationships: ${JSON.stringify(player.relationships.map(r => ({ name: r.name, val: r.val, dir: r.dir })))}
+- Inventory: ${player.inventory.join(", ") || "none"}
+- Active Quests: ${JSON.stringify(player.quests.filter(q => !q.done).map(q => q.name))}
+- Major Decisions: ${player.majorDecisions.slice(-5).join(" | ") || "none yet"}
 
-RULES:
-1. Scenes must be 40-80 words maximum
-2. Always return exactly 4 choices
-3. Make the world react to player stats and prior decisions
-4. Reference the villain and rivals naturally as story progresses
-5. Keep content appropriate for teens
-6. Make stat changes meaningful and visible
+CURRENT NARRATIVE POSITION:
+- Act: ${act.id} of 5 — "${act.name}"
+- Scene: ${sceneInAct} of ${totalInAct} in this act
+- Overall Progress: ${player.storyProgress} of 24
 
-Respond ONLY with this JSON, no markdown, no backticks, no extra text:
+NARRATIVE RULES BY ACT:
+- Act 1 (0-4): Establish the world. Introduce key allies and rivals. Give the player early wins. Hint at the villain. No major danger yet.
+- Act 2 (5-9): Raise the stakes. A rival challenges the player directly. The villain's influence grows. Force a hard loyalty or betrayal choice.
+- Act 3 (10-14): The crisis hits. Something the player built is threatened. A major loss or setback occurs. An ally may turn or be taken. The villain makes a move.
+- Act 4 (15-19): Direct confrontation begins. The player must use everything they have built. Reference all major past decisions. The final battle approaches.
+- Act 5 (20-24): The climax and resolution. Scene 24 must be the final confrontation with ${world.villain}. The ending reflects all of the player's choices.
+
+CONTINUITY RULES:
+- Every scene must reference at least one past decision the player made.
+- Characters introduced earlier must reappear as the story progresses.
+- Stats must matter: low Courage → hesitate; high Courage → bold action.
+- The villain must appear or be referenced every act, and appear in person in Acts 4 and 5.
+- Reward loyalty when chosen; test ambition when chosen.
+
+SCENE RULES:
+- Scene text: 60-80 words. Cinematic, immediate, present tense.
+- Exactly 4 choices every scene (the 4th must be type "custom": "Write your own path").
+- Choices must feel meaningfully different.
+- At least 2 stat changes per scene.
+- XP gained: 10-25 per scene.
+- Scene 24 is the FINAL scene: set isFinalScene=true, choices=[], and fill legacyTitle + legacyEnding (a resolution paragraph).
+
+YOU MUST RESPOND WITH ONLY THIS JSON. NO MARKDOWN. NO BACKTICKS. NO EXPLANATION:
 {
-  "sceneTitle": "Short dramatic title",
-  "sceneText": "40-80 word cinematic scene",
+  "sceneTitle": "Title here",
+  "sceneText": "Scene text here. 60-80 words. Present tense.",
   "choices": [
-    {"id":"A","text":"Choice text","type":"bold","risk":"Low","hint":"Short hint"},
-    {"id":"B","text":"Choice text","type":"strategic","risk":"Medium","hint":"Short hint"},
-    {"id":"C","text":"Choice text","type":"cautious","risk":"High","hint":"Short hint"},
-    {"id":"D","text":"Write your own action","type":"custom","risk":"Variable","hint":"Your path"}
+    {"id":"A","text":"Choice text","type":"bold","risk":"Low","hint":"Outcome hint"},
+    {"id":"B","text":"Choice text","type":"strategic","risk":"Medium","hint":"Outcome hint"},
+    {"id":"C","text":"Choice text","type":"loyal","risk":"High","hint":"Outcome hint"},
+    {"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"Anything goes"}
   ],
-  "statChanges": {"StatName": 5},
+  "statChanges": {"StatName": 5, "StatName2": -2},
   "xpGained": 15,
   "reputationChange": 3,
-  "relationshipChanges": [{"name":"Name","change":10,"dir":"friend","newEvent":"note"}],
+  "relationshipChanges": [{"name":"Character Name","change":10,"dir":"friend"}],
   "inventoryUnlocks": [],
   "questUpdates": [],
   "newQuests": [],
   "newAchievements": [],
-  "newsUpdates": [],
+  "newsUpdates": ["One in-world headline reflecting story events"],
   "worldStateUpdates": {},
-  "nextSceneHint": "What comes next"
+  "isFinalScene": false,
+  "legacyTitle": "",
+  "legacyEnding": ""
 }`;
-}
+};
 
-// ─── FONT LOADER ──────────────────────────────────────────────────────────────
-function useFonts() {
+const getOpeningPrompt = (player: PlayerState, world: World): string => {
+  const openers: Record<string, string> = {
+    arcane: `${player.name} receives their acceptance letter to Arcane Academy. It is their first day. The Great Hall is filled with students waiting for the Sorting Ceremony. Create the opening scene. Introduce Prof. Aldric warmly and Kira Voss as an immediate rival. End with the Sorting choice.`,
+    champions: `${player.name} arrives at their first trial match for a youth academy. The coach is watching. Rival player Luca Moretti is on the opposite team, already warming up and eyeing them with contempt. Create the opening scene. End with a choice about how to play.`,
+    galactic: `${player.name} is handed the controls of a small scout ship for the first time. Commander Lyra is in the co-pilot seat. A distress signal appears on the radar from an unknown vessel. Admiral Kross's warship is also responding. Create the opening scene.`,
+    hero: `${player.name} reports to Hero HQ for their first assignment as a junior hero. Director Crane briefs them on a low-level incident downtown. Shadow Wolf, a rival hero, is already at the scene showing off. Create the opening scene.`,
+    dragonfall: `${player.name} enters the tournament arena to prove their worth as a leader. Lord Eryn watches from the stands with pride. Lord Kael's champion stands across the field, sneering. A dragon circles overhead. Create the opening scene.`,
+    shadow: `${player.name} receives their first contract from Handler Zero in a dimly lit safe house. The job sounds simple. But The Fox, a rival operative, was also offered the same contract. Create the opening scene.`,
+    neon: `${player.name} sits in front of three screens preparing their first hack. Sable is on comms providing support. Director Kron's security system is the target. Failure means exposure. Create the opening scene.`,
+    odyssey: `${player.name} stands before the Oracle Temple to receive their mythic title. Sage Pyrene speaks in riddles. General Vorn's soldiers block the temple gates and demand tribute. Create the opening scene.`,
+  };
+  return openers[world.id] ?? `${player.name} enters ${world.name} for the first time. Create a dramatic opening scene establishing the world and ending with a critical first choice.`;
+};
+
+// ─── STYLES ─────────────────────────────────────────────────────────────────
+const CSS = `
+:root {
+  --bg: #07070a; --surface: #11121a; --surface2: #1a1c28; --border: #2a2d3d;
+  --text: #e8e6df; --muted: #8b8a85;
+  --gold: #d4af37; --gold2: #f4d878; --gold3: #8b7320;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Rajdhani', system-ui, sans-serif; }
+.rv-root { min-height: 100vh; background: radial-gradient(circle at 50% 0%, #1a1810 0%, #07070a 60%); color: var(--text); font-family: 'Rajdhani', system-ui, sans-serif; }
+.rv-shell { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+/* TOP BAR */
+.topbar { position: sticky; top: 0; z-index: 10; background: rgba(7,7,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gold3); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.tb-brand { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--gold2); letter-spacing: 3px; }
+.tb-stats { display: flex; gap: 16px; align-items: center; font-family: 'Orbitron', monospace; font-size: 11px; color: var(--muted); }
+.tb-stats b { color: var(--gold2); margin-left: 4px; }
+
+/* SPLASH */
+.splash { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px 20px; text-align: center; }
+.splash-logo { font-family: 'Cinzel', serif; font-size: clamp(48px, 10vw, 96px); font-weight: 900; color: var(--gold2); letter-spacing: 8px; text-shadow: 0 0 40px rgba(212,175,55,0.4); }
+.splash-tag { color: var(--muted); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; }
+
+/* BUTTONS */
+.btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #0a0a0a; border: none; padding: 14px 32px; font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 3px; font-size: 13px; cursor: pointer; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); transition: transform 0.2s; }
+.btn-gold:hover { transform: translateY(-2px); }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--gold2); border: 1px solid var(--gold3); padding: 12px 28px; font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 2px; font-size: 12px; cursor: pointer; }
+.btn-ghost:hover { background: rgba(212,175,55,0.1); }
+
+/* CREATION */
+.create-wrap { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+.create-step { color: var(--gold); font-size: 10px; letter-spacing: 4px; margin-bottom: 8px; }
+.create-title { font-family: 'Cinzel', serif; font-size: 28px; color: var(--gold2); margin-bottom: 24px; letter-spacing: 2px; }
+.create-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; font-family: 'Rajdhani', sans-serif; font-size: 16px; margin-bottom: 12px; }
+.create-input:focus { outline: none; border-color: var(--gold); }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; font-size: 13px; cursor: pointer; letter-spacing: 1px; }
+.chip.on { background: var(--gold3); border-color: var(--gold); color: var(--gold2); }
+.chip:hover { border-color: var(--gold); }
+
+/* WORLD SELECT */
+.world-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; max-width: 1100px; margin: 0 auto; padding: 20px; }
+.world-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.2s; }
+.world-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+.world-icon { font-size: 36px; margin-bottom: 8px; }
+.world-name { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold2); letter-spacing: 1px; margin-bottom: 4px; }
+.world-tag { color: var(--muted); font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+.world-theme { color: var(--text); font-size: 13px; line-height: 1.5; opacity: 0.8; }
+
+/* GAME LAYOUT */
+.game-grid { display: grid; grid-template-columns: 260px 1fr 280px; gap: 16px; padding: 16px 0; }
+@media (max-width: 1024px) { .game-grid { grid-template-columns: 1fr; } .sidebar-toggle { display: block; } .side-col { display: none; } .side-col.open { display: block; } }
+@media (min-width: 1025px) { .sidebar-toggle { display: none; } }
+.side-col { background: var(--surface); border: 1px solid var(--border); padding: 16px; min-height: 100px; }
+.side-section { margin-bottom: 18px; }
+.side-label { color: var(--gold); font-size: 9px; letter-spacing: 4px; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.sidebar-toggle { background: var(--surface); border: 1px solid var(--gold3); color: var(--gold2); padding: 8px 14px; margin: 4px; font-size: 12px; cursor: pointer; letter-spacing: 1px; }
+
+/* Stats */
+.stat-row { margin-bottom: 8px; }
+.stat-head { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px; }
+.stat-name { color: var(--text); letter-spacing: 1px; }
+.stat-val { color: var(--gold2); font-family: 'Orbitron', monospace; }
+.stat-bar { width: 100%; height: 4px; background: var(--surface2); }
+.stat-fill { height: 100%; background: linear-gradient(90deg, var(--gold3), var(--gold)); transition: width 0.5s; }
+
+/* Act tracker */
+.act-tracker { margin-bottom: 16px; }
+.act-name { color: var(--gold2); font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+.act-desc { color: var(--muted); font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; }
+.act-progress-bar { width: 100%; height: 4px; background: var(--surface2); margin-bottom: 4px; }
+.act-progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold3), var(--gold)); transition: width 0.5s ease; }
+.act-counter { color: var(--muted); font-size: 10px; letter-spacing: 2px; font-family: 'Orbitron', monospace; }
+
+/* Story history */
+.history-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.history-item { display: flex; gap: 6px; color: var(--muted); font-size: 11px; line-height: 1.4; letter-spacing: 0.5px; }
+.history-dot { color: var(--gold3); flex-shrink: 0; }
+
+/* Scene + choices */
+.scene-card { background: var(--surface); border: 1px solid var(--gold3); padding: 28px; min-height: 320px; clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%); }
+.scene-title { font-family: 'Cinzel', serif; font-size: 22px; color: var(--gold2); letter-spacing: 2px; margin-bottom: 16px; }
+.scene-text { color: var(--text); line-height: 1.7; font-size: 15px; margin-bottom: 20px; white-space: pre-wrap; }
+.notif-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.notif { background: var(--surface2); border: 1px solid var(--gold3); color: var(--gold2); padding: 4px 10px; font-size: 10px; letter-spacing: 1px; font-family: 'Orbitron', monospace; animation: fadeIn 0.4s; }
+.notif.bad { border-color: #6b2a2a; color: #f4a878; }
+.choices-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+@media (max-width: 700px) { .choices-wrap { grid-template-columns: 1fr; } }
+.choice-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s; font-family: 'Rajdhani', sans-serif; }
+.choice-btn:hover:not(:disabled) { border-color: var(--gold); background: rgba(212,175,55,0.05); }
+.choice-btn:disabled { opacity: 0.4; cursor: wait; }
+.choice-type { color: var(--gold); font-size: 9px; letter-spacing: 2px; font-family: 'Orbitron', monospace; }
+.choice-text { color: var(--text); font-size: 14px; line-height: 1.4; }
+.choice-hint { color: var(--muted); font-size: 11px; letter-spacing: 0.5px; }
+
+.custom-row { display: flex; gap: 8px; margin-top: 10px; }
+.custom-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px; font-family: 'Rajdhani', sans-serif; font-size: 14px; }
+
+/* Act transition */
+.act-transition { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; gap: 12px; animation: fadeIn 0.6s ease; background: var(--surface); border: 1px solid var(--gold3); min-height: 320px; }
+.act-transition-label { color: var(--gold); font-size: 10px; letter-spacing: 4px; }
+.act-transition-title { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700; color: var(--gold2); letter-spacing: 2px; text-align: center; }
+.act-transition-desc { color: var(--muted); font-size: 13px; letter-spacing: 2px; margin-bottom: 16px; text-align: center; }
+
+/* Final scene */
+.ending-wrap { display: flex; flex-direction: column; gap: 16px; padding: 24px; background: var(--surface); border: 1px solid var(--gold3); clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%); }
+.ending-label { color: var(--gold); font-size: 10px; letter-spacing: 4px; }
+.ending-text { color: var(--text); line-height: 1.7; font-size: 15px; }
+.ending-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; color: var(--gold2); letter-spacing: 2px; }
+
+/* Relationships, inventory, news */
+.rel-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 1px dashed var(--border); }
+.rel-name { color: var(--text); }
+.rel-tag { font-family: 'Orbitron', monospace; font-size: 10px; }
+.rel-tag.friend { color: #7cd17c; }
+.rel-tag.rival { color: #e87878; }
+.rel-tag.neutral { color: var(--muted); }
+.inv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.inv-slot { background: var(--surface2); border: 1px solid var(--border); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); text-align: center; padding: 2px; word-break: break-word; line-height: 1.1; }
+.inv-slot.filled { color: var(--gold2); border-color: var(--gold3); font-size: 9px; }
+.news-item { font-size: 11px; color: var(--muted); line-height: 1.4; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.news-item:before { content: "▸ "; color: var(--gold); }
+
+/* Loader */
+.loader { text-align: center; color: var(--gold2); padding: 40px; font-family: 'Cinzel', serif; letter-spacing: 4px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Error */
+.err-banner { background: rgba(139,42,42,0.2); border: 1px solid #6b2a2a; padding: 16px; color: #f4a878; margin-bottom: 12px; }
+.err-banner button { margin-top: 8px; background: #6b2a2a; color: #fff; border: none; padding: 8px 16px; cursor: pointer; font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 11px; }
+
+/* Legacy */
+.legacy-screen { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+.legacy-header { text-align: center; margin-bottom: 32px; }
+.legacy-world { color: var(--gold); font-size: 10px; letter-spacing: 4px; margin-bottom: 8px; }
+.legacy-name { font-family: 'Cinzel', serif; font-size: 36px; font-weight: 900; color: var(--gold2); letter-spacing: 4px; }
+.legacy-title-earned { color: var(--muted); font-size: 14px; letter-spacing: 3px; margin-top: 8px; }
+.legacy-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+@media (max-width: 600px) { .legacy-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+.legacy-stat { background: var(--surface); padding: 16px; text-align: center; }
+.ls-label { color: var(--gold); font-size: 9px; letter-spacing: 3px; margin-bottom: 6px; }
+.ls-val { font-family: 'Orbitron', monospace; font-size: 24px; color: var(--gold2); }
+.legacy-section { margin-bottom: 24px; }
+.legacy-section-title { color: var(--gold); font-size: 9px; letter-spacing: 4px; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
+.legacy-scene-item { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--border); align-items: center; }
+.legacy-scene-num { font-family: 'Orbitron', monospace; font-size: 11px; color: var(--gold3); min-width: 20px; }
+.legacy-scene-title { color: var(--text); font-size: 13px; }
+.legacy-decision { color: var(--muted); font-size: 13px; padding: 4px 0; }
+.legacy-achievements { display: flex; flex-wrap: wrap; gap: 8px; }
+.legacy-ach-badge { background: var(--gold3); color: var(--gold2); font-size: 11px; padding: 4px 12px; letter-spacing: 1px; }
+.legacy-actions { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+`;
+
+// ─── COMPONENT ──────────────────────────────────────────────────────────────
+type Screen = "splash" | "creation" | "worldselect" | "game" | "legacy";
+
+function SimulationPage() {
+  const callScene = useServerFn(simulationScene);
+  const [screen, setScreen] = useState<Screen>("splash");
+  const [player, setPlayer] = useState<PlayerState>(emptyPlayer);
+  const [currentWorld, setCurrentWorld] = useState<World | null>(null);
+  const [currentScene, setCurrentScene] = useState<Scene | null>(null);
+  const [sceneHistory, setSceneHistory] = useState<string[]>([]);
+  const [newsFeed, setNewsFeed] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<{ text: string; bad?: boolean }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingAct, setPendingAct] = useState<Act | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState<"left" | "right" | null>(null);
+  const [customText, setCustomText] = useState("");
+  const [creationStep, setCreationStep] = useState(0);
+  const playerRef = useRef(player);
+  playerRef.current = player;
+  const worldRef = useRef(currentWorld);
+  worldRef.current = currentWorld;
+
+  // Load save
   useEffect(() => {
-    const id = "revenio-fonts";
-    if (document.getElementById(id)) return;
-    const l = document.createElement("link");
-    l.id = id; l.rel = "stylesheet";
-    l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700&display=swap";
-    document.head.appendChild(l);
+    try {
+      const raw = localStorage.getItem("revenio_save_v2");
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.player && s.world && s.scene) {
+          setPlayer(s.player); setCurrentWorld(s.world); setCurrentScene(s.scene);
+          setSceneHistory(s.sceneHistory ?? []); setNewsFeed(s.newsFeed ?? []);
+          setScreen("game");
+        }
+      }
+    } catch { /* ignore */ }
   }, []);
-}
 
-// ─── SHARED UI ────────────────────────────────────────────────────────────────
-function GoldButton({ children, onClick, disabled, style }:{ children:React.ReactNode; onClick?:()=>void; disabled?:boolean; style?:CSSProperties }) {
+  const saveGame = useCallback(() => {
+    try {
+      localStorage.setItem("revenio_save_v2", JSON.stringify({
+        player: playerRef.current, world: worldRef.current,
+        scene: currentScene, sceneHistory, newsFeed,
+      }));
+      pushNotif("Game Saved");
+    } catch { /* ignore */ }
+  }, [currentScene, sceneHistory, newsFeed]);
+
+  const pushNotif = (text: string, bad = false) => {
+    setNotifications(n => [...n, { text, bad }]);
+    setTimeout(() => setNotifications(n => n.slice(1)), 4000);
+  };
+
+  // ─── AI call ──────────────────────────────────────────────────────────────
+  const requestScene = useCallback(async (userMessage: string, basePlayer: PlayerState, world: World) => {
+    setIsLoading(true); setError(null);
+    try {
+      const res = await callScene({
+        data: { systemPrompt: buildSystemPrompt(basePlayer, world), userMessage },
+      });
+      const scene = res.scene as Scene;
+      if (!scene || !scene.sceneTitle) throw new Error("Empty scene from AI");
+      applyScene(scene, basePlayer);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "The rift trembles…";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [callScene]);
+
+  const applyScene = (scene: Scene, basePlayer: PlayerState) => {
+    const next: PlayerState = { ...basePlayer, skills: { ...basePlayer.skills }, relationships: [...basePlayer.relationships], quests: [...basePlayer.quests], inventory: [...basePlayer.inventory], achievements: [...basePlayer.achievements], majorDecisions: [...basePlayer.majorDecisions] };
+
+    // stats
+    if (scene.statChanges) {
+      for (const [k, v] of Object.entries(scene.statChanges)) {
+        next.skills[k] = Math.max(0, (next.skills[k] ?? 0) + Number(v));
+        pushNotif(`${k} ${v >= 0 ? "+" : ""}${v}`, v < 0);
+      }
+    }
+    // xp & level
+    if (scene.xpGained) {
+      next.xp += scene.xpGained;
+      while (next.xp >= xpForLevel(next.level)) {
+        next.xp -= xpForLevel(next.level); next.level += 1;
+        pushNotif(`LEVEL UP → ${next.level}`);
+      }
+    }
+    if (scene.reputationChange) {
+      next.reputation += scene.reputationChange;
+      pushNotif(`Reputation ${scene.reputationChange >= 0 ? "+" : ""}${scene.reputationChange}`, scene.reputationChange < 0);
+    }
+    // relationships
+    if (scene.relationshipChanges) {
+      for (const rc of scene.relationshipChanges) {
+        const i = next.relationships.findIndex(r => r.name.toLowerCase() === rc.name.toLowerCase());
+        if (i >= 0) next.relationships[i] = { ...next.relationships[i], val: next.relationships[i].val + rc.change, dir: rc.dir ?? next.relationships[i].dir };
+        else next.relationships.push({ name: rc.name, val: rc.change, dir: rc.dir ?? "neutral" });
+      }
+    }
+    // inventory
+    if (scene.inventoryUnlocks) {
+      for (const it of scene.inventoryUnlocks) {
+        if (!next.inventory.includes(it) && next.inventory.length < 8) {
+          next.inventory.push(it); pushNotif(`Acquired: ${it}`);
+        }
+      }
+    }
+    // quests
+    if (scene.newQuests) for (const q of scene.newQuests) if (!next.quests.find(x => x.name === q)) { next.quests.push({ name: q, done: false }); pushNotif(`New Quest: ${q}`); }
+    if (scene.questUpdates) for (const u of scene.questUpdates) {
+      const q = next.quests.find(x => x.name === u.name);
+      if (q && u.done) { q.done = true; pushNotif(`Quest Done: ${q.name}`); }
+    }
+    if (scene.newAchievements) for (const a of scene.newAchievements) if (!next.achievements.includes(a)) { next.achievements.push(a); pushNotif(`🏆 ${a}`); }
+    if (scene.newsUpdates) setNewsFeed(f => [...scene.newsUpdates!, ...f].slice(0, 12));
+
+    next.storyProgress = basePlayer.storyProgress + 1;
+
+    setPlayer(next);
+    setCurrentScene(scene);
+    setSceneHistory(h => [...h, scene.sceneTitle]);
+  };
+
+  // ─── Handlers ────────────────────────────────────────────────────────────
+  const startWorld = (world: World) => {
+    const fresh = { ...player, storyProgress: 0 };
+    setPlayer(fresh); setCurrentWorld(world); setSceneHistory([]); setNewsFeed([]);
+    setCurrentScene(null); setScreen("game");
+    requestScene(getOpeningPrompt(fresh, world), fresh, world);
+  };
+
+  const handleChoice = (choice: Choice) => {
+    if (!currentWorld || !currentScene) return;
+    if (choice.type === "custom") return; // handled separately
+    const decision = `${currentScene.sceneTitle}: ${choice.text}`;
+    const updated = { ...player, majorDecisions: [...player.majorDecisions, decision] };
+    setPlayer(updated);
+
+    // act transition check (we just finished scene at end of act)
+    const justFinished = updated.storyProgress - 1; // storyProgress was incremented after last scene
+    const finishedAct = STORY_ACTS.find(a => justFinished === a.range[1]);
+    if (finishedAct && finishedAct.id < 5) {
+      setPendingAct(STORY_ACTS[finishedAct.id]); // next act
+      // store the choice to send after transition
+      void choice;
+      const userMsg = `The player chose: "${choice.text}" (${choice.type}, risk ${choice.risk}). Continue the story into Act ${finishedAct.id + 1}.`;
+      pendingMsgRef.current = userMsg;
+      return;
+    }
+
+    const userMsg = `The player chose: "${choice.text}" (${choice.type}, risk ${choice.risk}). Continue the story.`;
+    requestScene(userMsg, updated, currentWorld);
+  };
+
+  const pendingMsgRef = useRef<string | null>(null);
+  const continueAfterAct = () => {
+    if (!currentWorld || !pendingMsgRef.current) return;
+    const msg = pendingMsgRef.current;
+    pendingMsgRef.current = null;
+    setPendingAct(null);
+    requestScene(msg, playerRef.current, currentWorld);
+  };
+
+  const submitCustom = () => {
+    if (!customText.trim() || !currentWorld || !currentScene) return;
+    const decision = `${currentScene.sceneTitle}: ${customText}`;
+    const updated = { ...player, majorDecisions: [...player.majorDecisions, decision] };
+    setPlayer(updated);
+    const userMsg = `The player writes their own path: "${customText}". Continue the story.`;
+    setCustomText("");
+
+    const justFinished = updated.storyProgress - 1;
+    const finishedAct = STORY_ACTS.find(a => justFinished === a.range[1]);
+    if (finishedAct && finishedAct.id < 5) {
+      setPendingAct(STORY_ACTS[finishedAct.id]);
+      pendingMsgRef.current = userMsg;
+      return;
+    }
+    requestScene(userMsg, updated, currentWorld);
+  };
+
+  const retryLast = () => {
+    if (!currentWorld) return;
+    const msg = pendingMsgRef.current ?? "Continue the story from where we left off.";
+    requestScene(msg, playerRef.current, currentWorld);
+  };
+
+  const resetGame = () => {
+    localStorage.removeItem("revenio_save_v2");
+    setPlayer(emptyPlayer()); setCurrentWorld(null); setCurrentScene(null);
+    setSceneHistory([]); setNewsFeed([]); setNotifications([]); setError(null);
+    pendingMsgRef.current = null; setPendingAct(null); setCreationStep(0);
+  };
+
+  // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <button onClick={onClick} disabled={disabled} style={{
-      background: disabled ? C.surface2 : `linear-gradient(135deg, ${C.gold2}, ${C.gold} 50%, ${C.gold3})`,
-      color: disabled ? C.muted : "#0A0A0C",
-      border: "none", padding: "14px 28px", cursor: disabled?"not-allowed":"pointer",
-      fontFamily: FONT_BODY, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", fontSize: 13,
-      clipPath: CLIP, transition: "transform .15s, filter .15s", boxShadow: disabled ? "none" : `0 6px 20px ${C.gold}40`,
-      ...style,
-    }}
-      onMouseEnter={e => !disabled && (e.currentTarget.style.filter = "brightness(1.1)")}
-      onMouseLeave={e => !disabled && (e.currentTarget.style.filter = "brightness(1)")}
-    >{children}</button>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" />
+      <div className="rv-root">
+        {screen === "splash" && <SplashView onStart={() => { resetGame(); setScreen("creation"); }} />}
+        {screen === "creation" && (
+          <CreationView
+            player={player} setPlayer={setPlayer}
+            step={creationStep} setStep={setCreationStep}
+            onDone={() => setScreen("worldselect")}
+            onBack={() => setScreen("splash")}
+          />
+        )}
+        {screen === "worldselect" && <WorldSelectView onPick={startWorld} onBack={() => setScreen("creation")} />}
+        {screen === "game" && currentWorld && (
+          <GameView
+            player={player} world={currentWorld} scene={currentScene}
+            sceneHistory={sceneHistory} newsFeed={newsFeed}
+            notifications={notifications} isLoading={isLoading} error={error}
+            historyOpen={historyOpen} setHistoryOpen={setHistoryOpen}
+            sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}
+            pendingAct={pendingAct} continueAfterAct={continueAfterAct}
+            onChoice={handleChoice} customText={customText} setCustomText={setCustomText}
+            submitCustom={submitCustom} onSave={saveGame} onRetry={retryLast}
+            onSeeLegacy={() => setScreen("legacy")}
+          />
+        )}
+        {screen === "legacy" && currentWorld && (
+          <LegacyView player={player} world={currentWorld} scene={currentScene}
+            sceneHistory={sceneHistory}
+            onNewWorld={() => { setScreen("worldselect"); setPlayer(p => ({ ...emptyPlayer(), name: p.name, age: p.age, traits: p.traits, goal: p.goal })); setCurrentWorld(null); setCurrentScene(null); setSceneHistory([]); setNewsFeed([]); }}
+            onNewChar={() => { resetGame(); setScreen("creation"); }}
+          />
+        )}
+      </div>
+    </>
   );
 }
-function GhostButton({ children, onClick, style }:{ children:React.ReactNode; onClick?:()=>void; style?:CSSProperties }) {
-  return (
-    <button onClick={onClick} style={{
-      background: "transparent", color: C.gold, border: `1px solid ${C.gold}`,
-      padding: "12px 24px", cursor: "pointer", fontFamily: FONT_BODY, fontWeight: 600,
-      letterSpacing: "0.18em", textTransform: "uppercase", fontSize: 12, clipPath: CLIP,
-      transition: "all .15s", ...style,
-    }}
-      onMouseEnter={e => { e.currentTarget.style.background = `${C.gold}15`; }}
-      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-    >{children}</button>
-  );
-}
 
-function StatBar({ label, value, max=100 }:{ label:string; value:number; max?:number }) {
-  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+// ─── SUBVIEWS ───────────────────────────────────────────────────────────────
+function SplashView({ onStart }: { onStart: () => void }) {
   return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{ display:"flex", justifyContent:"space-between", marginBottom: 4 }}>
-        <span style={{ fontFamily: FONT_BODY, fontSize: 11, color: C.muted, letterSpacing: ".1em", textTransform: "uppercase" }}>{label}</span>
-        <span style={{ fontFamily: FONT_NUM, fontSize: 11, color: C.gold, fontWeight: 600 }}>{value}</span>
-      </div>
-      <div style={{ height: 6, background: C.bg2, borderRadius: 3, overflow:"hidden", border:`1px solid ${C.border}` }}>
-        <div style={{ height:"100%", width:`${pct}%`, background: `linear-gradient(90deg, ${C.gold3}, ${C.gold})`, transition:"width .5s" }} />
-      </div>
+    <div className="splash">
+      <div className="splash-logo">REVENIO</div>
+      <div className="splash-tag">Explore the Life You Never Lived</div>
+      <button className="btn-gold" onClick={onStart} style={{ marginTop: 32 }}>BEGIN YOUR LEGEND</button>
     </div>
   );
 }
 
-// ─── SPLASH ───────────────────────────────────────────────────────────────────
-function Splash({ onStart, onContinue, hasSave }:{ onStart:()=>void; onContinue:()=>void; hasSave:boolean }) {
-  const bgSvg = `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M30 0 L60 30 L30 60 L0 30 Z" fill="none" stroke="${C.gold}" stroke-opacity="0.06" stroke-width="1"/></svg>`)}`;
-  return (
-    <div style={{
-      minHeight:"100vh", boxSizing:"border-box", background: `${C.bg} url("${bgSvg}")`,
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-      padding:"40px 20px", color: C.text, fontFamily: FONT_BODY, textAlign:"center", overflowY:"auto",
-    }}>
-      <div style={{ fontFamily: FONT_HEAD, fontSize: "clamp(56px, 12vw, 140px)", fontWeight: 700,
-        background:`linear-gradient(135deg, ${C.gold2}, ${C.gold}, ${C.gold3})`, WebkitBackgroundClip:"text",
-        WebkitTextFillColor:"transparent", letterSpacing:"0.2em", lineHeight:1, marginBottom: 8 }}>REVENIO</div>
-      <div style={{ width: 120, height: 1, background: C.gold, opacity:.6, margin:"20px 0" }} />
-      <div style={{ fontStyle:"italic", color: C.gold2, fontSize:"clamp(16px, 2.5vw, 22px)", letterSpacing:"0.15em", marginBottom: 60 }}>
-        Explore the Life You Never Lived
-      </div>
-      <div style={{ display:"flex", flexDirection:"column", gap: 18, alignItems:"center" }}>
-        <GoldButton onClick={onStart} style={{ padding:"18px 48px", fontSize: 14 }}>Begin Your Legend</GoldButton>
-        {hasSave && <GhostButton onClick={onContinue}>Continue Journey</GhostButton>}
-      </div>
-    </div>
-  );
-}
-
-// ─── CHARACTER CREATION ───────────────────────────────────────────────────────
-function CharacterCreation({ onDone, onBack }:{ onDone:(p:{name:string;age:number;traits:string[];goal:string})=>void; onBack:()=>void }) {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState(18);
-  const [traits, setTraits] = useState<string[]>([]);
-  const [goal, setGoal] = useState("");
-  const ready = name.trim().length>0 && traits.length===3 && goal;
-  const toggleTrait = (t:string) => setTraits(p => p.includes(t) ? p.filter(x=>x!==t) : p.length<3 ? [...p, t] : p);
-  return (
-    <div style={{ minHeight:"100vh", boxSizing:"border-box", background: C.bg, color: C.text, fontFamily: FONT_BODY, padding:"40px 20px", overflowY:"auto" }}>
-      <div style={{ maxWidth: 880, margin:"0 auto" }}>
-        <div style={{ textAlign:"center", marginBottom: 40 }}>
-          <div style={{ fontFamily: FONT_HEAD, fontSize: 40, color: C.gold, letterSpacing:".15em" }}>FORGE YOUR CHARACTER</div>
-          <div style={{ color: C.muted, marginTop: 8, letterSpacing:".1em" }}>Choose who you become.</div>
-        </div>
-
-        <Section title="IDENTITY">
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 140px", gap: 14 }}>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inputStyle} />
-            <input type="number" min={10} max={99} value={age} onChange={e=>setAge(+e.target.value || 18)} style={inputStyle} />
-          </div>
-        </Section>
-
-        <Section title={`PICK 3 TRAITS  ·  ${traits.length}/3`}>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap: 10 }}>
-            {TRAITS.map(t => {
-              const on = traits.includes(t);
-              return (
-                <button key={t} onClick={()=>toggleTrait(t)} style={{
-                  padding:"12px", background: on ? `${C.gold}20` : C.surface, color: on ? C.gold : C.text,
-                  border:`1px solid ${on ? C.gold : C.border}`, cursor:"pointer", fontFamily: FONT_BODY, fontSize: 13,
-                  letterSpacing:".1em", clipPath: CLIP,
-                }}>{t}</button>
-              );
-            })}
-          </div>
-        </Section>
-
-        <Section title="LONG-TERM GOAL">
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-            {GOALS.map(g => {
-              const on = goal===g;
-              return (
-                <button key={g} onClick={()=>setGoal(g)} style={{
-                  padding:"14px", background: on ? `${C.gold}20` : C.surface, color: on ? C.gold : C.text,
-                  border:`1px solid ${on ? C.gold : C.border}`, cursor:"pointer", fontFamily: FONT_BODY, fontSize: 13,
-                  letterSpacing:".08em", clipPath: CLIP,
-                }}>{g}</button>
-              );
-            })}
-          </div>
-        </Section>
-
-        <div style={{ display:"flex", justifyContent:"space-between", gap: 16, marginTop: 30 }}>
-          <GhostButton onClick={onBack}>← Back</GhostButton>
-          <GoldButton onClick={()=> ready && onDone({ name:name.trim(), age, traits, goal })} disabled={!ready}>Choose Your World →</GoldButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-const inputStyle: CSSProperties = { background: C.surface, border:`1px solid ${C.border}`, color: C.text, padding:"14px 16px", fontFamily: FONT_BODY, fontSize: 16, outline:"none", clipPath: CLIP };
-function Section({ title, children }:{ title:string; children:React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 30 }}>
-      <div style={{ fontFamily: FONT_HEAD, fontSize: 14, color: C.gold, letterSpacing:".25em", marginBottom: 14 }}>{title}</div>
-      {children}
-    </div>
-  );
-}
-
-// ─── WORLD SELECT ─────────────────────────────────────────────────────────────
-function WorldSelect({ onPick, onBack }:{ onPick:(w:WorldDef)=>void; onBack:()=>void }) {
-  return (
-    <div style={{ minHeight:"100vh", boxSizing:"border-box", background: C.bg, color: C.text, fontFamily: FONT_BODY, padding:"40px 20px", overflowY:"auto" }}>
-      <div style={{ maxWidth: 1280, margin:"0 auto" }}>
-        <div style={{ textAlign:"center", marginBottom: 40 }}>
-          <div style={{ fontFamily: FONT_HEAD, fontSize: 42, color: C.gold, letterSpacing:".15em" }}>CHOOSE YOUR WORLD</div>
-          <div style={{ color: C.muted, marginTop: 10, letterSpacing:".1em" }}>Eight realities. One legend.</div>
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
-          {WORLDS.map(w => (
-            <button key={w.id} onClick={()=>onPick(w)} style={{
-              textAlign:"left", background: C.surface, border:`1px solid ${C.border}`,
-              padding: 20, cursor:"pointer", color: C.text, fontFamily: FONT_BODY, transition:"all .2s",
-              display:"flex", flexDirection:"column", gap: 8, minHeight: 240,
-            }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.surface2; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.surface; }}
-            >
-              <div style={{ fontSize: 36 }}>{w.icon}</div>
-              <div style={{ fontFamily: FONT_HEAD, fontSize: 18, color: C.gold, letterSpacing:".08em" }}>{w.name}</div>
-              <div style={{ fontSize: 10, color: C.gold3, letterSpacing:".25em" }}>{w.theme}</div>
-              <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.5, marginTop: 6 }}>{w.desc}</div>
-              <div style={{ marginTop:"auto", fontSize: 11, color: C.red, letterSpacing:".1em" }}>Villain: {w.villain}</div>
-            </button>
-          ))}
-        </div>
-        <div style={{ marginTop: 30, textAlign:"center" }}>
-          <GhostButton onClick={onBack}>← Back</GhostButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
-function notifColor(k: Notif['kind']) {
-  switch (k) {
-    case 'stat+': return { bg: `${C.green}20`, fg: C.green };
-    case 'stat-': return { bg: `${C.red}20`, fg: C.red };
-    case 'xp': return { bg: `${C.gold}25`, fg: C.gold };
-    case 'level': return { bg: `${C.gold}40`, fg: C.gold2 };
-    case 'item': return { bg: `${C.amber}20`, fg: C.amber };
-    case 'quest': return { bg: `${C.purple}25`, fg: C.purple };
-    case 'ach': return { bg: `${C.blue}25`, fg: C.blue };
-    case 'rel+': return { bg: `${C.green}20`, fg: C.green };
-    case 'rel-': return { bg: `${C.red}20`, fg: C.red };
-  }
-}
-
-// ─── GAME SCREEN ──────────────────────────────────────────────────────────────
-function GameScreen({
-  player, setPlayer, scene, setScene, history, setHistory,
-  loading, callAI, error, onRetry, onSave, onEndChapter, onMenu,
-}: {
-  player: PlayerState; setPlayer: (p:PlayerState)=>void;
-  scene: Scene | null; setScene: (s:Scene|null)=>void;
-  history: Msg[]; setHistory: (m:Msg[])=>void;
-  loading: boolean;
-  callAI: (userMsg: string) => Promise<void>;
-  error: string | null; onRetry: ()=>void;
-  onSave: ()=>void; onEndChapter: ()=>void; onMenu: ()=>void;
+function CreationView({ player, setPlayer, step, setStep, onDone, onBack }: {
+  player: PlayerState; setPlayer: (p: PlayerState | ((p: PlayerState) => PlayerState)) => void;
+  step: number; setStep: (n: number) => void; onDone: () => void; onBack: () => void;
 }) {
-  const [notifs, setNotifs] = useState<Notif[]>([]);
-  const [popup, setPopup] = useState<string | null>(null);
-  const [sideOpen, setSideOpen] = useState<"none"|"left"|"right">("none");
-  const world = WORLDS.find(w => w.id === player.currentWorld)!;
-
-  const showPopup = (txt: string) => {
-    setPopup(txt);
-    setTimeout(() => setPopup(null), 3000);
-  };
-
-  // After scene applied, derive notifications
-  const lastSceneRef = useRef<Scene | null>(null);
-  useEffect(() => {
-    if (!scene || scene === lastSceneRef.current) return;
-    lastSceneRef.current = scene;
-    const ns: Notif[] = [];
-    let nid = Date.now();
-    if (scene.statChanges) for (const [k,v] of Object.entries(scene.statChanges)) {
-      ns.push({ id: nid++, kind: v>=0?'stat+':'stat-', text: `${v>=0?'+':''}${v} ${k}` });
-    }
-    if (scene.xpGained) ns.push({ id: nid++, kind:'xp', text:`+${scene.xpGained} XP` });
-    if (scene.inventoryUnlocks) for (const it of scene.inventoryUnlocks) ns.push({ id: nid++, kind:'item', text:`Item: ${it}` });
-    if (scene.questUpdates) for (const q of scene.questUpdates) ns.push({ id: nid++, kind:'quest', text:`Quest: ${q.name}` });
-    if (scene.newQuests) for (const q of scene.newQuests) ns.push({ id: nid++, kind:'quest', text:`New Quest: ${q.name}` });
-    if (scene.newAchievements) for (const a of scene.newAchievements) ns.push({ id: nid++, kind:'ach', text:`🏆 ${a}` });
-    if (scene.relationshipChanges) for (const r of scene.relationshipChanges) ns.push({
-      id: nid++, kind: r.change>=0?'rel+':'rel-', text:`${r.name} ${r.change>=0?'▲':'▼'}`,
+  const toggleTrait = (t: string) => {
+    setPlayer(p => {
+      const has = p.traits.includes(t);
+      if (has) return { ...p, traits: p.traits.filter(x => x !== t) };
+      if (p.traits.length >= 3) return p;
+      return { ...p, traits: [...p.traits, t] };
     });
-    setNotifs(ns);
-  }, [scene]);
-
-  const handleChoice = async (c: Choice) => {
-    if (loading) return;
-    let userMsg = `Player chose: ${c.text}. Create the consequence scene.`;
-    if (c.type === "custom") {
-      const ans = window.prompt("What do you do?");
-      if (!ans || !ans.trim()) return;
-      userMsg = `Player chose to: ${ans.trim()}. Create the consequence scene.`;
-      setPlayer({ ...player, majorDecisions: [...player.majorDecisions, ans.trim()] });
-    } else {
-      setPlayer({ ...player, majorDecisions: [...player.majorDecisions, c.text] });
-    }
-    await callAI(userMsg);
   };
+  return (
+    <div className="create-wrap">
+      {step === 0 && (
+        <>
+          <div className="create-step">STEP 1 OF 3</div>
+          <div className="create-title">Who are you?</div>
+          <input className="create-input" placeholder="Your name" value={player.name} onChange={e => setPlayer(p => ({ ...p, name: e.target.value }))} maxLength={40} />
+          <input className="create-input" type="number" placeholder="Age" value={player.age} onChange={e => setPlayer(p => ({ ...p, age: Number(e.target.value) || 18 }))} min={10} max={100} />
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="btn-ghost" onClick={onBack}>BACK</button>
+            <button className="btn-gold" onClick={() => setStep(1)} disabled={!player.name.trim() || player.age < 10}>NEXT</button>
+          </div>
+        </>
+      )}
+      {step === 1 && (
+        <>
+          <div className="create-step">STEP 2 OF 3</div>
+          <div className="create-title">Choose 3 traits</div>
+          <div className="chip-grid">
+            {TRAITS.map(t => <div key={t} className={`chip ${player.traits.includes(t) ? "on" : ""}`} onClick={() => toggleTrait(t)}>{t}</div>)}
+          </div>
+          <div style={{ color: "var(--muted)", fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>{player.traits.length}/3 SELECTED</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn-ghost" onClick={() => setStep(0)}>BACK</button>
+            <button className="btn-gold" onClick={() => setStep(2)} disabled={player.traits.length !== 3}>NEXT</button>
+          </div>
+        </>
+      )}
+      {step === 2 && (
+        <>
+          <div className="create-step">STEP 3 OF 3</div>
+          <div className="create-title">Your life goal</div>
+          <div className="chip-grid">
+            {GOALS.map(g => <div key={g} className={`chip ${player.goal === g ? "on" : ""}`} onClick={() => setPlayer(p => ({ ...p, goal: g }))}>{g}</div>)}
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="btn-ghost" onClick={() => setStep(1)}>BACK</button>
+            <button className="btn-gold" onClick={onDone} disabled={!player.goal}>CHOOSE WORLD</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
-  const handleTravel = async (loc: string) => {
-    if (loading || loc === player.currentLocation) return;
-    setPlayer({ ...player, currentLocation: loc });
-    await callAI(`Player travels to ${loc}. Create a short scene or event there.`);
-  };
+function WorldSelectView({ onPick, onBack }: { onPick: (w: World) => void; onBack: () => void }) {
+  return (
+    <div>
+      <div style={{ textAlign: "center", padding: "32px 20px 8px" }}>
+        <div className="create-step">CHOOSE YOUR WORLD</div>
+        <div className="create-title" style={{ marginBottom: 4 }}>Eight realities. One legend.</div>
+      </div>
+      <div className="world-grid">
+        {WORLDS.map(w => (
+          <div key={w.id} className="world-card" onClick={() => onPick(w)}>
+            <div className="world-icon">{w.icon}</div>
+            <div className="world-name">{w.name}</div>
+            <div className="world-tag">{w.tag}</div>
+            <div className="world-theme">{w.theme}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign: "center", padding: 20 }}>
+        <button className="btn-ghost" onClick={onBack}>BACK</button>
+      </div>
+    </div>
+  );
+}
 
-  // Track level ups
-  const prevLevel = useRef(player.level);
-  useEffect(() => {
-    if (player.level > prevLevel.current) {
-      showPopup(`LEVEL UP → ${player.level}`);
-      setNotifs(n => [...n, { id: Date.now(), kind:'level', text:`LEVEL UP → ${player.level}` }]);
-    }
-    prevLevel.current = player.level;
-  }, [player.level]);
-
-  // Track new achievements popup
-  const prevAch = useRef(player.achievements.length);
-  useEffect(() => {
-    if (player.achievements.length > prevAch.current) {
-      const latest = player.achievements[player.achievements.length-1];
-      showPopup(`🏆 ${latest}`);
-    }
-    prevAch.current = player.achievements.length;
-  }, [player.achievements]);
-
-  const xpPct = Math.min(100, (player.xp / player.xpNext) * 100);
+function GameView(props: {
+  player: PlayerState; world: World; scene: Scene | null;
+  sceneHistory: string[]; newsFeed: string[];
+  notifications: { text: string; bad?: boolean }[]; isLoading: boolean; error: string | null;
+  historyOpen: boolean; setHistoryOpen: (f: (b: boolean) => boolean) => void;
+  sidebarOpen: "left" | "right" | null; setSidebarOpen: (s: "left" | "right" | null) => void;
+  pendingAct: Act | null; continueAfterAct: () => void;
+  onChoice: (c: Choice) => void; customText: string; setCustomText: (s: string) => void;
+  submitCustom: () => void; onSave: () => void; onRetry: () => void;
+  onSeeLegacy: () => void;
+}) {
+  const { player, world, scene, sceneHistory, newsFeed, notifications, isLoading, error, historyOpen, setHistoryOpen, sidebarOpen, setSidebarOpen, pendingAct, continueAfterAct, onChoice, customText, setCustomText, submitCustom, onSave, onRetry, onSeeLegacy } = props;
+  const act = getCurrentAct(player.storyProgress);
+  const sceneInAct = Math.max(1, player.storyProgress - act.range[0] + 1);
+  const totalInAct = act.range[1] - act.range[0] + 1;
+  const actPct = Math.min(100, (sceneInAct / totalInAct) * 100);
 
   return (
-    <div style={{ minHeight:"100vh", boxSizing:"border-box", background: C.bg, color: C.text, fontFamily: FONT_BODY, display:"flex", flexDirection:"column" }}>
-      {/* TOPBAR */}
-      <div style={{
-        position:"sticky", top: 0, zIndex: 50, background: `${C.bg2}f5`, backdropFilter:"blur(10px)",
-        borderBottom: `1px solid ${C.border}`, padding:"10px 16px", display:"flex", alignItems:"center", gap: 14, flexWrap:"wrap"
-      }}>
-        <div style={{ fontFamily: FONT_HEAD, fontSize: 20, color: C.gold, letterSpacing:".2em", fontWeight: 700 }}>REVENIO</div>
-        <div style={{ flex: 1, display:"flex", alignItems:"center", gap: 10, justifyContent:"center", minWidth: 200 }}>
-          <span style={{ fontFamily: FONT_BODY, fontSize: 14, color: C.text, fontWeight: 600 }}>{player.name}</span>
-          <span style={{ background: C.gold, color: C.bg, padding:"2px 8px", fontFamily: FONT_NUM, fontSize: 11, fontWeight: 700, clipPath: CLIP }}>LV {player.level}</span>
-          <div style={{ width: 160, height: 6, background: C.bg2, border:`1px solid ${C.border}`, borderRadius: 3, overflow:"hidden" }}>
-            <div style={{ width:`${xpPct}%`, height:"100%", background: `linear-gradient(90deg, ${C.gold3}, ${C.gold2})`, transition:"width .4s" }} />
-          </div>
-          <span style={{ fontFamily: FONT_NUM, fontSize: 11, color: C.muted }}>{player.xp}/{player.xpNext}</span>
+    <div>
+      <div className="topbar">
+        <div className="tb-brand">{world.icon} {world.name.toUpperCase()}</div>
+        <div className="tb-stats">
+          <span>LVL<b>{player.level}</b></span>
+          <span>XP<b>{player.xp}/{xpForLevel(player.level)}</b></span>
+          <span>REP<b>{player.reputation}</b></span>
+          <span>SCENE<b>{player.storyProgress}/24</b></span>
+          <button className="btn-ghost" style={{ padding: "6px 12px", fontSize: 11 }} onClick={onSave}>SAVE</button>
         </div>
-        <button onClick={()=>setSideOpen(o => o==="left"?"none":"left")} style={topBtn}>☰ Stats</button>
-        <button onClick={()=>setSideOpen(o => o==="right"?"none":"right")} style={topBtn}>Info ☰</button>
-        <button onClick={onSave} style={topBtn}>Save</button>
-        <button onClick={onMenu} style={topBtn}>Menu</button>
       </div>
 
-      {/* BODY */}
-      <div style={{ display:"flex", flex: 1, minHeight: 0 }}>
-        {/* LEFT */}
-        <aside style={leftStyle(sideOpen==="left")}>
-          <Pane title="STATS">
-            {Object.entries(player.skills).map(([k,v]) => <StatBar key={k} label={k} value={v} max={Math.max(100, v)} />)}
-            <StatBar label="Reputation" value={player.reputation} max={Math.max(100, player.reputation)} />
-          </Pane>
-          <Pane title="QUESTS">
-            {player.quests.filter(q=>!q.done).slice(0,5).map((q,i) => (
-              <div key={i} style={{ marginBottom: 10, padding: 8, background: C.bg2, borderLeft:`2px solid ${C.gold}` }}>
-                <div style={{ fontSize: 12, color: C.gold, fontWeight: 600 }}>{q.name}</div>
-                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{q.desc}</div>
-              </div>
-            ))}
-            {player.quests.filter(q=>!q.done).length===0 && <div style={{ fontSize: 12, color: C.muted }}>No active quests.</div>}
-          </Pane>
-          <Pane title="LOCATIONS">
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap: 6 }}>
-              {world.locations.map(loc => {
-                const here = loc === player.currentLocation;
-                return (
-                  <button key={loc} onClick={()=>handleTravel(loc)} disabled={loading} style={{
-                    padding:"8px 6px", fontSize: 11, fontFamily: FONT_BODY, cursor: loading?"wait":"pointer",
-                    background: here ? `${C.gold}25` : C.bg2, color: here ? C.gold : C.text,
-                    border:`1px solid ${here ? C.gold : C.border}`, letterSpacing:".05em",
-                  }}>{loc}</button>
-                );
-              })}
-            </div>
-          </Pane>
-        </aside>
+      <div className="rv-shell">
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(sidebarOpen === "left" ? null : "left")}>{sidebarOpen === "left" ? "✕ STORY" : "☰ STORY"}</button>
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(sidebarOpen === "right" ? null : "right")}>{sidebarOpen === "right" ? "✕ ALLIES" : "☰ ALLIES"}</button>
+        </div>
 
-        {/* MAIN */}
-        <main style={{ flex: 1, padding: 20, overflowY:"auto", minWidth: 0 }}>
-          {/* notifications */}
-          {notifs.length > 0 && (
-            <div style={{ display:"flex", flexWrap:"wrap", gap: 6, marginBottom: 14 }}>
-              {notifs.map(n => {
-                const col = notifColor(n.kind);
-                return (
-                  <span key={n.id} style={{
-                    background: col.bg, color: col.fg, padding:"5px 12px", fontSize: 11, fontFamily: FONT_BODY,
-                    letterSpacing:".1em", borderRadius: 999, fontWeight: 600,
-                    border: `1px solid ${col.fg}40`,
-                  }}>{n.text}</span>
-                );
-              })}
+        <div className="game-grid">
+          {/* LEFT */}
+          <div className={`side-col ${sidebarOpen === "left" ? "open" : ""}`}>
+            <div className="side-section act-tracker">
+              <div className="side-label">CURRENT ACT</div>
+              <div className="act-name">ACT {act.id} · {act.name}</div>
+              <div className="act-desc">{act.desc}</div>
+              <div className="act-progress-bar"><div className="act-progress-fill" style={{ width: `${actPct}%` }} /></div>
+              <div className="act-counter">SCENE {sceneInAct} OF {totalInAct}</div>
             </div>
-          )}
 
-          {/* scene card */}
-          <div style={{ background: C.surface, border:`1px solid ${C.border}`, padding: 24, marginBottom: 18 }}>
-            <div style={{ fontSize: 10, color: C.gold3, letterSpacing:".3em", marginBottom: 8 }}>
-              {world.icon} {world.name.toUpperCase()} · {player.currentLocation.toUpperCase()}
+            <div className="side-section">
+              <div className="side-label">STATS</div>
+              {Object.entries(player.skills).map(([k, v]) => (
+                <div key={k} className="stat-row">
+                  <div className="stat-head"><span className="stat-name">{k}</span><span className="stat-val">{v}</span></div>
+                  <div className="stat-bar"><div className="stat-fill" style={{ width: `${Math.min(100, v * 4)}%` }} /></div>
+                </div>
+              ))}
             </div>
-            {loading && !scene ? (
-              <LoadingState />
-            ) : error && !scene ? (
-              <div style={{ textAlign:"center", padding: 30 }}>
-                <h2 style={{ fontFamily: FONT_HEAD, fontSize: 24, color: C.red, margin: 0, marginBottom: 10, letterSpacing:".15em" }}>THE RIFT TREMBLES</h2>
-                <p style={{ color: C.muted, marginBottom: 20, lineHeight: 1.6 }}>A force disrupts the simulation. The story flickers…</p>
-                <GoldButton onClick={onRetry}>Retry</GoldButton>
+
+            <div className="side-section">
+              <div className="side-label" onClick={() => setHistoryOpen(h => !h)} style={{ cursor: "pointer" }}>
+                STORY SO FAR {historyOpen ? "▲" : "▼"}
               </div>
-            ) : scene ? (
-              <>
-                <h2 style={{ fontFamily: FONT_HEAD, fontSize: 28, color: C.gold, margin: 0, marginBottom: 14, letterSpacing:".05em" }}>{scene.sceneTitle}</h2>
-                <p style={{ fontSize: 16, lineHeight: 1.7, color: C.text, margin: 0 }}>{scene.sceneText}</p>
-                {error && (
-                  <div style={{ marginTop: 14, padding: 10, background: `${C.red}15`, border:`1px solid ${C.red}40`, color: C.red, fontSize: 12, display:"flex", justifyContent:"space-between", alignItems:"center", gap: 12 }}>
-                    <span>Last action failed. {error.slice(0, 120)}</span>
-                    <GhostButton onClick={onRetry} style={{ padding:"6px 14px", fontSize: 10 }}>Retry</GhostButton>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div style={{ color: C.muted }}>No scene loaded.</div>
+              {historyOpen && (
+                <div className="history-list">
+                  {sceneHistory.length === 0 && <div className="history-item"><span className="history-dot">·</span><span>Your story begins…</span></div>}
+                  {sceneHistory.slice(-5).reverse().map((title, i) => (
+                    <div key={i} className="history-item"><span className="history-dot">·</span><span>{title}</span></div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {player.quests.filter(q => !q.done).length > 0 && (
+              <div className="side-section">
+                <div className="side-label">QUESTS</div>
+                {player.quests.filter(q => !q.done).map((q, i) => (
+                  <div key={i} style={{ fontSize: 12, color: "var(--text)", padding: "4px 0", borderBottom: "1px dashed var(--border)" }}>▸ {q.name}</div>
+                ))}
+              </div>
             )}
           </div>
 
-
-          {/* loading overlay */}
-          {loading && scene && <LoadingState />}
-
-          {/* choices */}
-          {scene && !loading && (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
-              {scene.choices.map(c => (
-                <button key={c.id} onClick={()=>handleChoice(c)} disabled={loading} style={{
-                  textAlign:"left", background: C.surface, border:`1px solid ${C.border2}`, padding: 16,
-                  cursor: loading?"wait":"pointer", color: C.text, fontFamily: FONT_BODY, transition:"all .15s",
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = C.gold; e.currentTarget.style.background = C.surface2; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = C.border2; e.currentTarget.style.background = C.surface; }}
-                >
-                  <div style={{ fontSize: 10, color: C.gold3, letterSpacing:".25em", marginBottom: 6 }}>{c.id} · {c.type.toUpperCase()}</div>
-                  <div style={{ fontSize: 14, color: C.text, marginBottom: 8, lineHeight: 1.4 }}>{c.text}</div>
-                  <div style={{ display:"flex", justifyContent:"space-between", fontSize: 11 }}>
-                    <span style={{ color: C.muted }}>{c.hint}</span>
-                    <span style={{ color: c.risk==='Low'?C.green:c.risk==='High'?C.red:C.amber, letterSpacing:".1em" }}>{c.risk}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* end chapter */}
-          {player.storyProgress >= 15 && (
-            <div style={{ marginTop: 24, textAlign:"center" }}>
-              <GhostButton onClick={onEndChapter}>End This Chapter</GhostButton>
-            </div>
-          )}
-        </main>
-
-        {/* RIGHT */}
-        <aside style={rightStyle(sideOpen==="right")}>
-          <Pane title="RELATIONSHIPS">
-            {player.relationships.map((r,i) => (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap: 8, marginBottom: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius:"50%", background: C.surface2,
-                  display:"flex", alignItems:"center", justifyContent:"center", color: C.gold,
-                  fontFamily: FONT_HEAD, fontSize: 12, border:`1px solid ${C.border2}`, flexShrink: 0 }}>
-                  {r.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, color: C.text, fontWeight: 600, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{r.name}</div>
-                  <div style={{ fontSize: 10, color: C.muted }}>{r.type}</div>
-                  <div style={{ height: 4, background: C.bg2, marginTop: 4, borderRadius: 2, overflow:"hidden" }}>
-                    <div style={{ width: `${Math.max(0,Math.min(100,r.val))}%`, height:"100%",
-                      background: r.dir==='friend'?C.green:r.dir==='rival'?C.red:C.muted }} />
-                  </div>
-                </div>
+          {/* MAIN */}
+          <div>
+            {notifications.length > 0 && (
+              <div className="notif-row">
+                {notifications.map((n, i) => <div key={i} className={`notif ${n.bad ? "bad" : ""}`}>{n.text}</div>)}
               </div>
-            ))}
-          </Pane>
-          <Pane title="INVENTORY">
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(4, 1fr)", gap: 6 }}>
-              {Array.from({length: 8}).map((_,i) => {
-                const it = player.inventory[i];
-                return (
-                  <div key={i} title={it ?? "Empty"} style={{
-                    aspectRatio:"1", background: C.bg2, border:`1px solid ${it?C.gold3:C.border}`,
-                    display:"flex", alignItems:"center", justifyContent:"center", fontSize: 18,
-                  }}>{it ? it.split(" ")[0] : ""}</div>
-                );
-              })}
-            </div>
-          </Pane>
-          <Pane title="NEWS FEED">
-            {player.newsHistory.slice(-5).reverse().map((n,i) => (
-              <div key={i} style={{
-                fontSize: 11, padding: 8, marginBottom: 6, background: C.bg2,
-                borderLeft:`2px solid ${i===0?C.gold:C.border2}`,
-                color: i===0?C.gold2:C.muted, lineHeight: 1.4,
-              }}>{n}</div>
-            ))}
-          </Pane>
-        </aside>
-      </div>
+            )}
 
-      {/* achievement popup */}
-      {popup && (
-        <div style={{
-          position:"fixed", top: 80, right: 20, zIndex: 100, background: `linear-gradient(135deg, ${C.gold2}, ${C.gold3})`,
-          color: C.bg, padding:"14px 22px", fontFamily: FONT_HEAD, letterSpacing:".15em", fontSize: 14,
-          fontWeight: 700, clipPath: CLIP, boxShadow:`0 10px 30px ${C.gold}60`, animation: "slideIn .3s ease-out",
-        }}>{popup}</div>
-      )}
-      <style>{`@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 900px) { .revenio-left, .revenio-right { display: none; } .revenio-left-open, .revenio-right-open { display: block !important; position: fixed; top: 60px; bottom: 0; z-index: 40; } .revenio-left-open { left: 0; } .revenio-right-open { right: 0; } }
-      `}</style>
-    </div>
-  );
-}
+            {error && (
+              <div className="err-banner">
+                <div style={{ fontFamily: "'Cinzel', serif", letterSpacing: 3, marginBottom: 6 }}>THE RIFT TREMBLES</div>
+                <div style={{ fontSize: 13 }}>{error}</div>
+                <button onClick={onRetry}>RETRY</button>
+              </div>
+            )}
 
-const topBtn: CSSProperties = {
-  background: "transparent", color: C.gold, border:`1px solid ${C.border2}`, padding:"6px 12px",
-  fontFamily: FONT_BODY, fontSize: 11, letterSpacing:".15em", cursor:"pointer", textTransform:"uppercase",
-};
-function leftStyle(open: boolean): CSSProperties {
-  return {
-    width: 220, background: C.bg2, borderRight:`1px solid ${C.border}`, padding: 16, overflowY:"auto", flexShrink: 0,
-  } as any;
-}
-function rightStyle(open: boolean): CSSProperties {
-  return {
-    width: 240, background: C.bg2, borderLeft:`1px solid ${C.border}`, padding: 16, overflowY:"auto", flexShrink: 0,
-  } as any;
-}
-function Pane({ title, children }:{ title:string; children:React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <div style={{ fontFamily: FONT_HEAD, fontSize: 11, color: C.gold, letterSpacing:".3em", marginBottom: 10, paddingBottom: 6, borderBottom:`1px solid ${C.border}` }}>{title}</div>
-      {children}
-    </div>
-  );
-}
-function LoadingState() {
-  return (
-    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding: 40, gap: 16 }}>
-      <div style={{
-        width: 44, height: 44, borderRadius:"50%",
-        border: `3px solid ${C.border2}`, borderTopColor: C.gold,
-        animation: "spin 0.9s linear infinite",
-      }} />
-      <div style={{ fontFamily: FONT_HEAD, fontSize: 12, color: C.gold, letterSpacing:".3em" }}>GENERATING YOUR FATE...</div>
-    </div>
-  );
-}
+            {pendingAct ? (
+              <div className="act-transition">
+                <div className="act-transition-label">ACT COMPLETE</div>
+                <div className="act-transition-title">ACT {pendingAct.id} · {pendingAct.name}</div>
+                <div className="act-transition-desc">{pendingAct.desc}</div>
+                <button className="btn-gold" onClick={continueAfterAct}>CONTINUE YOUR LEGEND</button>
+              </div>
+            ) : isLoading && !scene ? (
+              <div className="loader">WEAVING YOUR STORY…</div>
+            ) : scene ? (
+              <div className="scene-card">
+                <div className="scene-title">{scene.sceneTitle}</div>
+                <div className="scene-text">{scene.sceneText}</div>
+                {isLoading && <div className="loader" style={{ padding: 12, fontSize: 12 }}>THE WORLD SHIFTS…</div>}
 
-// ─── LEGACY SCREEN ────────────────────────────────────────────────────────────
-function Legacy({ player, onNewWorld, onNewChar }:{ player:PlayerState; onNewWorld:()=>void; onNewChar:()=>void }) {
-  const topSkill = Object.entries(player.skills).sort((a,b)=>b[1]-a[1])[0];
-  return (
-    <div style={{ minHeight:"100vh", boxSizing:"border-box", background: C.bg, color: C.text, fontFamily: FONT_BODY, padding:"40px 20px", overflowY:"auto" }}>
-      <div style={{ maxWidth: 880, margin:"0 auto", textAlign:"center" }}>
-        <div style={{ fontFamily: FONT_HEAD, fontSize: 14, color: C.gold3, letterSpacing:".4em", marginBottom: 10 }}>YOUR LEGACY</div>
-        <div style={{ fontFamily: FONT_HEAD, fontSize: 56, color: C.gold, letterSpacing:".1em", marginBottom: 40 }}>{player.name}</div>
-
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 30 }}>
-          <StatCard label="LEVEL" val={player.level} />
-          <StatCard label="ACHIEVEMENTS" val={player.achievements.length} />
-          <StatCard label="SCENES LIVED" val={player.storyProgress} />
-        </div>
-
-        {topSkill && (
-          <div style={{ background: C.surface, border:`1px solid ${C.gold}`, padding: 20, marginBottom: 30 }}>
-            <div style={{ fontSize: 11, color: C.gold3, letterSpacing:".3em" }}>TOP SKILL</div>
-            <div style={{ fontFamily: FONT_HEAD, fontSize: 28, color: C.gold, marginTop: 4 }}>{topSkill[0]} · {topSkill[1]}</div>
+                {scene.isFinalScene ? (
+                  <div className="ending-wrap">
+                    <div className="ending-label">YOUR LEGEND IS WRITTEN</div>
+                    <div className="ending-text">{scene.legacyEnding}</div>
+                    <div className="ending-title">{scene.legacyTitle}</div>
+                    <button className="btn-gold" onClick={onSeeLegacy}>SEE YOUR LEGACY</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="choices-wrap">
+                      {scene.choices?.filter(c => c.type !== "custom").map(c => (
+                        <button key={c.id} className="choice-btn" disabled={isLoading} onClick={() => onChoice(c)}>
+                          <span className="choice-type">[{c.type?.toUpperCase()}] · RISK {c.risk}</span>
+                          <span className="choice-text">{c.text}</span>
+                          <span className="choice-hint">{c.hint}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="custom-row">
+                      <input
+                        placeholder="Write your own path…"
+                        value={customText}
+                        onChange={e => setCustomText(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") submitCustom(); }}
+                        disabled={isLoading}
+                        maxLength={200}
+                      />
+                      <button className="btn-gold" onClick={submitCustom} disabled={isLoading || !customText.trim()}>GO</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="loader">AWAITING THE FIRST SCENE…</div>
+            )}
           </div>
-        )}
 
-        <div style={{ textAlign:"left", marginBottom: 30 }}>
-          <div style={{ fontFamily: FONT_HEAD, fontSize: 14, color: C.gold, letterSpacing:".3em", marginBottom: 12 }}>DEFINING CHOICES</div>
-          {player.majorDecisions.slice(-5).map((d,i) => (
-            <div key={i} style={{ padding:"10px 14px", background: C.surface, borderLeft:`2px solid ${C.gold}`, marginBottom: 6, fontStyle:"italic", color: C.text }}>“{d}”</div>
-          ))}
-        </div>
-
-        {player.achievements.length>0 && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ fontFamily: FONT_HEAD, fontSize: 14, color: C.gold, letterSpacing:".3em", marginBottom: 12 }}>ACHIEVEMENTS</div>
-            <div style={{ display:"flex", flexWrap:"wrap", gap: 8, justifyContent:"center" }}>
-              {player.achievements.map((a,i) => (
-                <span key={i} style={{ background:`${C.gold}20`, color: C.gold, padding:"8px 16px", border:`1px solid ${C.gold}`, fontSize: 12, letterSpacing:".1em", clipPath: CLIP }}>🏆 {a}</span>
+          {/* RIGHT */}
+          <div className={`side-col ${sidebarOpen === "right" ? "open" : ""}`}>
+            <div className="side-section">
+              <div className="side-label">RELATIONSHIPS</div>
+              {player.relationships.length === 0 && <div style={{ color: "var(--muted)", fontSize: 12 }}>No bonds yet.</div>}
+              {player.relationships.slice(0, 8).map((r, i) => (
+                <div key={i} className="rel-row">
+                  <span className="rel-name">{r.name}</span>
+                  <span className={`rel-tag ${r.dir}`}>{r.dir.toUpperCase()} {r.val >= 0 ? "+" : ""}{r.val}</span>
+                </div>
               ))}
             </div>
-          </div>
-        )}
 
-        <div style={{ display:"flex", gap: 14, justifyContent:"center", flexWrap:"wrap" }}>
-          <GoldButton onClick={onNewWorld}>New World</GoldButton>
-          <GhostButton onClick={onNewChar}>New Character</GhostButton>
+            <div className="side-section">
+              <div className="side-label">INVENTORY</div>
+              <div className="inv-grid">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className={`inv-slot ${player.inventory[i] ? "filled" : ""}`}>{player.inventory[i] ?? "—"}</div>
+                ))}
+              </div>
+            </div>
+
+            <div className="side-section">
+              <div className="side-label">NEWS FEED</div>
+              {newsFeed.length === 0 && <div style={{ color: "var(--muted)", fontSize: 11 }}>The world is quiet.</div>}
+              {newsFeed.slice(0, 6).map((n, i) => <div key={i} className="news-item">{n}</div>)}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-function StatCard({ label, val }:{ label:string; val:number }) {
+
+function LegacyView({ player, world, scene, sceneHistory, onNewWorld, onNewChar }: {
+  player: PlayerState; world: World; scene: Scene | null;
+  sceneHistory: string[]; onNewWorld: () => void; onNewChar: () => void;
+}) {
   return (
-    <div style={{ background: C.surface, border:`1px solid ${C.border}`, padding: 20 }}>
-      <div style={{ fontSize: 10, color: C.gold3, letterSpacing:".3em" }}>{label}</div>
-      <div style={{ fontFamily: FONT_NUM, fontSize: 38, color: C.gold, fontWeight: 700, marginTop: 4 }}>{val}</div>
+    <div className="legacy-screen">
+      <div className="legacy-header">
+        <div className="legacy-world">{world.name.toUpperCase()}</div>
+        <div className="legacy-name">{player.name.toUpperCase()}</div>
+        <div className="legacy-title-earned">{scene?.legacyTitle || "A Legend in the Making"}</div>
+      </div>
+
+      <div className="legacy-stats-grid">
+        <div className="legacy-stat"><div className="ls-label">LEVEL</div><div className="ls-val">{player.level}</div></div>
+        <div className="legacy-stat"><div className="ls-label">SCENES LIVED</div><div className="ls-val">{player.storyProgress}</div></div>
+        <div className="legacy-stat"><div className="ls-label">ACHIEVEMENTS</div><div className="ls-val">{player.achievements.length}</div></div>
+        <div className="legacy-stat"><div className="ls-label">REPUTATION</div><div className="ls-val">{player.reputation}</div></div>
+      </div>
+
+      {scene?.legacyEnding && (
+        <div className="legacy-section">
+          <div className="legacy-section-title">YOUR ENDING</div>
+          <div style={{ color: "var(--text)", lineHeight: 1.7, fontSize: 14 }}>{scene.legacyEnding}</div>
+        </div>
+      )}
+
+      <div className="legacy-section">
+        <div className="legacy-section-title">YOUR STORY</div>
+        {sceneHistory.map((title, i) => (
+          <div key={i} className="legacy-scene-item">
+            <span className="legacy-scene-num">{String(i + 1).padStart(2, "0")}</span>
+            <span className="legacy-scene-title">{title}</span>
+          </div>
+        ))}
+      </div>
+
+      {player.majorDecisions.length > 0 && (
+        <div className="legacy-section">
+          <div className="legacy-section-title">KEY DECISIONS</div>
+          {player.majorDecisions.slice(-10).map((d, i) => <div key={i} className="legacy-decision">· {d}</div>)}
+        </div>
+      )}
+
+      {player.achievements.length > 0 && (
+        <div className="legacy-section">
+          <div className="legacy-section-title">ACHIEVEMENTS</div>
+          <div className="legacy-achievements">
+            {player.achievements.map((a, i) => <span key={i} className="legacy-ach-badge">🏆 {a}</span>)}
+          </div>
+        </div>
+      )}
+
+      <div className="legacy-actions">
+        <button className="btn-gold" onClick={onNewWorld}>NEW WORLD</button>
+        <button className="btn-ghost" onClick={onNewChar}>NEW CHARACTER</button>
+      </div>
     </div>
   );
-}
-
-// ─── ROOT PAGE / STATE MACHINE ────────────────────────────────────────────────
-type Screen = "splash" | "create" | "world" | "game" | "legacy";
-
-function SimulationPage() {
-  useFonts();
-  const callScene = useServerFn(simulationScene);
-  const [screen, setScreen] = useState<Screen>("splash");
-  const [hasSave, setHasSave] = useState(false);
-  const [player, setPlayer] = useState<PlayerState | null>(null);
-  const [scene, setScene] = useState<Scene | null>(null);
-  const [history, setHistory] = useState<Msg[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUserMsg, setLastUserMsg] = useState<string | null>(null);
-  const [pending, setPending] = useState<{ name:string;age:number;traits:string[];goal:string } | null>(null);
-
-  useEffect(() => {
-    try { setHasSave(!!localStorage.getItem(SAVE_KEY)); } catch {}
-  }, []);
-
-  const save = useCallback((p: PlayerState, h: Msg[], s: Scene | null) => {
-    try {
-      const blob: SaveBlob = { player: p, history: h, scene: s };
-      localStorage.setItem(SAVE_KEY, JSON.stringify(blob));
-      setHasSave(true);
-    } catch {}
-  }, []);
-
-  // Core AI call
-  const callAI = useCallback(async (userMsg: string, playerOverride?: PlayerState) => {
-    const p = playerOverride ?? player;
-    if (!p) return;
-    setLoading(true);
-    setError(null);
-    setLastUserMsg(userMsg);
-    try {
-      const trimmedHistory = history.slice(-20);
-      const conversationContext = trimmedHistory.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-      const fullUserMsg = conversationContext
-        ? `RECENT STORY:\n${conversationContext}\n\nNOW: ${userMsg}`
-        : userMsg;
-
-      const res = await callScene({ data: { systemPrompt: buildSystemPrompt(p), userMessage: fullUserMsg } });
-      const s = res.scene as Scene;
-      if (!s || !s.choices) {
-        setError("The story flickered. The scene could not form.");
-        return;
-      }
-
-      // Apply
-      const np: PlayerState = { ...p };
-      np.storyProgress += 1;
-
-      if (s.statChanges) {
-        const sk = { ...np.skills };
-        for (const [k,v] of Object.entries(s.statChanges)) {
-          sk[k] = Math.max(0, (sk[k] ?? 0) + (v as number));
-        }
-        np.skills = sk;
-      }
-      if (s.xpGained) {
-        np.xp += s.xpGained;
-        while (np.xp >= np.xpNext) {
-          np.xp -= np.xpNext;
-          np.level += 1;
-          np.xpNext = Math.round(np.xpNext * 1.4);
-        }
-      }
-      if (s.reputationChange) np.reputation += s.reputationChange;
-      if (s.relationshipChanges) {
-        const rels = [...np.relationships];
-        for (const rc of s.relationshipChanges) {
-          const idx = rels.findIndex(r => r.name === rc.name);
-          if (idx >= 0) {
-            rels[idx] = { ...rels[idx], val: Math.max(0, Math.min(100, rels[idx].val + rc.change)), dir: rc.dir ?? rels[idx].dir };
-          } else {
-            rels.push({ name: rc.name, type: "Contact", val: Math.max(0, Math.min(100, 50 + rc.change)), dir: rc.dir ?? "neutral" });
-          }
-        }
-        np.relationships = rels;
-      }
-      if (s.inventoryUnlocks) for (const it of s.inventoryUnlocks) if (!np.inventory.includes(it)) np.inventory.push(it);
-      if (s.questUpdates) {
-        for (const qu of s.questUpdates) {
-          const idx = np.quests.findIndex(q => q.name === qu.name);
-          if (idx >= 0) np.quests[idx] = { ...np.quests[idx], ...qu };
-        }
-      }
-      if (s.newQuests) for (const q of s.newQuests) if (!np.quests.find(x => x.name===q.name)) np.quests.push({ ...q, done: false });
-      if (s.newAchievements) for (const a of s.newAchievements) if (!np.achievements.includes(a)) np.achievements.push(a);
-      if (s.newsUpdates) np.newsHistory = [...np.newsHistory, ...s.newsUpdates];
-      if (s.worldStateUpdates) np.worldState = { ...np.worldState, ...s.worldStateUpdates };
-
-      const newHistory: Msg[] = [...trimmedHistory, { role:"user", content: userMsg }, { role:"assistant", content: JSON.stringify(s) }];
-      setPlayer(np);
-      setScene(s);
-      setHistory(newHistory);
-      save(np, newHistory, s);
-    } catch (e: any) {
-      console.error(e);
-      setError(e?.message ?? "The rift trembles. The story flickers.");
-    } finally {
-      setLoading(false);
-    }
-  }, [player, history, callScene, save]);
-
-  const retryLast = useCallback(() => {
-    if (lastUserMsg) callAI(lastUserMsg);
-    else callAI("Continue the story from where we left off.");
-  }, [lastUserMsg, callAI]);
-
-  // ── Splash actions
-  const beginNew = () => setScreen("create");
-  const continueJourney = () => {
-    try {
-      const raw = localStorage.getItem(SAVE_KEY);
-      if (!raw) return;
-      const blob = JSON.parse(raw) as SaveBlob;
-      setPlayer(blob.player); setHistory(blob.history ?? []); setScene(blob.scene ?? null);
-      setScreen("game");
-      // continue narrative
-      setTimeout(() => { callAI("Continue the story from where we left off.", blob.player); }, 50);
-    } catch {}
-  };
-
-  // ── Character → world
-  const onCreated = (data:{name:string;age:number;traits:string[];goal:string}) => {
-    setPending(data); setScreen("world");
-  };
-
-  // ── World pick → start game
-  const onPickWorld = async (w: WorldDef) => {
-    if (!pending) return;
-    const p: PlayerState = {
-      name: pending.name, age: pending.age, traits: pending.traits, goal: pending.goal,
-      level: 1, xp: 0, xpNext: 100, reputation: 0,
-      currentWorld: w.id, currentLocation: w.locations[0], currentFaction: w.factions[0],
-      skills: { ...w.startStat }, relationships: w.startRels.map(r => ({ ...r })),
-      inventory: [...w.startItems], quests: w.startQuests.map(q => ({ ...q, done: false })),
-      achievements: [], majorDecisions: [], storyProgress: 0, worldState: {},
-      newsHistory: [...w.startNews],
-    };
-    setPlayer(p); setScene(null); setHistory([]);
-    setScreen("game");
-    setTimeout(() => callAI(`Player ${p.name} just entered ${w.name}. Create a dramatic opening scene.`, p), 50);
-  };
-
-  // ── Menu / save / legacy
-  const goSave = () => { if (player) save(player, history, scene); };
-  const goEndChapter = () => setScreen("legacy");
-  const goMenu = () => setScreen("splash");
-  const newWorldKeepChar = () => { setScene(null); setHistory([]); setScreen("world"); if (player) setPending({ name: player.name, age: player.age, traits: player.traits, goal: player.goal }); };
-  const newChar = () => { setPlayer(null); setScene(null); setHistory([]); setPending(null); setScreen("create"); };
-
-  // ── Render
-  if (screen === "splash") return <Splash onStart={beginNew} onContinue={continueJourney} hasSave={hasSave} />;
-  if (screen === "create") return <CharacterCreation onDone={onCreated} onBack={()=>setScreen("splash")} />;
-  if (screen === "world") return <WorldSelect onPick={onPickWorld} onBack={()=> setScreen(player?"game":"create")} />;
-  if (screen === "legacy" && player) return <Legacy player={player} onNewWorld={newWorldKeepChar} onNewChar={newChar} />;
-  if (screen === "game" && player) {
-    return (
-      <GameScreen
-        player={player} setPlayer={(p)=>{ setPlayer(p); save(p, history, scene); }}
-        scene={scene} setScene={setScene}
-        history={history} setHistory={setHistory}
-        loading={loading} callAI={callAI}
-        error={error} onRetry={retryLast}
-        onSave={goSave} onEndChapter={goEndChapter} onMenu={goMenu}
-      />
-    );
-  }
-  return <Splash onStart={beginNew} onContinue={continueJourney} hasSave={hasSave} />;
 }
