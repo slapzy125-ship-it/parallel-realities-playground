@@ -8,19 +8,38 @@ const FREE_WORLDS = ['arcane', 'champions']
 const FREE_DAILY_LIMIT = 1
 
 const G:any = {
-  app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px'},
+  app:{minHeight:'100vh',background:'#0A0A0C',color:'#E8E4D8',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px',WebkitTextSizeAdjust:'100%',WebkitTapHighlightColor:'transparent'},
   center:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',gap:'16px'},
   gold:{color:'#D4A843'},
   gold2:{color:'#F0C060'},
   muted:{color:'#7A7A8A'},
   surface:{background:'#1A1A24',border:'1px solid #2A2A3A',borderRadius:'2px',padding:'20px'},
   sideLabel:{color:'#D4A843',fontSize:'9px',letterSpacing:'4px',borderBottom:'1px solid #2A2A3A',paddingBottom:'6px',marginBottom:'10px'},
-  input:{width:'100%',background:'#1A1A24',border:'1px solid #3A3A4A',color:'#E8E4D8',padding:'12px 16px',fontFamily:"'Rajdhani',sans-serif",fontSize:'16px',outline:'none',borderRadius:'2px',boxSizing:'border-box'},
+  input:{width:'100%',background:'#1A1A24',border:'1px solid #3A3A4A',color:'#E8E4D8',padding:'12px 16px',fontFamily:"'Rajdhani',sans-serif",fontSize:'16px',outline:'none',borderRadius:'2px',boxSizing:'border-box',WebkitAppearance:'none',appearance:'none'},
   label:{display:'block',color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'8px'},
-  btnGold:{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',border:'none',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px'},
-  btnGhost:{background:'transparent',color:'#D4A843',border:'1px solid #8B6914',fontFamily:"'Rajdhani',sans-serif",fontWeight:600,padding:'10px 32px',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px'},
-  topbar:{background:'#0F0F14',borderBottom:'1px solid #2A2A3A',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100},
+  btnGold:{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 32px',border:'none',cursor:'pointer',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',WebkitAppearance:'none',appearance:'none',minHeight:'44px'},
+  btnGhost:{background:'transparent',color:'#D4A843',border:'1px solid #8B6914',fontFamily:"'Rajdhani',sans-serif",fontWeight:600,padding:'10px 20px',cursor:'pointer',letterSpacing:'2px',fontSize:'13px',borderRadius:'2px',WebkitAppearance:'none',appearance:'none',minHeight:'40px'},
+  topbar:{background:'#0F0F14',borderBottom:'1px solid #2A2A3A',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100,flexWrap:'wrap',gap:'10px'},
 }
+
+const RESPONSIVE_CSS = `
+@keyframes spin{to{transform:rotate(360deg)}}
+.rv-game-grid{display:grid;grid-template-columns:260px 1fr 260px;gap:16px;padding:16px;max-width:1400px;margin:0 auto;}
+.rv-traits-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.rv-worlds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;max-width:960px;margin:0 auto;}
+@media (max-width: 900px){
+  .rv-game-grid{grid-template-columns:1fr;padding:12px;gap:12px;}
+  .rv-game-grid > div:first-child{order:2;}
+  .rv-game-grid > div:nth-child(2){order:1;}
+  .rv-game-grid > div:last-child{order:3;}
+  .rv-topbar-center{display:none !important;}
+  .rv-traits-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width: 480px){
+  .rv-worlds-grid{grid-template-columns:1fr;}
+  .rv-traits-grid{grid-template-columns:repeat(2,1fr);}
+}
+`
 
 const defaultPlayer = () => ({
   name:'',age:18,traits:[] as string[],goal:'',
