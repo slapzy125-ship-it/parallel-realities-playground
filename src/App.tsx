@@ -5,14 +5,14 @@ type Screen = "splash" | "creation" | "worldselect" | "game";
 const TRAITS = ["Ambitious","Loyal","Brave","Competitive","Intelligent","Creative","Confident","Curious","Ruthless","Charismatic"];
 const GOALS = ["Become a Legend","Gain Power","Build an Empire","Become Rich","Save the World","Discover the Unknown"];
 const WORLDS = [
-  { name: "Arcane Academy", desc: "A school of forbidden magic" },
-  { name: "Galactic Frontier", desc: "Pioneer the edge of known space" },
-  { name: "Dragonfall Kingdoms", desc: "Medieval intrigue and dragons" },
-  { name: "Neon Dominion", desc: "Cyberpunk power struggles" },
-  { name: "Hero Nexus", desc: "A world of supers and villains" },
-  { name: "Shadow Guild", desc: "Thieves, assassins, and secrets" },
-  { name: "Champions Legacy", desc: "Rise through pro sports" },
-  { name: "Eternal Odyssey", desc: "Ancient mythic adventure" },
+  { id:'arcane', name:'Arcane Academy', icon:'🔮', desc:"Enter the world's greatest magical academy.", theme:'MAGIC · POWER · RIVALRY', villain:'The Hollow Mage', factions:['House Aetheris','House Drakemore','House Umbra','House Sylvara'], startStat:{Spellcasting:20,Knowledge:20,Courage:15,Control:15,HousePoints:0}, startItems:['📚 Spellbook'], startQuests:[{name:'Choose Your House',desc:'Attend the Sorting Ceremony tonight.'}], startRels:[{name:'Prof. Aldric',type:'Mentor',val:60,dir:'friend'},{name:'Kira Voss',type:'Rival',val:30,dir:'rival'}], startNews:['The Hollow Mage was sighted near the east tower.'] },
+  { id:'champions', name:'Champions Legacy', icon:'⚽', desc:'From unknown youth to global icon.', theme:'FAME · SACRIFICE · RIVALRY', villain:'Adrian Vega', factions:['Crimson United','Royal Blue Academy','Blackstone FC','Golden City Academy'], startStat:{Overall:45,Speed:40,Skill:38,Shooting:35,Passing:40,Stamina:60}, startItems:['👟 Academy Boots'], startQuests:[{name:'First Trial',desc:"Impress the coaches at the trial match."}], startRels:[{name:'Coach Ramos',type:'Coach',val:50,dir:'friend'},{name:'Luca Moretti',type:'Rival',val:20,dir:'rival'}], startNews:['Adrian Vega signs record deal.'] },
+  { id:'galactic', name:'Galactic Frontier', icon:'🚀', desc:'Command a starship across the stars.', theme:'FREEDOM · REBELLION · ORDER', villain:'Emperor Vexis', factions:['Vanguard Alliance','Iron Dominion','Nova Syndicate','Celestial Order'], startStat:{Piloting:30,Combat:25,Diplomacy:20,CrewLoyalty:50,Credits:1000,GalacticRep:0}, startItems:['⚔️ Energy Saber'], startQuests:[{name:'First Voyage',desc:'Establish your first alliance.'}], startRels:[{name:'Commander Lyra',type:'Ally',val:60,dir:'friend'},{name:'Admiral Kross',type:'Enemy',val:10,dir:'rival'}], startNews:['Emperor Vexis expands into Sector 7.'] },
+  { id:'hero', name:'Hero Nexus', icon:'⚡', desc:'Rise from rookie to the number 1 hero.', theme:'POWER · FAME · SACRIFICE', villain:'The Null', factions:['Titan Academy','Sentinel Academy','Nexus Institute','Phoenix Academy'], startStat:{Power:30,Control:20,Courage:35,PublicTrust:40,HeroRank:99,Teamwork:30}, startItems:['🦸 Hero Suit'], startQuests:[{name:'First Mission',desc:'Respond to the distress call downtown.'}], startRels:[{name:'Director Crane',type:'Handler',val:55,dir:'friend'},{name:'Shadow Wolf',type:'Rival',val:25,dir:'rival'}], startNews:['The Null disables three heroes.'] },
+  { id:'dragonfall', name:'Dragonfall Kingdoms', icon:'🐉', desc:'Command armies and claim the throne.', theme:'LEGACY · POWER · LOYALTY', villain:'King Malakar', factions:['Emberhold','Frostmere','Thornvale','Goldcrest'], startStat:{Leadership:25,ArmyStrength:30,DragonBond:10,Diplomacy:20,Territory:1,Gold:500}, startItems:['🗡️ Dragonsteel Blade'], startQuests:[{name:'Prove Your Worth',desc:'Win the Regional Tournament.'}], startRels:[{name:'Lord Eryn',type:'Advisor',val:65,dir:'friend'},{name:'Lord Kael',type:'Rival',val:20,dir:'rival'}], startNews:['King Malakar invades the northern border.'] },
+  { id:'shadow', name:'Shadow Guild', icon:'🕶️', desc:'Rise through secret ranks. Trust no one.', theme:'DECEPTION · POWER · LOYALTY', villain:'The Black Regent', factions:['Night Ravens','Phantom Circle','Iron Blades','Whisper Network'], startStat:{Stealth:30,Influence:15,Trust:50,Resources:200,Reputation:0,DistrictControl:0}, startItems:['🗡️ Shadow Blades'], startQuests:[{name:'First Contract',desc:'Complete your initiation mission.'}], startRels:[{name:'Handler Zero',type:'Contact',val:60,dir:'friend'},{name:'The Fox',type:'Rival',val:15,dir:'rival'}], startNews:['The Black Regent tightens grip on east district.'] },
+  { id:'neon', name:'Neon Domination', icon:'🌆', desc:'Hack the system and dominate the city.', theme:'WEALTH · TECH · CONTROL', villain:'Director Kron', factions:['Helix Industries','NovaCore','Synapse Systems','Apex Dynamics'], startStat:{Wealth:5000,Influence:10,Cybernetics:5,Hacking:20,CorporatePower:0,StreetRep:30}, startItems:['🕶️ Cyber Visor'], startQuests:[{name:'First Hack',desc:'Breach the rival server.'}], startRels:[{name:'Sable',type:'Ally',val:55,dir:'friend'},{name:'Dir. Kron',type:'Enemy',val:5,dir:'rival'}], startNews:['Director Kron announces citywide AI surveillance.'] },
+  { id:'odyssey', name:'Eternal Odyssey', icon:'⚔️', desc:"Answer destiny's call. Face the Eternal King.", theme:'DESTINY · COURAGE · DISCOVERY', villain:'The Eternal King', factions:['Dawnseekers','Moonwardens','Stormforged','Celestial Keepers'], startStat:{Courage:30,Wisdom:25,Strength:35,ArtifactPower:0,MythicRep:0,Exploration:10}, startItems:['🛡️ Bronze Spear'], startQuests:[{name:'The First Trial',desc:"Complete the Oracle's trial."}], startRels:[{name:'Sage Pyrene',type:'Oracle',val:70,dir:'friend'},{name:'General Vorn',type:'Enemy',val:10,dir:'rival'}], startNews:['The Eternal King stirs beyond the Rift.'] },
 ];
 
 const GOLD = "#d4af37";
@@ -59,7 +59,7 @@ export default function App() {
   const [name, setName] = useState("");
   const [traits, setTraits] = useState<string[]>([]);
   const [goal, setGoal] = useState<string>("");
-  const [world, setWorld] = useState<string>("");
+  const [world, setWorld] = useState<typeof WORLDS[number] | null>(null);
 
   const toggleTrait = (t: string) => {
     setTraits(prev =>
@@ -159,7 +159,7 @@ export default function App() {
             {WORLDS.map(w => (
               <button
                 key={w.name}
-                onClick={() => { setWorld(w.name); setScreen("game"); }}
+                onClick={() => { setWorld(w); setScreen("game"); }}
                 style={{
                   background: PANEL, border: `1px solid ${BORDER}`, color: GOLD,
                   padding: 20, textAlign: "left", cursor: "pointer", fontFamily: "Cinzel, serif",
@@ -168,7 +168,9 @@ export default function App() {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; }}
               >
-                <div style={{ fontSize: 16, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>{w.name}</div>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{w.icon}</div>
+                <div style={{ fontSize: 16, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>{w.name}</div>
+                <div style={{ fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase", color: GOLD, opacity: 0.6, marginBottom: 8 }}>{w.theme}</div>
                 <div style={{ fontSize: 13, color: "#9a8550", fontFamily: "serif", lineHeight: 1.5 }}>{w.desc}</div>
               </button>
             ))}
@@ -187,9 +189,9 @@ export default function App() {
       <div style={{ textAlign: "center" }}>
         <Logo size="clamp(2rem, 5vw, 3rem)" />
         <p style={{ marginTop: 24, letterSpacing: "0.3em", textTransform: "uppercase", fontSize: 14 }}>Game Loading</p>
-        <p style={{ marginTop: 12, color: "#9a8550", fontSize: 12 }}>
-          {name} · {world} · {goal}
-        </p>
+          {world && <p style={{ marginTop: 12, color: "#9a8550", fontSize: 12 }}>
+            {name} · {world.name} · {goal}
+          </p>}
       </div>
     </div>
   );
