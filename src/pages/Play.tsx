@@ -47,6 +47,12 @@ const WORLDS = [
 export default function Play() {
   const [screen, setScreen] = useState('splash')
   const [player, setPlayer] = useState(defaultPlayer())
+  const [world, setWorld] = useState<any>(null)
+  const [scene, setScene] = useState<any>(null)
+  const [hasError, setHasError] = useState(false)
+  const [sceneHistory, setSceneHistory] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const historyRef = useRef<any[]>([])
 
   const toggleTrait = (t:string) => {
     setPlayer(p=>({...p,traits:p.traits.includes(t)?p.traits.filter((x:string)=>x!==t):p.traits.length<3?[...p.traits,t]:p.traits}))
