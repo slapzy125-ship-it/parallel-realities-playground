@@ -189,9 +189,9 @@ export default function App() {
       <div style={{ textAlign: "center" }}>
         <Logo size="clamp(2rem, 5vw, 3rem)" />
         <p style={{ marginTop: 24, letterSpacing: "0.3em", textTransform: "uppercase", fontSize: 14 }}>Game Loading</p>
-        <p style={{ marginTop: 12, color: "#9a8550", fontSize: 12 }}>
-          {name} · {world} · {goal}
-        </p>
+          {world && <p style={{ marginTop: 12, color: "#9a8550", fontSize: 12 }}>
+            {name} · {world.name} · {goal}
+          </p>}
       </div>
     </div>
   );
