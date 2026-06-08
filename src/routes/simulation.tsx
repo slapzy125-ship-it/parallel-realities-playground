@@ -583,15 +583,28 @@ function GameScreen({
             </div>
             {loading && !scene ? (
               <LoadingState />
+            ) : error && !scene ? (
+              <div style={{ textAlign:"center", padding: 30 }}>
+                <h2 style={{ fontFamily: FONT_HEAD, fontSize: 24, color: C.red, margin: 0, marginBottom: 10, letterSpacing:".15em" }}>THE RIFT TREMBLES</h2>
+                <p style={{ color: C.muted, marginBottom: 20, lineHeight: 1.6 }}>A force disrupts the simulation. The story flickers…</p>
+                <GoldButton onClick={onRetry}>Retry</GoldButton>
+              </div>
             ) : scene ? (
               <>
                 <h2 style={{ fontFamily: FONT_HEAD, fontSize: 28, color: C.gold, margin: 0, marginBottom: 14, letterSpacing:".05em" }}>{scene.sceneTitle}</h2>
                 <p style={{ fontSize: 16, lineHeight: 1.7, color: C.text, margin: 0 }}>{scene.sceneText}</p>
+                {error && (
+                  <div style={{ marginTop: 14, padding: 10, background: `${C.red}15`, border:`1px solid ${C.red}40`, color: C.red, fontSize: 12, display:"flex", justifyContent:"space-between", alignItems:"center", gap: 12 }}>
+                    <span>Last action failed. {error.slice(0, 120)}</span>
+                    <GhostButton onClick={onRetry} style={{ padding:"6px 14px", fontSize: 10 }}>Retry</GhostButton>
+                  </div>
+                )}
               </>
             ) : (
               <div style={{ color: C.muted }}>No scene loaded.</div>
             )}
           </div>
+
 
           {/* loading overlay */}
           {loading && scene && <LoadingState />}
