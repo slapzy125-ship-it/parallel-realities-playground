@@ -338,7 +338,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     }catch{alert('Could not load.')}
   }
 
-  const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
+  const fonts = <><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/><style>{RESPONSIVE_CSS}</style></>
 
   if (screen === 'splash') return (
     <div style={{...G.app, ...G.center}}>
