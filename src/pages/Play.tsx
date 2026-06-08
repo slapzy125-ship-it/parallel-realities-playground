@@ -368,7 +368,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         </div>
         <div style={{marginBottom:'20px'}}>
           <label style={G.label}>CHOOSE 3 TRAITS <span style={G.muted}>({player.traits.length}/3)</span></label>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'8px'}}>
+          <div className="rv-traits-grid">
             {TRAITS.map(t=>(
               <button key={t} onClick={()=>toggleTrait(t)} style={{background:player.traits.includes(t)?'#8B6914':'#1A1A24',border:`1px solid ${player.traits.includes(t)?'#D4A843':'#3A3A4A'}`,color:player.traits.includes(t)?'#F0C060':'#7A7A8A',padding:'8px 4px',cursor:'pointer',fontFamily:"'Rajdhani',sans-serif",fontSize:'12px',fontWeight:600,letterSpacing:'1px',borderRadius:'2px'}}>{t}</button>
             ))}
@@ -395,7 +395,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         <div style={{fontFamily:"'Cinzel',serif",fontSize:'28px',fontWeight:700,letterSpacing:'2px'}}>CHOOSE YOUR WORLD</div>
         <div style={{...G.muted,fontSize:'13px',marginTop:'6px',letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'16px',maxWidth:'960px',margin:'0 auto'}}>
+      <div className="rv-worlds-grid">
         {WORLDS.map(w=>(
           <div key={w.id} onClick={()=>handleSelectWorld(w)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',padding:'20px',cursor:'pointer',borderRadius:'2px',transition:'border-color .2s'}} onMouseEnter={e=>(e.currentTarget.style.borderColor='#D4A843')} onMouseLeave={e=>(e.currentTarget.style.borderColor='#2A2A3A')}>
             <div style={{fontSize:'28px',marginBottom:'10px'}}>{w.icon}</div>
@@ -427,11 +427,11 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     return (
       <div style={G.app}>
         {fonts}
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{RESPONSIVE_CSS}</style>
 
         <div style={G.topbar}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,color:'#D4A843',letterSpacing:'3px'}}>REVENIO</div>
-          <div style={{display:'flex',alignItems:'center',gap:'16px',flex:1,justifyContent:'center'}}>
+          <div className="rv-topbar-center" style={{display:'flex',alignItems:'center',gap:'16px',flex:1,justifyContent:'center'}}>
             <div style={{color:'#F0C060',fontWeight:700,letterSpacing:'1px'}}>{player.name}</div>
             <div style={{...G.muted,fontSize:'11px',letterSpacing:'2px'}}>LVL {player.level}</div>
             <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:'180px'}}>
@@ -447,7 +447,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
           </div>
         </div>
 
-        <div style={{display:'grid',gridTemplateColumns:'260px 1fr 260px',gap:'16px',padding:'16px',maxWidth:'1400px',margin:'0 auto'}}>
+        <div className="rv-game-grid">
           <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
             <div style={G.surface}>
               <div style={G.sideLabel}>STORY PROGRESS</div>
