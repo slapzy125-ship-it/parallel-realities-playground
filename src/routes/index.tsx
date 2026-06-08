@@ -66,6 +66,12 @@ function Home() {
             >
               How It Works
             </Link>
+            <Link
+              to="/play"
+              className="px-10 py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)] hover:text-background transition-all duration-500"
+            >
+              PLAY REVENIO
+            </Link>
           </div>
         </div>
 
