@@ -59,7 +59,7 @@ export default function App() {
   const [name, setName] = useState("");
   const [traits, setTraits] = useState<string[]>([]);
   const [goal, setGoal] = useState<string>("");
-  const [world, setWorld] = useState<string>("");
+  const [world, setWorld] = useState<typeof WORLDS[number] | null>(null);
 
   const toggleTrait = (t: string) => {
     setTraits(prev =>
