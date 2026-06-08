@@ -30,8 +30,23 @@ const defaultPlayer = () => ({
   newsHistory:[] as string[],
 })
 
+const TRAITS = ['Brave','Cunning','Kind','Strong','Wise','Charismatic','Lucky','Creative','Stealthy','Patient']
+const GOALS = ['Wealth','Power','Love','Glory','Knowledge','Revenge','Freedom','Legacy']
+
 export default function Play() {
   const [screen, setScreen] = useState('splash')
+  const [player, setPlayer] = useState(defaultPlayer())
+
+  const toggleTrait = (t:string) => {
+    setPlayer(p=>({...p,traits:p.traits.includes(t)?p.traits.filter((x:string)=>x!==t):p.traits.length<3?[...p.traits,t]:p.traits}))
+  }
+
+  const finishCreation = () => {
+    if(!player.name.trim()){alert('Enter your name');return}
+    if(player.traits.length<1){alert('Pick at least 1 trait');return}
+    if(!player.goal){alert('Choose a goal');return}
+    setScreen('worldselect')
+  }
 
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
 
