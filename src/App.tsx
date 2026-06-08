@@ -76,6 +76,16 @@ export default function App() {
   const [goal, setGoal] = useState<string>("");
   const [world, setWorld] = useState<typeof WORLDS[number] | null>(null);
 
+  const [scene, setScene] = useState<Scene | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errMsg, setErrMsg] = useState<string>("");
+  const [history, setHistory] = useState<Msg[]>([]);
+  const [liveStats, setLiveStats] = useState<Record<string, number>>({});
+  const [liveRels, setLiveRels] = useState<{ name: string; type: string; val: number; dir: string }[]>([]);
+  const [liveNews, setLiveNews] = useState<string[]>([]);
+  const [xp, setXp] = useState(0);
+  const initRef = useRef(false);
+
   const toggleTrait = (t: string) => {
     setTraits(prev =>
       prev.includes(t) ? prev.filter(x => x !== t) : prev.length < 3 ? [...prev, t] : prev
