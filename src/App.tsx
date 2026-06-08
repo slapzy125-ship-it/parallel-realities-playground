@@ -211,15 +211,83 @@ export default function App() {
 
   // GAME SCREEN
   const w = world!;
-  const xp = 0;
   const xpMax = 100;
-  const level = 1;
-  const stats = Object.entries(w.startStat);
+  const level = Math.floor(xp / xpMax) + 1;
+  const xpInLevel = xp % xpMax;
+  const stats = Object.entries(liveStats);
   const quests = w.startQuests;
-  const rels = w.startRels;
+  const rels = liveRels;
   const items = w.startItems;
-  const news = w.startNews;
+  const news = liveNews;
   const slots = 8;
+
+  const callAI = async (userMsg: string | null) => {
+    setLoading(true);
+    setErrMsg("");
+    const systemPrompt = `You are the game master for REVENIO. WORLD: ${w.name}. VILLAIN: ${w.villain}. PLAYER: ${name}, traits: ${traits.join(", ")}, goal: ${goal}. STATS: ${JSON.stringify(liveStats)}. Respond ONLY with this JSON no markdown no backticks: {"sceneTitle":"title","sceneText":"60-80 words present tense","choices":[{"id":"A","text":"choice","type":"bold","risk":"Low","hint":"hint"},{"id":"B","text":"choice","type":"strategic","risk":"Medium","hint":"hint"},{"id":"C","text":"choice","type":"loyal","risk":"High","hint":"hint"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["headline"],"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`;
+    const conversationHistory: Msg[] = userMsg
+      ? [...history, { role: "user", content: userMsg }]
+      : [{ role: "user", content: "Begin the story." }];
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: conversationHistory,
+        }),
+      });
+      const data = await response.json();
+      const raw = (data.content || []).map((c: any) => c.text || "").join("");
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("No JSON in response");
+      const parsed: Scene = JSON.parse(match[0]);
+      setScene(parsed);
+      setHistory([...conversationHistory, { role: "assistant", content: raw }]);
+
+      if (parsed.statChanges) {
+        setLiveStats(prev => {
+          const next = { ...prev };
+          for (const [k, v] of Object.entries(parsed.statChanges!)) {
+            if (k in next) next[k] = Math.max(0, next[k] + v);
+          }
+          return next;
+        });
+      }
+      if (parsed.xpGained) setXp(p => p + parsed.xpGained!);
+      if (parsed.relationshipChanges) {
+        setLiveRels(prev => prev.map(r => {
+          const upd = parsed.relationshipChanges!.find(x => x.name === r.name);
+          return upd ? { ...r, val: Math.max(0, Math.min(100, r.val + upd.change)), dir: upd.dir } : r;
+        }));
+      }
+      if (parsed.newsUpdates?.length) {
+        setLiveNews(prev => [...parsed.newsUpdates!, ...prev].slice(0, 6));
+      }
+    } catch (e: any) {
+      setErrMsg(e?.message || "AI request failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (screen !== "game" || !world || initRef.current) return;
+    initRef.current = true;
+    setLiveStats({ ...world.startStat } as Record<string, number>);
+    setLiveRels(world.startRels.map(r => ({ ...r })));
+    setLiveNews([...world.startNews]);
+    callAI(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, world]);
+
+  const onChoice = (c: Choice) => {
+    if (loading) return;
+    callAI(`I choose ${c.id}: ${c.text}`);
+  };
+
 
   const panel: React.CSSProperties = {
     background: PANEL,
