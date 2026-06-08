@@ -111,13 +111,23 @@ Stats affect the narrative. High courage means bold action. Low stamina means fa
 
 Scene text is 60 to 80 words, present tense, cinematic.
 
+LANGUAGE RULES (CRITICAL):
+- Use simple, everyday words a 12-year-old would know. No fancy or rare words.
+- Short punchy sentences. Cut long ones in half. Avoid commas stacked together.
+- No words like: whilst, amidst, perchance, behold, traverse, endeavor, myriad, ominous, foreboding, treacherous, formidable, resplendent, ethereal, visage, countenance, alas. Pick the plain version instead (while, among, try, many, scary, hard, beautiful, face).
+- Never say "the rift trembles", "the air shimmers", "fate hangs in the balance", or any other purple cliche. Be concrete: say what is happening, who is there, what they do.
+- Choices are 3 to 8 words. Plain verbs. Action first. Examples: "Punch the guard", "Sneak past the dragon", "Lie to the king", "Cast a fire spell".
+- Hints are one short clear sentence. Say what might happen, not a riddle.
+- Same rules for EVERY world (magic school, space war, hero city, dragons, sports, spies, cyberpunk, fantasy quest) and EVERY scene of every playthrough. No exceptions.
+
 Always return exactly 4 choices unless isFinalScene is true.
 
 Always change at least 2 stats. XP between 10 and 25.
 
 RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
 
-{"sceneTitle":"title","sceneText":"60-80 words present tense","choices":[{"id":"A","text":"choice","type":"bold","risk":"Low","hint":"hint"},{"id":"B","text":"choice","type":"strategic","risk":"Medium","hint":"hint"},{"id":"C","text":"choice","type":"loyal","risk":"High","hint":"hint"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["one headline"],"worldStateUpdates":{},"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
+{"sceneTitle":"title","sceneText":"60-80 words present tense, simple words","choices":[{"id":"A","text":"3-8 simple words","type":"bold","risk":"Low","hint":"one plain sentence"},{"id":"B","text":"3-8 simple words","type":"strategic","risk":"Medium","hint":"one plain sentence"},{"id":"C","text":"3-8 simple words","type":"loyal","risk":"High","hint":"one plain sentence"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["one headline"],"worldStateUpdates":{},"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
+
 
     historyRef.current.push({role:'user',content:msg})
     try {
