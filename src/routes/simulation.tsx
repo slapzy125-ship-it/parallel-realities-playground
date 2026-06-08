@@ -959,6 +959,7 @@ function SimulationPage() {
         scene={scene} setScene={setScene}
         history={history} setHistory={setHistory}
         loading={loading} callAI={callAI}
+        error={error} onRetry={retryLast}
         onSave={goSave} onEndChapter={goEndChapter} onMenu={goMenu}
       />
     );
