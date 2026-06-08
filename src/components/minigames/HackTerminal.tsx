@@ -20,8 +20,8 @@ export default function HackTerminal({ playerName, targetName, onComplete }: Pro
   const [traceProgress, setTraceProgress] = useState(0)
   const [layer, setLayer] = useState(1)
   const [layerComplete, setLayerComplete] = useState(false)
-  const timerRef = useRef<any>()
-  const traceRef = useRef<any>()
+  const timerRef = useRef<any>(null)
+  const traceRef = useRef<any>(null)
   const ended = useRef(false)
   const layerRef = useRef(1)
   const nodeMap = useRef(
