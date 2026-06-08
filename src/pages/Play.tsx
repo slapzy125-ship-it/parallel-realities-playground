@@ -120,6 +120,21 @@ LANGUAGE RULES (CRITICAL):
 - Hints are one short clear sentence. Say what might happen, not a riddle.
 - Same rules for EVERY world (magic school, space war, hero city, dragons, sports, spies, cyberpunk, fantasy quest) and EVERY scene of every playthrough. No exceptions.
 
+${w.id==='champions' ? `
+CHAMPIONS LEGACY REALISM MODE (CRITICAL — overrides generic fantasy tone):
+This world is a grounded football (soccer) career sim in the style of EA Sports FC Career Mode. NO magic, NO fantasy, NO "rifts" or "destiny" language. Treat it like a real pro footballer's life.
+
+- Real football structure: youth academy trials → reserves → senior debut → first team → cup runs → league title race → international call-up → transfer windows → contract talks → Ballon d'Or contention → retirement.
+- Use real football terminology: formation (4-3-3, 4-2-3-1), positions (CAM, CDM, LW, ST, CB), tactics (high press, low block, gegenpress, tiki-taka), set pieces, VAR, xG, clean sheets, pre-season, derby day, transfer fee, release clause, wage demands, agent fees, loan move, sell-on clause, work permit, medical, fitness %, match sharpness, yellow/red cards, suspension, injury (hamstring, ACL, metatarsal, groin strain) with weeks out.
+- Scenes cover realistic moments: training drills, tactics meetings, press conferences, post-match interviews, dressing room talks, social media drama, fan reactions, manager meetings, agent calls, scouting reports, transfer rumours, family pressure, sponsorship deals (Nike/Adidas/Puma style), charity work, World Cup / Euros / Copa America / AFCON qualifying.
+- Match scenes describe minute, score, opponent, competition (Premier League / La Liga / Serie A / Bundesliga / Ligue 1 / Champions League / Europa / FA Cup style — invent club names if needed but keep them realistic, no fantasy names).
+- Choices are real footballer decisions: "Take the free kick", "Pass to the striker", "Track back to defend", "Reject the contract offer", "Accept the transfer to Madrid", "Apologise on social media", "Demand a new agent", "Play through the knock", "Tell the manager you want out".
+- Stats map to football attributes (Speed=pace, Skill=dribbling, Shooting=finishing, Passing=vision, Leadership=composure, Stamina=fitness). Stat changes reflect training, matches, injuries, age decline.
+- News headlines sound like real football media: "[Player] bags brace in derby win", "Manager defends [Player] after red card", "United scouts spotted at training", "Agent denies exit talks".
+- Villain Adrian Vega is a rival player / pundit / agent — not a supervillain. Keep grudges grounded (cleat-on-shin tackles, snide press quotes, poaching teammates, dressing room politics).
+- NEVER say magic, spell, prophecy, chosen one, ancient power, dark force. This is sport, not fantasy.
+` : ''}
+
 Always return exactly 4 choices unless isFinalScene is true.
 
 Always change at least 2 stats. XP between 10 and 25.
