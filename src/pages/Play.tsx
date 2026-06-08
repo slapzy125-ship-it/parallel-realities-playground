@@ -60,6 +60,10 @@ export default function Play() {
   const [hasError, setHasError] = useState(false)
   const [sceneHistory, setSceneHistory] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [notifs, setNotifs] = useState<any[]>([])
+  const [nextAct, setNextAct] = useState<any>(null)
+  const [showTransition, setShowTransition] = useState(false)
+  const [saveMsg, setSaveMsg] = useState('')
   const historyRef = useRef<any[]>([])
 
   const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
@@ -178,6 +182,85 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
     const result = await callAI(openers[w.id]??`${player.name} enters ${w.name}. Create a dramatic opening scene.`, fresh, w)
     if(result){setScene(result);setSceneHistory([result.sceneTitle])}else{setHasError(true)}
     setLoading(false)
+  }
+
+  const applyScene = (s:any) => {
+    const n:any[] = []
+    setPlayer(prev => {
+      const next = {...prev,skills:{...prev.skills},relationships:[...prev.relationships],inventory:[...prev.inventory],quests:[...prev.quests],achievements:[...prev.achievements],newsHistory:[...prev.newsHistory]}
+      if(s.statChanges) Object.entries(s.statChanges).forEach(([k,v]:any)=>{if(next.skills[k]!==undefined){next.skills[k]=Math.max(0,Math.min(100,next.skills[k]+v));n.push({text:`${k} ${v>0?'+'+v:v}`,type:v>0?'pos':'neg'})}})
+      if(s.xpGained){next.xp+=s.xpGained;n.push({text:`+${s.xpGained} XP`,type:'xp'});if(next.xp>=next.xpNext){next.xp-=next.xpNext;next.level+=1;next.xpNext=Math.round(next.xpNext*1.3);n.push({text:`LEVEL UP → ${next.level}`,type:'ach'})}}
+      if(s.reputationChange){next.reputation+=s.reputationChange;n.push({text:`REP ${s.reputationChange>0?'+':''}${s.reputationChange}`,type:s.reputationChange>0?'pos':'neg'})}
+      if(s.relationshipChanges) s.relationshipChanges.forEach((rc:any)=>{const idx=next.relationships.findIndex((r:any)=>r.name===rc.name);if(idx>=0){next.relationships[idx]={...next.relationships[idx],val:Math.max(0,Math.min(100,next.relationships[idx].val+rc.change)),dir:rc.dir??next.relationships[idx].dir};n.push({text:`${rc.name} ${rc.change>0?'▲':'▼'}`,type:rc.change>0?'pos':'neg'})}else{next.relationships.push({name:rc.name,type:'Character',val:Math.max(0,Math.min(100,50+rc.change)),dir:rc.dir??'neutral'});n.push({text:`Met: ${rc.name}`,type:'item'})}})
+      if(s.inventoryUnlocks?.length) s.inventoryUnlocks.forEach((item:string)=>{if(!next.inventory.includes(item)){next.inventory.push(item);n.push({text:`Item: ${item}`,type:'item'})}})
+      if(s.questUpdates) s.questUpdates.forEach((qu:any)=>{const idx=next.quests.findIndex((q:any)=>q.name===qu.name);if(idx>=0){next.quests[idx]={...next.quests[idx],...qu};if(qu.done)n.push({text:`✓ ${qu.name}`,type:'quest'})}})
+      if(s.newQuests) s.newQuests.forEach((nq:any)=>{if(!next.quests.find((q:any)=>q.name===nq.name)){next.quests.push({...nq,done:false});n.push({text:`Quest: ${nq.name}`,type:'quest'})}})
+      if(s.newAchievements) s.newAchievements.forEach((a:string)=>{if(!next.achievements.includes(a)){next.achievements.push(a);n.push({text:`🏆 ${a}`,type:'ach'})}})
+      if(s.newsUpdates?.length) next.newsHistory=[...prev.newsHistory,...s.newsUpdates]
+      next.storyProgress=prev.storyProgress+1
+      next.worldState={...prev.worldState,...s.worldStateUpdates,sceneCount:(prev.worldState.sceneCount??0)+1}
+      return next
+    })
+    return n
+  }
+
+  const handleChoice = async (choice:any) => {
+    if(loading) return
+    let msg = ''
+    if(choice.id==='D'){const c=window.prompt('What do you do?');if(!c)return;msg=`Player custom action: "${c}". Create consequence scene.`}
+    else msg=`Player chose "${choice.text}". Risk: ${choice.risk}. Create the consequence scene. Change at least 2 stats. Progress story toward ${world?.villain}.`
+    setPlayer(p=>({...p,majorDecisions:[...p.majorDecisions,choice.text]}))
+    setLoading(true)
+    setHasError(false)
+    const result = await callAI(msg)
+    if(result){
+      const n = applyScene(result)
+      const prevAct = getAct(player.storyProgress)
+      setScene(result)
+      setNotifs(n)
+      setSceneHistory(h=>[...h,result.sceneTitle])
+      const newProgress = player.storyProgress + 1
+      const newAct = getAct(newProgress)
+      if(newAct.id !== prevAct.id && !result.isFinalScene){setNextAct(newAct);setShowTransition(true)}
+    } else {
+      setHasError(true)
+    }
+    setLoading(false)
+  }
+
+  const handleRetry = async () => {
+    setHasError(false)
+    setLoading(true)
+    const result = await callAI('Continue the story from where we left off. Give the player a new choice.')
+    if(result){const n=applyScene(result);setScene(result);setNotifs(n);setSceneHistory(h=>[...h,result.sceneTitle])}else{setHasError(true)}
+    setLoading(false)
+  }
+
+  const handleSave = () => {
+    try{
+      localStorage.setItem('revenio_save',JSON.stringify({player,worldId:world?.id,scene,sceneHistory,history:historyRef.current.slice(-10)}))
+      setSaveMsg('SAVED ✓')
+    }catch{setSaveMsg('FAILED')}
+    setTimeout(()=>setSaveMsg(''),2000)
+  }
+
+  const handleLoad = () => {
+    try{
+      const raw=localStorage.getItem('revenio_save')
+      if(!raw){alert('No save found.');return}
+      const d=JSON.parse(raw)
+      const w=WORLDS.find(x=>x.id===d.worldId)
+      if(!w){alert('Save corrupted.');return}
+      setPlayer(d.player)
+      setWorld(w)
+      setScene(d.scene)
+      setSceneHistory(d.sceneHistory??[])
+      historyRef.current=d.history??[]
+      setScreen('game')
+      callAI('Continue the story from where we left off. Give the player a new choice.').then(result=>{
+        if(result){const n=applyScene(result);setScene(result);setNotifs(n);setSceneHistory(h=>[...h,result.sceneTitle])}
+      })
+    }catch{alert('Could not load.')}
   }
 
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
