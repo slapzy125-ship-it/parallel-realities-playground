@@ -518,6 +518,8 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         </div>
       </div>
     )
+  }
+
   if(screen==='legacy'){
 
     const topStat = Object.entries(player.skills).sort((a,b)=>Number(b[1])-Number(a[1]))[0]
