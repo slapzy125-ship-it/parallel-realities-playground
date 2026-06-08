@@ -34,15 +34,23 @@ const TRAITS = ['Brave','Cunning','Kind','Strong','Wise','Charismatic','Lucky','
 const GOALS = ['Wealth','Power','Love','Glory','Knowledge','Revenge','Freedom','Legacy']
 
 const WORLDS = [
-  { id:'arcane', name:'Arcane Academy', desc:"Enter the world's greatest magic academy.", theme:'Magic School', icon:'✨', locations:['Great Hall','Library','Dueling Grounds','Potion Lab'], startStat:{Spellcasting:10,Potions:5,Dueling:5,'Arcane Theory':5,Wandcraft:5}, startRels:[{name:'Prof. Aldric',type:'mentor',affinity:60},{name:'Kira Voss',type:'rival',affinity:-20}], startItems:['Wand','Robes','Spellbook'], startQuests:[{title:'Sorting Ceremony',desc:'Attend the house sorting.'}], startNews:['Arcane Academy welcomes new students.'] },
-  { id:'champions', name:'Champions Legacy', desc:'Rise from unknown youth to global sporting legend.', theme:'Sports Career', icon:'⚽', locations:['Training Ground','Stadium','Locker Room','Cafeteria'], startStat:{Speed:10,Skill:5,Shooting:5,Passing:5,Leadership:5,Stamina:5}, startRels:[{name:'Coach Ramos',type:'mentor',affinity:60},{name:'Luca Moretti',type:'rival',affinity:-20}], startItems:['Cleats','Jersey','Water Bottle'], startQuests:[{title:'First Trial',desc:'Prove yourself in the opening match.'}], startNews:['New talent spotted at the trials.'] },
-  { id:'galactic', name:'Galactic Frontier', desc:'Navigate a galaxy of factions, destiny, and conflict.', theme:'Space Adventure', icon:'🚀', locations:['Bridge','Engine Room','Mess Hall','Airlock'], startStat:{Piloting:10,Combat:5,Diplomacy:5,Navigation:5,Engineering:5}, startRels:[{name:'Commander Lyra',type:'mentor',affinity:60},{name:'Admiral Kross',type:'rival',affinity:-20}], startItems:['Blaster','Space Suit','Datapad'], startQuests:[{title:'Distress Signal',desc:'Respond to an incoming distress call.'}], startNews:['Vanguard Alliance patrols increase.'] },
-  { id:'hero', name:'Hero Nexus', desc:'Discover powers and decide what kind of hero you are.', theme:'Superhero', icon:'⚡', locations:['Hero HQ','Training Room','City Streets','Rooftop'], startStat:{'Power Control':10,Combat:5,PR:5,Strategy:5,Tech:5}, startRels:[{name:'Director Crane',type:'mentor',affinity:60},{name:'Shadow Wolf',type:'rival',affinity:-20}], startItems:['Costume','Mask','Comms Device'], startQuests:[{title:'First Assignment',desc:'Handle a downtown incident.'}], startNews:['Hero Nexus recruits new members.'] },
-  { id:'dragonfall', name:'Dragonfall Kingdoms', desc:'Rule kingdoms, tame dragons, shape a realm.', theme:'Medieval Fantasy', icon:'🐉', locations:['Throne Room','Stables','Battlefield','Dragon Pit'], startStat:{Combat:10,Leadership:5,Diplomacy:5,'Dragon Taming':5,Strategy:5}, startRels:[{name:'Lord Eryn',type:'mentor',affinity:60},{name:'Lord Kael',type:'rival',affinity:-20}], startItems:['Sword','Armor','Map'], startQuests:[{title:'Tournament',desc:'Prove your worth in the arena.'}], startNews:['Dragon sightings reported near the border.'] },
-  { id:'shadow', name:'Shadow Guild', desc:'Join a secret network of spies and power brokers.', theme:'Spy Thriller', icon:'🕶️', locations:['Safe House','Drop Point','Club Red','Rooftop'], startStat:{Stealth:10,Deception:5,Combat:5,Hacking:5,Persuasion:5}, startRels:[{name:'Handler Zero',type:'mentor',affinity:60},{name:'The Fox',type:'rival',affinity:-20}], startItems:['Lockpick','Disguise','Encrypted Phone'], startQuests:[{title:'First Contract',desc:'Complete your first guild assignment.'}], startNews:['Shadow Guild activity rises in the east.'] },
-  { id:'neon', name:'Neon Domination', desc:'Rise through a mega-city ruled by AI and corporations.', theme:'Cyberpunk', icon:'🤖', locations:['Hideout','Server Farm','Club Neon','Rooftop'], startStat:{Hacking:10,Combat:5,Persuasion:5,Cybernetics:5,Business:5}, startRels:[{name:'Sable',type:'mentor',affinity:60},{name:'Director Kron',type:'rival',affinity:-20}], startItems:['Cyberdeck','Neural Implant','Cred Chip'], startQuests:[{title:'First Hack',desc:'Infiltrate a corporate system.'}], startNews:['Corps tighten security after recent breaches.'] },
-  { id:'odyssey', name:'Eternal Odyssey', desc:'Journey through mythical realms and ancient trials.', theme:'Mythological', icon:'⚔️', locations:['Oracle Temple','Forest of Trials','Ancient Ruins','Village'], startStat:{Combat:10,Wisdom:5,Exploration:5,'Ancient Lore':5,Leadership:5}, startRels:[{name:'Sage Pyrene',type:'mentor',affinity:60},{name:'General Vorn',type:'rival',affinity:-20}], startItems:['Sword','Shield','Torch'], startQuests:[{title:'Oracle Prophecy',desc:'Seek the Oracle Temple blessing.'}], startNews:['Ancient ruins unearthed in the valley.'] },
+  { id:'arcane', name:'Arcane Academy', desc:"Enter the world's greatest magic academy.", theme:'Magic School', icon:'✨', villain:'The Hollow Mage', factions:['House Aetheris','House Drakemore','House Umbra','House Sylvara'], locations:['Great Hall','Library','Dueling Grounds','Potion Lab'], startStat:{Spellcasting:10,Potions:5,Dueling:5,'Arcane Theory':5,Wandcraft:5}, startRels:[{name:'Prof. Aldric',val:60,dir:'friend'},{name:'Kira Voss',val:-20,dir:'rival'}], startItems:['Wand','Robes','Spellbook'], startQuests:[{name:'Sorting Ceremony',desc:'Attend the house sorting.'}], startNews:['Arcane Academy welcomes new students.'] },
+  { id:'champions', name:'Champions Legacy', desc:'Rise from unknown youth to global sporting legend.', theme:'Sports Career', icon:'⚽', villain:'Adrian Vega', factions:['Crimson United','Royal Blue Academy','Blackstone FC','Golden City Academy','Phoenix Athletic'], locations:['Training Ground','Stadium','Locker Room','Cafeteria'], startStat:{Speed:10,Skill:5,Shooting:5,Passing:5,Leadership:5,Stamina:5}, startRels:[{name:'Coach Ramos',val:60,dir:'friend'},{name:'Luca Moretti',val:-20,dir:'rival'}], startItems:['Cleats','Jersey','Water Bottle'], startQuests:[{name:'First Trial',desc:'Prove yourself in the opening match.'}], startNews:['New talent spotted at the trials.'] },
+  { id:'galactic', name:'Galactic Frontier', desc:'Navigate a galaxy of factions, destiny, and conflict.', theme:'Space Adventure', icon:'🚀', villain:'Emperor Vexis', factions:['Vanguard Alliance','Iron Dominion','Nova Syndicate','Celestial Order'], locations:['Bridge','Engine Room','Mess Hall','Airlock'], startStat:{Piloting:10,Combat:5,Diplomacy:5,Navigation:5,Engineering:5}, startRels:[{name:'Commander Lyra',val:60,dir:'friend'},{name:'Admiral Kross',val:-20,dir:'rival'}], startItems:['Blaster','Space Suit','Datapad'], startQuests:[{name:'Distress Signal',desc:'Respond to an incoming distress call.'}], startNews:['Vanguard Alliance patrols increase.'] },
+  { id:'hero', name:'Hero Nexus', desc:'Discover powers and decide what kind of hero you are.', theme:'Superhero', icon:'⚡', villain:'The Null', factions:['Titan Academy','Sentinel Academy','Nexus Institute','Phoenix Academy'], locations:['Hero HQ','Training Room','City Streets','Rooftop'], startStat:{'Power Control':10,Combat:5,PR:5,Strategy:5,Tech:5}, startRels:[{name:'Director Crane',val:60,dir:'friend'},{name:'Shadow Wolf',val:-20,dir:'rival'}], startItems:['Costume','Mask','Comms Device'], startQuests:[{name:'First Assignment',desc:'Handle a downtown incident.'}], startNews:['Hero Nexus recruits new members.'] },
+  { id:'dragonfall', name:'Dragonfall Kingdoms', desc:'Rule kingdoms, tame dragons, shape a realm.', theme:'Medieval Fantasy', icon:'🐉', villain:'King Malakar', factions:['Emberhold','Frostmere','Thornvale','Goldcrest'], locations:['Throne Room','Stables','Battlefield','Dragon Pit'], startStat:{Combat:10,Leadership:5,Diplomacy:5,'Dragon Taming':5,Strategy:5}, startRels:[{name:'Lord Eryn',val:60,dir:'friend'},{name:'Lord Kael',val:-20,dir:'rival'}], startItems:['Sword','Armor','Map'], startQuests:[{name:'Tournament',desc:'Prove your worth in the arena.'}], startNews:['Dragon sightings reported near the border.'] },
+  { id:'shadow', name:'Shadow Guild', desc:'Join a secret network of spies and power brokers.', theme:'Spy Thriller', icon:'🕶️', villain:'The Black Regent', factions:['Night Ravens','Phantom Circle','Iron Blades','Whisper Network'], locations:['Safe House','Drop Point','Club Red','Rooftop'], startStat:{Stealth:10,Deception:5,Combat:5,Hacking:5,Persuasion:5}, startRels:[{name:'Handler Zero',val:60,dir:'friend'},{name:'The Fox',val:-20,dir:'rival'}], startItems:['Lockpick','Disguise','Encrypted Phone'], startQuests:[{name:'First Contract',desc:'Complete your first guild assignment.'}], startNews:['Shadow Guild activity rises in the east.'] },
+  { id:'neon', name:'Neon Domination', desc:'Rise through a mega-city ruled by AI and corporations.', theme:'Cyberpunk', icon:'🤖', villain:'Director Kron', factions:['Helix Industries','NovaCore','Synapse Systems','Apex Dynamics'], locations:['Hideout','Server Farm','Club Neon','Rooftop'], startStat:{Hacking:10,Combat:5,Persuasion:5,Cybernetics:5,Business:5}, startRels:[{name:'Sable',val:60,dir:'friend'},{name:'Director Kron',val:-20,dir:'rival'}], startItems:['Cyberdeck','Neural Implant','Cred Chip'], startQuests:[{name:'First Hack',desc:'Infiltrate a corporate system.'}], startNews:['Corps tighten security after recent breaches.'] },
+  { id:'odyssey', name:'Eternal Odyssey', desc:'Journey through mythical realms and ancient trials.', theme:'Mythological', icon:'⚔️', villain:'The Eternal King', factions:['Dawnseekers','Moonwardens','Stormforged','Celestial Keepers'], locations:['Oracle Temple','Forest of Trials','Ancient Ruins','Village'], startStat:{Combat:10,Wisdom:5,Exploration:5,'Ancient Lore':5,Leadership:5}, startRels:[{name:'Sage Pyrene',val:60,dir:'friend'},{name:'General Vorn',val:-20,dir:'rival'}], startItems:['Sword','Shield','Torch'], startQuests:[{name:'Oracle Prophecy',desc:'Seek the Oracle Temple blessing.'}], startNews:['Ancient ruins unearthed in the valley.'] },
 ]
+
+const getAct = (progress:number) => {
+  if(progress<=4) return {id:1,name:'Awakening',range:[0,4]}
+  if(progress<=9) return {id:2,name:'Rising Stakes',range:[5,9]}
+  if(progress<=14) return {id:3,name:'Crisis',range:[10,14]}
+  if(progress<=19) return {id:4,name:'Confrontation',range:[15,19]}
+  return {id:5,name:'Climax',range:[20,24]}
+}
 
 export default function Play() {
   const [screen, setScreen] = useState('splash')
@@ -54,6 +62,78 @@ export default function Play() {
   const [loading, setLoading] = useState(false)
   const historyRef = useRef<any[]>([])
 
+  const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
+    const p = playerOverride ?? player
+    const w = worldOverride ?? world
+    if(!w) return null
+    const act = getAct(p.storyProgress)
+    const sceneInAct = p.storyProgress - act.range[0] + 1
+    const totalInAct = act.range[1] - act.range[0] + 1
+    const system = `You are the game master for REVENIO, a linear alternate-life simulation game.
+
+WORLD: ${w.name} | VILLAIN: ${w.villain} | FACTIONS: ${w.factions.join(', ')}
+
+PLAYER: ${p.name}, Level ${p.level}, Traits: ${p.traits.join(', ')}, Goal: ${p.goal}
+
+STATS: ${JSON.stringify(p.skills)}
+
+RELATIONSHIPS: ${JSON.stringify(p.relationships.map((r:any)=>({name:r.name,val:r.val,dir:r.dir})))}
+
+INVENTORY: ${p.inventory.join(', ')||'none'}
+
+QUESTS: ${p.quests.filter((q:any)=>!q.done).map((q:any)=>q.name).join(', ')||'none'}
+
+DECISIONS: ${p.majorDecisions.slice(-5).join(' | ')||'none'}
+
+ACT: ${act.id} of 5 — ${act.name} | Scene ${sceneInAct} of ${totalInAct} | Overall: ${p.storyProgress} of 24
+
+NARRATIVE RULES:
+
+Act 1 scenes 0-4: Establish world, early wins, hint at villain, introduce key characters
+
+Act 2 scenes 5-9: Stakes rise, rival confronts player directly, force a hard loyalty choice
+
+Act 3 scenes 10-14: Crisis hits, something the player built is threatened, villain makes a move
+
+Act 4 scenes 15-19: Direct confrontation begins, reference all past decisions, villain appears in person
+
+Act 5 scenes 20-24: Climax and resolution. Scene 24 is the final battle. Set isFinalScene true on scene 24 only.
+
+Every scene must reference at least one past player decision.
+
+Stats affect the narrative. High courage means bold action. Low stamina means fatigue shows.
+
+Scene text is 60 to 80 words, present tense, cinematic.
+
+Always return exactly 4 choices unless isFinalScene is true.
+
+Always change at least 2 stats. XP between 10 and 25.
+
+RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
+
+{"sceneTitle":"title","sceneText":"60-80 words present tense","choices":[{"id":"A","text":"choice","type":"bold","risk":"Low","hint":"hint"},{"id":"B","text":"choice","type":"strategic","risk":"Medium","hint":"hint"},{"id":"C","text":"choice","type":"loyal","risk":"High","hint":"hint"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["one headline"],"worldStateUpdates":{},"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
+
+    historyRef.current.push({role:'user',content:msg})
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:historyRef.current})
+      })
+      const data = await res.json()
+      const raw = (data.content||[]).map((c:any)=>c.text||'').join('')
+      const match = raw.match(/\{[\s\S]*\}/)
+      if(!match) throw new Error('no json')
+      const result = JSON.parse(match[0])
+      historyRef.current.push({role:'assistant',content:raw})
+      if(historyRef.current.length>20) historyRef.current=historyRef.current.slice(-20)
+      return result
+    } catch(e) {
+      historyRef.current.pop()
+      return null
+    }
+  }
+
   const toggleTrait = (t:string) => {
     setPlayer(p=>({...p,traits:p.traits.includes(t)?p.traits.filter((x:string)=>x!==t):p.traits.length<3?[...p.traits,t]:p.traits}))
   }
@@ -63,11 +143,6 @@ export default function Play() {
     if(player.traits.length<1){alert('Pick at least 1 trait');return}
     if(!player.goal){alert('Choose a goal');return}
     setScreen('worldselect')
-  }
-
-  const callAI = async (prompt:string, player:any, world:any):Promise<any> => {
-    // TODO: AI integration
-    return null
   }
 
   const handleSelectWorld = async (w:any) => {
