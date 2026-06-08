@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
 import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as PlayRouteImport } from './routes/play'
 import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as ExperienceRouteImport } from './routes/experience'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -24,6 +25,11 @@ const WorldsRoute = WorldsRouteImport.update({
 const SimulationRoute = SimulationRouteImport.update({
   id: '/simulation',
   path: '/simulation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayRoute = PlayRouteImport.update({
+  id: '/play',
+  path: '/play',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HardwareRoute = HardwareRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/play': typeof PlayRoute
   '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/play': typeof PlayRoute
   '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
+  '/play': typeof PlayRoute
   '/simulation': typeof SimulationRoute
   '/worlds': typeof WorldsRoute
 }
@@ -79,16 +88,25 @@ export interface FileRouteTypes {
     | '/auth'
     | '/experience'
     | '/hardware'
+    | '/play'
     | '/simulation'
     | '/worlds'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/experience' | '/hardware' | '/simulation' | '/worlds'
+  to:
+    | '/'
+    | '/auth'
+    | '/experience'
+    | '/hardware'
+    | '/play'
+    | '/simulation'
+    | '/worlds'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/experience'
     | '/hardware'
+    | '/play'
     | '/simulation'
     | '/worlds'
   fileRoutesById: FileRoutesById
@@ -98,6 +116,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ExperienceRoute: typeof ExperienceRoute
   HardwareRoute: typeof HardwareRoute
+  PlayRoute: typeof PlayRoute
   SimulationRoute: typeof SimulationRoute
   WorldsRoute: typeof WorldsRoute
 }
@@ -116,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/simulation'
       fullPath: '/simulation'
       preLoaderRoute: typeof SimulationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play': {
+      id: '/play'
+      path: '/play'
+      fullPath: '/play'
+      preLoaderRoute: typeof PlayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hardware': {
@@ -154,9 +180,20 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ExperienceRoute: ExperienceRoute,
   HardwareRoute: HardwareRoute,
+  PlayRoute: PlayRoute,
   SimulationRoute: SimulationRoute,
   WorldsRoute: WorldsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
