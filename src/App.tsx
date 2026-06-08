@@ -159,7 +159,7 @@ export default function App() {
             {WORLDS.map(w => (
               <button
                 key={w.name}
-                onClick={() => { setWorld(w.name); setScreen("game"); }}
+                onClick={() => { setWorld(w); setScreen("game"); }}
                 style={{
                   background: PANEL, border: `1px solid ${BORDER}`, color: GOLD,
                   padding: 20, textAlign: "left", cursor: "pointer", fontFamily: "Cinzel, serif",
@@ -168,7 +168,9 @@ export default function App() {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; }}
               >
-                <div style={{ fontSize: 16, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>{w.name}</div>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{w.icon}</div>
+                <div style={{ fontSize: 16, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 4 }}>{w.name}</div>
+                <div style={{ fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase", color: GOLD, opacity: 0.6, marginBottom: 8 }}>{w.theme}</div>
                 <div style={{ fontSize: 13, color: "#9a8550", fontFamily: "serif", lineHeight: 1.5 }}>{w.desc}</div>
               </button>
             ))}
