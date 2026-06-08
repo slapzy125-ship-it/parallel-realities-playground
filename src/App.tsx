@@ -1,4 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
+type Choice = { id: string; text: string; type: string; risk: string; hint: string };
+type Scene = {
+  sceneTitle: string;
+  sceneText: string;
+  choices: Choice[];
+  statChanges?: Record<string, number>;
+  xpGained?: number;
+  relationshipChanges?: { name: string; change: number; dir: string }[];
+  newsUpdates?: string[];
+  isFinalScene?: boolean;
+  legacyTitle?: string;
+  legacyEnding?: string;
+};
+type Msg = { role: "user" | "assistant"; content: string };
 
 type Screen = "splash" | "creation" | "worldselect" | "game";
 
