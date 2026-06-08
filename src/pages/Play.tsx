@@ -121,24 +121,23 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
 
     historyRef.current.push({role:'user',content:msg})
     try {
-      console.log('Calling edge function...')
       const { data, error } = await supabase.functions.invoke('ai-scene', {
         body: { system, messages: historyRef.current }
       })
-      console.log('Response data:', data)
-      console.log('Response error:', error)
-      if (error) throw error
+      console.log('Full data:', JSON.stringify(data))
+      console.log('Full error:', JSON.stringify(error))
+      if (error) throw new Error(JSON.stringify(error))
+      if (data?.type === 'error') throw new Error(JSON.stringify(data.error))
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
-      console.log('Raw text:', raw)
+      console.log('Raw:', raw)
       const match = raw.match(/\{[\s\S]*\}/)
-      if (!match) throw new Error('no json found in response')
+      if (!match) throw new Error('no json found')
       const result = JSON.parse(match[0])
-      console.log('Parsed scene:', result)
       historyRef.current.push({role:'assistant',content:raw})
       if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20)
       return result
     } catch(e) {
-      console.log('ERROR in callAI:', e)
+      console.log('FULL ERROR:', e)
       historyRef.current.pop()
       return null
     }
