@@ -791,6 +791,8 @@ function SimulationPage() {
   const [scene, setScene] = useState<Scene | null>(null);
   const [history, setHistory] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUserMsg, setLastUserMsg] = useState<string | null>(null);
   const [pending, setPending] = useState<{ name:string;age:number;traits:string[];goal:string } | null>(null);
 
   useEffect(() => {
