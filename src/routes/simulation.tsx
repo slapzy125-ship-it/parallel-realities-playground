@@ -32,13 +32,14 @@ const WORLDS: World[] = [
   { id: "odyssey", name: "Eternal Odyssey", icon: "⚡", tag: "Modern Myth", theme: "Demigods, oracles, monsters bleeding into the modern world", villain: "The Eternal King", factions: ["Dawnseekers", "Moonwardens", "Stormforged", "Celestial Keepers"] },
 ];
 
-const STORY_ACTS = [
+type Act = { id: number; name: string; range: [number, number]; desc: string };
+const STORY_ACTS: Act[] = [
   { id: 1, name: "The Beginning", range: [0, 4], desc: "Your story starts here." },
   { id: 2, name: "Rising Tension", range: [5, 9], desc: "The world reacts to you." },
   { id: 3, name: "The Crisis", range: [10, 14], desc: "Everything is at stake." },
   { id: 4, name: "Confrontation", range: [15, 19], desc: "Face your greatest challenge." },
   { id: 5, name: "The Legend", range: [20, 24], desc: "Your legacy is decided." },
-] as const;
+];
 
 const getCurrentAct = (progress: number) =>
   STORY_ACTS.find(a => progress >= a.range[0] && progress <= a.range[1]) ?? STORY_ACTS[4];
