@@ -377,25 +377,63 @@ export default function App() {
         </aside>
 
         {/* MAIN AREA */}
-        <main style={{ ...panel, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                width: 48, height: 48, margin: "0 auto",
-                border: `3px solid ${BORDER}`,
-                borderTopColor: GOLD,
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            <p style={{ marginTop: 20, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#9a8550" }}>
-              Weaving Your Story
-            </p>
-            <p style={{ marginTop: 8, fontSize: 11, color: "#6a5a30", fontFamily: "serif" }}>
-              {w.icon} {w.name}
-            </p>
-          </div>
+        <main style={{ ...panel, minHeight: 400, display: "flex", flexDirection: "column" }}>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          {loading && (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  width: 48, height: 48, margin: "0 auto",
+                  border: `3px solid ${BORDER}`, borderTopColor: GOLD,
+                  borderRadius: "50%", animation: "spin 1s linear infinite",
+                }} />
+                <p style={{ marginTop: 20, fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#9a8550" }}>
+                  Weaving Your Story
+                </p>
+              </div>
+            </div>
+          )}
+          {!loading && errMsg && (
+            <div style={{ padding: 20, textAlign: "center" }}>
+              <p style={{ color: "#c0392b", fontSize: 12, letterSpacing: "0.15em", textTransform: "uppercase" }}>Story Interrupted</p>
+              <p style={{ color: "#9a8550", fontSize: 12, marginTop: 8, fontFamily: "serif" }}>{errMsg}</p>
+              <button onClick={() => callAI(null)} style={{ ...btnBase, marginTop: 16, fontSize: 11 }}>Retry</button>
+            </div>
+          )}
+          {!loading && !errMsg && scene && (
+            <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#9a8550" }}>Scene</div>
+                <h2 style={{ margin: "6px 0 0", fontSize: 24, color: GOLD, letterSpacing: "0.1em" }}>{scene.sceneTitle}</h2>
+              </div>
+              <p style={{ fontFamily: "serif", color: "#d8c891", fontSize: 16, lineHeight: 1.7, margin: 0 }}>
+                {scene.sceneText}
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginTop: 8 }}>
+                {scene.choices.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => onChoice(c)}
+                    style={{
+                      background: "transparent", color: GOLD,
+                      border: `1px solid ${BORDER}`, padding: 12,
+                      fontFamily: "Cinzel, serif", cursor: "pointer",
+                      textAlign: "left", transition: "all 0.2s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = GOLD; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, letterSpacing: "0.2em", color: "#9a8550", marginBottom: 6 }}>
+                      <span>{c.id} · {c.type.toUpperCase()}</span>
+                      <span>RISK: {c.risk}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: GOLD, marginBottom: 6 }}>{c.text}</div>
+                    <div style={{ fontSize: 11, color: "#6a5a30", fontFamily: "serif", fontStyle: "italic" }}>{c.hint}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </main>
 
         {/* RIGHT SIDEBAR */}
