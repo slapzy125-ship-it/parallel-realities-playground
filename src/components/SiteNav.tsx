@@ -37,7 +37,7 @@ export function SiteNav() {
     { to: "/worlds", label: "Worlds" },
     { to: "/experience", label: "Experience" },
     { to: "/hardware", label: "Hardware" },
-    { to: "/simulation", label: "Simulation" },
+    { to: "/play", label: "Play" },
   ];
 
   return (
