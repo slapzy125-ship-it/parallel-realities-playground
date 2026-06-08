@@ -44,6 +44,14 @@ const WORLDS = [
   { id:'odyssey', name:'Eternal Odyssey', desc:'Journey through mythical realms and ancient trials.', theme:'Mythological', icon:'⚔️', villain:'The Eternal King', factions:['Dawnseekers','Moonwardens','Stormforged','Celestial Keepers'], locations:['Oracle Temple','Forest of Trials','Ancient Ruins','Village'], startStat:{Combat:10,Wisdom:5,Exploration:5,'Ancient Lore':5,Leadership:5}, startRels:[{name:'Sage Pyrene',val:60,dir:'friend'},{name:'General Vorn',val:-20,dir:'rival'}], startItems:['Sword','Shield','Torch'], startQuests:[{name:'Oracle Prophecy',desc:'Seek the Oracle Temple blessing.'}], startNews:['Ancient ruins unearthed in the valley.'] },
 ]
 
+const getAct = (progress:number) => {
+  if(progress<=4) return {id:1,name:'Awakening',range:[0,4]}
+  if(progress<=9) return {id:2,name:'Rising Stakes',range:[5,9]}
+  if(progress<=14) return {id:3,name:'Crisis',range:[10,14]}
+  if(progress<=19) return {id:4,name:'Confrontation',range:[15,19]}
+  return {id:5,name:'Climax',range:[20,24]}
+}
+
 export default function Play() {
   const [screen, setScreen] = useState('splash')
   const [player, setPlayer] = useState(defaultPlayer())
