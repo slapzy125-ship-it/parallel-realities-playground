@@ -420,13 +420,14 @@ function notifColor(k: Notif['kind']) {
 // ─── GAME SCREEN ──────────────────────────────────────────────────────────────
 function GameScreen({
   player, setPlayer, scene, setScene, history, setHistory,
-  loading, callAI, onSave, onEndChapter, onMenu,
+  loading, callAI, error, onRetry, onSave, onEndChapter, onMenu,
 }: {
   player: PlayerState; setPlayer: (p:PlayerState)=>void;
   scene: Scene | null; setScene: (s:Scene|null)=>void;
   history: Msg[]; setHistory: (m:Msg[])=>void;
   loading: boolean;
   callAI: (userMsg: string) => Promise<void>;
+  error: string | null; onRetry: ()=>void;
   onSave: ()=>void; onEndChapter: ()=>void; onMenu: ()=>void;
 }) {
   const [notifs, setNotifs] = useState<Notif[]>([]);
