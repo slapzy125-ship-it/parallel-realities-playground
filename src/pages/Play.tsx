@@ -518,7 +518,126 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
         </div>
       </div>
     )
+  if(screen==='legacy'){
+
+    const topStat = Object.entries(player.skills).sort((a,b)=>Number(b[1])-Number(a[1]))[0]
+
+    return (
+
+      <div style={{...G.app,display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 20px',background:'radial-gradient(ellipse at center,#0F0F20,#0A0A0C)'}}>
+
+        {fonts}
+
+        <div style={{maxWidth:'700px',width:'100%'}}>
+
+          <div style={{textAlign:'center',marginBottom:'32px'}}>
+
+            <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'8px'}}>{world?.name?.toUpperCase()}</div>
+
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,6vw,42px)',fontWeight:900,color:'#F0C060',letterSpacing:'4px'}}>{player.name.toUpperCase()}</div>
+
+            <div style={{...G.muted,fontSize:'14px',letterSpacing:'3px',marginTop:'8px'}}>{scene?.legacyTitle||'A Legend in the Making'}</div>
+
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',marginBottom:'32px'}}>
+
+            {[['LEVEL',player.level],['SCENES',player.storyProgress],['ACHIEVEMENTS',player.achievements.length],['REPUTATION',player.reputation]].map(([l,v])=>(
+
+              <div key={String(l)} style={{background:'#1A1A24',padding:'16px',textAlign:'center',borderRadius:'2px'}}>
+
+                <div style={{...G.gold,fontSize:'9px',letterSpacing:'3px',marginBottom:'6px'}}>{l}</div>
+
+                <div style={{fontFamily:"'Orbitron',monospace",fontSize:'24px',color:'#F0C060'}}>{v}</div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+          {topStat && (
+
+            <div style={{...G.surface,marginBottom:'20px'}}>
+
+              <div style={{...G.gold,fontSize:'9px',letterSpacing:'4px',marginBottom:'8px'}}>TOP SKILL</div>
+
+              <div style={{fontSize:'16px',fontWeight:600}}>{topStat[0]}: {Math.round(Number(topStat[1]))}</div>
+
+            </div>
+
+          )}
+
+          <div style={{...G.surface,marginBottom:'20px'}}>
+
+            <div style={{...G.gold,fontSize:'9px',letterSpacing:'4px',borderBottom:'1px solid #2A2A3A',paddingBottom:'6px',marginBottom:'10px'}}>YOUR STORY</div>
+
+            {sceneHistory.map((t,i)=> (
+
+              <div key={i} style={{display:'flex',gap:'12px',padding:'6px 0',borderBottom:'1px solid #2A2A3A',alignItems:'center'}}>
+
+                <span style={{fontFamily:"'Orbitron',monospace",fontSize:'11px',color:'#8B6914',minWidth:'20px'}}>{i+1}</span>
+
+                <span style={{fontSize:'13px'}}>{t}</span>
+
+              </div>
+
+            ))}
+
+          </div>
+
+          {player.majorDecisions.length>0 && (
+
+            <div style={{...G.surface,marginBottom:'20px'}}>
+
+              <div style={{...G.gold,fontSize:'9px',letterSpacing:'4px',borderBottom:'1px solid #2A2A3A',paddingBottom:'6px',marginBottom:'10px'}}>KEY DECISIONS</div>
+
+              {player.majorDecisions.map((d,i)=> (
+
+                <div key={i} style={{...G.muted,fontSize:'13px',padding:'4px 0'}}>· {d}</div>
+
+              ))}
+
+            </div>
+
+          )}
+
+          {player.achievements.length>0 && (
+
+            <div style={{...G.surface,marginBottom:'24px'}}>
+
+              <div style={{...G.gold,fontSize:'9px',letterSpacing:'4px',marginBottom:'10px'}}>ACHIEVEMENTS</div>
+
+              <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+
+                {player.achievements.map((a,i)=> (
+
+                  <span key={i} style={{background:'#8B6914',color:'#F0C060',fontSize:'11px',padding:'4px 12px',letterSpacing:'1px',borderRadius:'2px'}}>🏆 {a}</span>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          )}
+
+          <div style={{display:'flex',gap:'12px',justifyContent:'center'}}>
+
+            <button style={G.btnGold} onClick={()=>{setWorld(null);setScene(null);setSceneHistory([]);setNotifs([]);setPlayer(defaultPlayer());setScreen('worldselect')}}>NEW WORLD</button>
+
+            <button style={G.btnGhost} onClick={()=>{setWorld(null);setScene(null);setSceneHistory([]);setNotifs([]);setPlayer(defaultPlayer());setScreen('creation')}}>NEW CHARACTER</button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    )
+
   }
 
   return <div style={{...G.app, ...G.center}}>{fonts}<div style={G.gold}>Loading...</div></div>
+
 }
