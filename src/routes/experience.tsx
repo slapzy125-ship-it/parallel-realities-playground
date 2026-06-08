@@ -169,8 +169,12 @@ function Experience() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Character Slots</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future World Access</li>
               </ul>
-              <button className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
-                Become A Legend
+              <button
+                disabled={loading}
+                onClick={() => handleSubscribe("revenio_legend_monthly", "legend")}
+                className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)] disabled:opacity-50"
+              >
+                {isActive && tier === "legend" ? "Current Plan" : loading ? "Loading..." : "Become A Legend"}
               </button>
             </div>
 
@@ -189,8 +193,12 @@ function Experience() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Revenio One Discounts</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future Hardware Benefits</li>
               </ul>
-              <button className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
-                Enter Infinite
+              <button
+                disabled={loading}
+                onClick={() => handleSubscribe("revenio_infinite_monthly", "infinite")}
+                className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500 disabled:opacity-50"
+              >
+                {isActive && tier === "infinite" ? "Current Plan" : loading ? "Loading..." : "Enter Infinite"}
               </button>
             </div>
           </div>
