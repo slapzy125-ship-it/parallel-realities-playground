@@ -484,7 +484,7 @@ function SimulationPage() {
     const justFinished = updated.storyProgress - 1; // storyProgress was incremented after last scene
     const finishedAct = STORY_ACTS.find(a => justFinished === a.range[1]);
     if (finishedAct && finishedAct.id < 5) {
-      setPendingAct(STORY_ACTS[finishedAct.id]); // next act
+      setPendingAct(STORY_ACTS[finishedAct.id] as typeof STORY_ACTS[number]); // next act
       // store the choice to send after transition
       void choice;
       const userMsg = `The player chose: "${choice.text}" (${choice.type}, risk ${choice.risk}). Continue the story into Act ${finishedAct.id + 1}.`;
