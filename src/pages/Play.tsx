@@ -62,6 +62,78 @@ export default function Play() {
   const [loading, setLoading] = useState(false)
   const historyRef = useRef<any[]>([])
 
+  const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
+    const p = playerOverride ?? player
+    const w = worldOverride ?? world
+    if(!w) return null
+    const act = getAct(p.storyProgress)
+    const sceneInAct = p.storyProgress - act.range[0] + 1
+    const totalInAct = act.range[1] - act.range[0] + 1
+    const system = `You are the game master for REVENIO, a linear alternate-life simulation game.
+
+WORLD: ${w.name} | VILLAIN: ${w.villain} | FACTIONS: ${w.factions.join(', ')}
+
+PLAYER: ${p.name}, Level ${p.level}, Traits: ${p.traits.join(', ')}, Goal: ${p.goal}
+
+STATS: ${JSON.stringify(p.skills)}
+
+RELATIONSHIPS: ${JSON.stringify(p.relationships.map((r:any)=>({name:r.name,val:r.val,dir:r.dir})))}
+
+INVENTORY: ${p.inventory.join(', ')||'none'}
+
+QUESTS: ${p.quests.filter((q:any)=>!q.done).map((q:any)=>q.name).join(', ')||'none'}
+
+DECISIONS: ${p.majorDecisions.slice(-5).join(' | ')||'none'}
+
+ACT: ${act.id} of 5 — ${act.name} | Scene ${sceneInAct} of ${totalInAct} | Overall: ${p.storyProgress} of 24
+
+NARRATIVE RULES:
+
+Act 1 scenes 0-4: Establish world, early wins, hint at villain, introduce key characters
+
+Act 2 scenes 5-9: Stakes rise, rival confronts player directly, force a hard loyalty choice
+
+Act 3 scenes 10-14: Crisis hits, something the player built is threatened, villain makes a move
+
+Act 4 scenes 15-19: Direct confrontation begins, reference all past decisions, villain appears in person
+
+Act 5 scenes 20-24: Climax and resolution. Scene 24 is the final battle. Set isFinalScene true on scene 24 only.
+
+Every scene must reference at least one past player decision.
+
+Stats affect the narrative. High courage means bold action. Low stamina means fatigue shows.
+
+Scene text is 60 to 80 words, present tense, cinematic.
+
+Always return exactly 4 choices unless isFinalScene is true.
+
+Always change at least 2 stats. XP between 10 and 25.
+
+RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS NO EXTRA TEXT:
+
+{"sceneTitle":"title","sceneText":"60-80 words present tense","choices":[{"id":"A","text":"choice","type":"bold","risk":"Low","hint":"hint"},{"id":"B","text":"choice","type":"strategic","risk":"Medium","hint":"hint"},{"id":"C","text":"choice","type":"loyal","risk":"High","hint":"hint"},{"id":"D","text":"Write your own path","type":"custom","risk":"Variable","hint":"anything goes"}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":2,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["one headline"],"worldStateUpdates":{},"isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
+
+    historyRef.current.push({role:'user',content:msg})
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,messages:historyRef.current})
+      })
+      const data = await res.json()
+      const raw = (data.content||[]).map((c:any)=>c.text||'').join('')
+      const match = raw.match(/\{[\s\S]*\}/)
+      if(!match) throw new Error('no json')
+      const result = JSON.parse(match[0])
+      historyRef.current.push({role:'assistant',content:raw})
+      if(historyRef.current.length>20) historyRef.current=historyRef.current.slice(-20)
+      return result
+    } catch(e) {
+      historyRef.current.pop()
+      return null
+    }
+  }
+
   const toggleTrait = (t:string) => {
     setPlayer(p=>({...p,traits:p.traits.includes(t)?p.traits.filter((x:string)=>x!==t):p.traits.length<3?[...p.traits,t]:p.traits}))
   }
@@ -71,11 +143,6 @@ export default function Play() {
     if(player.traits.length<1){alert('Pick at least 1 trait');return}
     if(!player.goal){alert('Choose a goal');return}
     setScreen('worldselect')
-  }
-
-  const callAI = async (prompt:string, player:any, world:any):Promise<any> => {
-    // TODO: AI integration
-    return null
   }
 
   const handleSelectWorld = async (w:any) => {
