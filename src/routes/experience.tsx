@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { useSubscription } from "@/hooks/useSubscription";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/experience")({
   head: () => ({
@@ -42,9 +47,30 @@ const features = [
 ];
 
 function Experience() {
+  const { openCheckout, loading } = usePaddleCheckout();
+  const { tier, isActive } = useSubscription();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      toast.success("Welcome aboard! Your subscription is being activated.");
+      window.history.replaceState({}, "", "/experience");
+    }
+  }, []);
+
+  const handleSubscribe = (priceId: string, tierName: "legend" | "infinite") => {
+    if (isActive && tier === tierName) {
+      toast.info(`You're already on Revenio ${tierName === "legend" ? "Legend" : "Infinite"}.`);
+      return;
+    }
+    openCheckout({ priceId });
+  };
+
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+      <PaymentTestModeBanner />
       <SiteNav />
+
 
       {/* Hero */}
       <section className="relative pt-40 pb-20 px-6 text-center">
@@ -143,8 +169,12 @@ function Experience() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Character Slots</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future World Access</li>
               </ul>
-              <button className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
-                Become A Legend
+              <button
+                disabled={loading}
+                onClick={() => handleSubscribe("revenio_legend_monthly", "legend")}
+                className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)] disabled:opacity-50"
+              >
+                {isActive && tier === "legend" ? "Current Plan" : loading ? "Loading..." : "Become A Legend"}
               </button>
             </div>
 
@@ -163,8 +193,12 @@ function Experience() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Revenio One Discounts</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future Hardware Benefits</li>
               </ul>
-              <button className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
-                Enter Infinite
+              <button
+                disabled={loading}
+                onClick={() => handleSubscribe("revenio_infinite_monthly", "infinite")}
+                className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500 disabled:opacity-50"
+              >
+                {isActive && tier === "infinite" ? "Current Plan" : loading ? "Loading..." : "Enter Infinite"}
               </button>
             </div>
           </div>
