@@ -64,6 +64,7 @@ export default function Play() {
   const [nextAct, setNextAct] = useState<any>(null)
   const [showTransition, setShowTransition] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [historyOpen, setHistoryOpen] = useState(false)
   const historyRef = useRef<any[]>([])
 
   const callAI = async (msg:string, playerOverride?:any, worldOverride?:any):Promise<any> => {
