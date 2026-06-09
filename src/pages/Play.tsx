@@ -462,12 +462,530 @@ export default function Play() {
     }
   }, [trophyQueue, currentTrophy])
 
-  return (
-    <div style={G.app}>
+  const pickVillain = (worldId: string) => {
+    const pool = VILLAIN_POOLS[worldId] || []
+    if (pool.length === 0) return null
+    return {...pool[Math.floor(Math.random() * pool.length)]}
+  }
+
+  const buildOpeningPrompt = (p: any, w: any, item: any): string => {
+    const itemDesc = item ? `Their custom item: ${item.displayName || item.name}. ${item.meaning || item.desc || ''}` : ''
+    const openers: Record<string, string> = {
+      arcane: `Write the opening scene of a Harry Potter inspired magic school story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}. ${itemDesc} First day at Arcane Academy. The Sorting Ceremony is tonight. Prof. Aldric is warm but watchful. Kira Voss dismisses ${p.name} immediately. Write a vivid specific scene with real magical world details. Include one line of realistic dialogue. End with a genuine choice about how ${p.name} presents themselves at the ceremony. Reference their wand naturally.`,
+      champions: `Write the opening scene of a realistic football career story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, position: ${p.position || item?.name || 'unknown'}, nationality: ${p.nationality}. They have arrived for their first trial. Coach Ramos has 40 players to assess this week. Luca Moretti arrived yesterday and has already impressed. Jamie Osei watches ${p.name} with competitive eyes. Create a scene set in a specific training drill for their position. Use real football tactical language. Include one line of coaching dialogue. End with a real tactical or personal decision.`,
+      galactic: `Write the opening scene of a Star Wars inspired space epic for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}. ${itemDesc} They have just chosen a ${item?.color || 'unknown'} lightsaber which means ${item?.meaning || ''}. Initial faction alignment: ${item?.faction || 'undecided'}. Commander Lyra is their first contact. Create a vivid opening aboard a frontier vessel. Include one line of dialogue. End with a decision that reveals who ${p.name} is.`,
+      hero: `Write the opening scene of a superhero origin story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, power: ${p.customItem?.name || item?.name || 'unknown'}. Just received their hero licence. Director Crane is demanding. Shadow Wolf resents being their supervisor. Create a specific opening at Hero HQ. Include one line of dialogue. End with a choice that reveals who ${p.name} will become.`,
+      dragonfall: `Write the opening scene of a Game of Thrones inspired medieval story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}. They have arrived at the regional tournament. Lord Eryn believes in them but the other lords are skeptical. Lord Kael has paid for the best fighter in the region to face ${p.name}. Their dragon has not yet bonded with them — it must be earned. Create a vivid scene with political tension and specific medieval details. Include one line of dialogue. End with a strategic decision.`,
+      shadow: `Write the opening scene of an Assassins Creed inspired story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, creed: ${item?.name || 'unknown'}. They have just completed initiation and received their hidden blade. Handler Zero is cold and professional. Asha watches with uncertain alliance. Create a scene with real assassin brotherhood texture. Include one line of dialogue from Handler Zero. End with a real decision about the first job.`,
+      neon: `Write the opening scene of a Cyberpunk inspired story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, augmentation: ${item?.name || 'unknown'} — ${item?.desc || ''}. Operating in a city where the villain is 18 months from completing a plan to merge human consciousness with AI. Sable is their contact — urgent and paranoid. Create a vivid cyberpunk opening with specific technology details. Include one line of dialogue. End with a real first move decision where every option has a genuine cost.`,
+      odyssey: `Write the opening scene of a Greek mythology story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, divine weapon: ${item?.name || 'unknown'} — ${item?.desc || ''}. They have arrived at the Oracle Temple after weeks of travel. Sage Pyrene has been waiting specifically for them. General Vorn's soldiers block the entrance demanding tribute. Create a vivid scene with specific Greek world details. Include one line of cryptic dialogue from Pyrene. End with a real decision about how to get past Vorn's soldiers.`,
+    }
+    return openers[w.id] ?? `${p.name} enters ${w.name} for the first time. Create a dramatic opening scene that pulls them in immediately.`
+  }
+
+  const buildSystemPrompt = (p: any, w: any): string => {
+    const act = getAct(p.storyProgress)
+    const sceneInAct = p.storyProgress - act.range[0] + 1
+    const totalInAct = act.range[1] - act.range[0] + 1
+    const villain = p.villain
+    const newsSource = WORLD_NEWS_SOURCE[w.id] || 'World News'
+    const chapterName = CHAPTER_NAMES[w.id]?.[p.currentChapter] || 'The Journey'
+
+    return `You are the AI game master for REVENIO. Generate short punchy video game scenes. Think cutscene, not novel chapter.
+
+WORLD: ${w.name}
+WORLD STYLE: ${
+  w.id==='arcane'?'Harry Potter. Warm specific magical world details. Characters feel like real students. Show the world through small details — a moving portrait that looks worried, a spell that smells like burnt sugar, a corridor colder than it should be.':
+  w.id==='champions'?'Real football journalism. Tactical, specific, emotional. Use real football language — pressing triggers, half-spaces, diagonal runs, defensive shape. Performance ratings, wage figures, and transfer fees are real numbers. Coaches speak like real managers.':
+  w.id==='galactic'?'Star Wars. Cinematic and sparse. Big stakes in small moments. The Force is real and mysterious. Dialogue is clipped and purposeful.':
+  w.id==='dragonfall'?'Game of Thrones. Political and brutal. Nobody is safe. Characters have genuine competing interests. Violence has weight. Dragons are rare and terrifying.':
+  w.id==='shadow'?'Assassins Creed. Brotherhood weight, moral grey area. The creed is taken seriously. Every kill has a reason. Trust is earned slowly and broken quickly.':
+  w.id==='neon'?'Cyberpunk 2077. Neon and grit. Corporate cynicism alongside street loyalty. Augmentations have side effects and identity costs. The city is a character.':
+  w.id==='odyssey'?'Greek mythology. Gods are real and petty and magnificent. Fate is a weight you carry. Mythological creatures have specific weaknesses from actual mythology.':
+  'Cinematic game world. Specific and vivid.'}
+VILLAIN THIS RUN: ${villain ? `${villain.name} — ${villain.motivation || villain.description || ''}` : 'Unknown'}
+CHAPTER: ${p.currentChapter + 1} — ${chapterName}
+PLAYER: ${p.name}, Age ${p.careerStats?.age || p.age}, Level ${p.level}
+NATIONALITY: ${p.nationality || 'Unknown'}
+TRAITS: ${p.traits.join(', ')}
+GOAL: ${p.goal}
+POSITION: ${p.position || 'Unknown'}
+FACTION: ${p.currentFaction || 'None yet'}
+CUSTOM ITEM: ${p.inventory.slice(0, 3).join(', ') || 'None'}
+STATS: ${JSON.stringify(p.skills)}
+RELATIONSHIPS: ${JSON.stringify(p.relationships.slice(0, 6).map((r: any) => ({name: r.name, type: r.type, val: r.val, dir: r.dir})))}
+ACTIVE QUESTS: ${p.quests.filter((q: any) => !q.done).slice(0, 3).map((q: any) => q.name).join(', ') || 'None'}
+KEY PAST DECISIONS: ${p.majorDecisions.slice(-6).join(' | ') || 'None yet'}
+STORY PROGRESS: ${p.storyProgress}
+ACT: ${act.id} of 5 — ${act.name}
+SCENE: ${sceneInAct} of ${totalInAct} in this act
+${w.id === 'champions' ? `CAREER: Apps ${p.careerStats?.appearances || 0}, Goals ${p.careerStats?.goals || 0}, Assists ${p.careerStats?.assists || 0}, Avg Rating ${p.careerStats?.averageRating?.toFixed(1) || 'N/A'}, Club ${p.worldState?.club || 'Academy'}, Year ${p.careerStats?.currentYear || 1}` : ''}
+
+SCENE RULES:
+- 60-80 words MAX. Present tense. One strong image. One line of dialogue. Then the choice.
+- No flowery prose. Show through action and dialogue only.
+- Every choice must feel mechanically different — not tone variations.
+- At least 2 stats change every scene.
+- Reference at least one past decision from Act 2 onward.
+
+${w.id === 'champions' ? `FOOTBALL RULES:
+Career spans age 16 to 45 across 7 acts. Each act is 2-3 real career years.
+Act 1 (age 16-18): Youth academy, position battles, first youth team match.
+Act 2 (age 18-21): First professional contract, loan moves, breakthrough season.
+Act 3 (age 21-24): First major transfer, dressing room politics, derbies.
+Act 4 (age 24-27): Peak years, trophy pushes, international duty, World Cup.
+Act 5 (age 27-30): Elite level, Champions League, Ballon d'Or contention.
+Act 6 (age 30-34): Veteran years, younger rivals, legacy under question.
+Act 7 (age 34-45): Final seasons, retirement decision, defining the legacy.
+MATCH SCENES: Generate matchReport object with real stats. Never write "score a goal" as a choice. Write specific tactical decisions.
+TRANSFER WINDOWS: Generate transferWindow object with 2-3 clubs, wages, fees, pros and cons.
+SEASON END: Every 8-10 scenes generate seasonSummary object.
+WORLD CUP: Trigger every 4 in-game years if international stats are high enough.
+INJURIES: Specific — "Grade 2 hamstring strain — 6 weeks", "Ankle ligament — 3 months".` : ''}
+
+${w.id === 'arcane' ? `ARCANE RULES:
+Story spans exactly 7 school years. Each year is one chapter.
+Year 1: Arrival, sorting, first friendships, first hints something is wrong.
+Year 2: Darker. A student is affected by something unexplained.
+Year 3: Something forbidden is learned. The villain's presence grows.
+Year 4: Trust is tested. An authority figure is compromised. Villain can first be suspected.
+Year 5: Exam year under crisis. Villain makes a direct move.
+Year 6: Someone close to the player is turned or taken. Truth about villain revealed.
+Year 7: Final year. Everything the player built is the only thing that can stop what is coming.
+Villain must NOT be named or identified until Year 4 minimum.
+Reference the player's specific wand in dueling and spell scenes.
+Spells have specific names and feel authentic.` : ''}
+
+${w.id === 'odyssey' ? `ODYSSEY RULES:
+Reference specific Greek gods by name. Their favour or displeasure affects events.
+Mythological creatures have specific weaknesses from actual mythology.
+Oracle prophecies are cryptic but eventually make literal sense in retrospect.
+Gods appear as real characters with distinct personalities and petty agendas.` : ''}
+
+VILLAIN BUILDUP:
+${act.id <= 2 ? 'Villain is background only — rumours, indirect effects, no direct appearance.' : ''}
+${act.id === 3 ? 'Villain makes a significant indirect move. Player feels the consequences.' : ''}
+${act.id === 4 ? 'Villain appears directly for the first time. This must feel earned.' : ''}
+${act.id === 5 ? 'Final confrontation. Everything the player built determines the outcome.' : ''}
+
+FACTION RULE: ${w.factionTiming === 'early' ? 'If player has no faction yet this scene should offer or force a faction choice. Make it feel weighty.' : 'Faction loyalty builds gradually through decisions. Do not force a faction choice. Let actions reveal alignment naturally.'}
+
+RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
+{"sceneTitle":"title","sceneText":"60-80 words present tense one image one dialogue line","imagePrompt":"detailed cinematic scene description","choices":[{"id":"A","text":"specific realistic choice","type":"bold","risk":"Low","hint":"specific consequence","statPreview":{"StatName":5}},{"id":"B","text":"specific realistic choice","type":"strategic","risk":"Medium","hint":"specific consequence","statPreview":{"StatName":3}},{"id":"C","text":"specific realistic choice","type":"loyal","risk":"High","hint":"specific consequence","statPreview":{"StatName":-2}},{"id":"D","text":"Write your own action","type":"custom","risk":"Variable","hint":"anything goes","statPreview":{}}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":3,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["${newsSource}: specific headline"],"worldStateUpdates":{},"matchReport":null,"seasonSummary":null,"transferWindow":null,"chapterComplete":false,"factionEvent":"","isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
+  }
+
+  const callAI = async (msg: string, pOverride?: any, wOverride?: any): Promise<any> => {
+    const p = pOverride ?? player
+    const w = wOverride ?? currentWorld
+    if (!w) return null
+    historyRef.current.push({role: 'user', content: msg})
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1200,
+          system: buildSystemPrompt(p, w),
+          messages: historyRef.current,
+        })
+      })
+      const data = await res.json()
+      const raw = (data.content || []).map((c: any) => c.text || '').join('')
+      const match = raw.match(/\{[\s\S]*\}/)
+      if (!match) throw new Error('no json')
+      const scene = JSON.parse(match[0])
+      historyRef.current.push({role: 'assistant', content: raw})
+      if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20)
+      return scene
+    } catch (e) {
+      historyRef.current.pop()
+      return null
+    }
+  }
+
+  const applyScene = (s: any): any[] => {
+    const n: any[] = []
+    setPlayer(prev => {
+      const next = {
+        ...prev,
+        skills: {...prev.skills},
+        relationships: [...prev.relationships],
+        inventory: [...prev.inventory],
+        quests: [...prev.quests],
+        achievements: [...prev.achievements],
+        newsHistory: [...prev.newsHistory],
+        careerStats: {...prev.careerStats, seasonStats: {...prev.careerStats.seasonStats}},
+      }
+      if (s.statChanges) Object.entries(s.statChanges).forEach(([k, v]: any) => {
+        if (next.skills[k] !== undefined) {
+          next.skills[k] = Math.max(0, Math.min(100, next.skills[k] + v))
+          n.push({text: `${k} ${v > 0 ? '+' + v : v}`, type: v > 0 ? 'pos' : 'neg'})
+        }
+      })
+      if (s.xpGained) {
+        next.xp = prev.xp + s.xpGained
+        n.push({text: `+${s.xpGained} XP`, type: 'xp'})
+        if (next.xp >= next.xpNext) {
+          next.xp -= next.xpNext
+          next.level += 1
+          next.xpNext = Math.round(next.xpNext * 1.3)
+          n.push({text: `LEVEL UP → ${next.level}`, type: 'ach'})
+        }
+      }
+      if (s.reputationChange) {
+        next.reputation = prev.reputation + s.reputationChange
+        n.push({text: `REP ${s.reputationChange > 0 ? '+' : ''}${s.reputationChange}`, type: s.reputationChange > 0 ? 'pos' : 'neg'})
+      }
+      if (s.relationshipChanges) s.relationshipChanges.forEach((rc: any) => {
+        const idx = next.relationships.findIndex((r: any) => r.name === rc.name)
+        if (idx >= 0) {
+          next.relationships[idx] = {...next.relationships[idx], val: Math.max(0, Math.min(100, next.relationships[idx].val + rc.change)), dir: rc.dir ?? next.relationships[idx].dir}
+          n.push({text: `${rc.name} ${rc.change > 0 ? '▲' : '▼'}`, type: rc.change > 0 ? 'pos' : 'neg'})
+        } else {
+          next.relationships.push({name: rc.name, type: 'Character', val: Math.max(0, Math.min(100, 50 + rc.change)), dir: rc.dir ?? 'neutral'})
+          n.push({text: `Met: ${rc.name}`, type: 'item'})
+        }
+      })
+      if (s.inventoryUnlocks?.length) s.inventoryUnlocks.forEach((item: string) => {
+        if (!next.inventory.includes(item)) {
+          next.inventory.push(item)
+          n.push({text: `Item: ${item}`, type: 'item'})
+        }
+      })
+      if (s.questUpdates) s.questUpdates.forEach((qu: any) => {
+        const idx = next.quests.findIndex((q: any) => q.name === qu.name)
+        if (idx >= 0) { next.quests[idx] = {...next.quests[idx], ...qu}; if (qu.done) n.push({text: `✓ ${qu.name}`, type: 'quest'}) }
+      })
+      if (s.newQuests) s.newQuests.forEach((nq: any) => {
+        if (!next.quests.find((q: any) => q.name === nq.name)) {
+          next.quests.push({...nq, done: false})
+          n.push({text: `Quest: ${nq.name}`, type: 'quest'})
+        }
+      })
+      if (s.newAchievements) s.newAchievements.forEach((a: string) => {
+        if (!next.achievements.includes(a)) {
+          next.achievements.push(a)
+          n.push({text: ` ${a}`, type: 'ach'})
+          const achKey = a.toLowerCase().replace(/ /g, '_')
+          const ach = ACHIEVEMENTS[achKey]
+          if (ach) setTrophyQueue((q: any[]) => [...q, {...ach, id: a}])
+        }
+      })
+      if (s.newsUpdates?.length) next.newsHistory = [...prev.newsHistory, ...s.newsUpdates]
+      if (s.worldStateUpdates) next.worldState = {...prev.worldState, ...s.worldStateUpdates, sceneCount: (prev.worldState.sceneCount ?? 0) + 1}
+      if (s.matchReport) {
+        const cs = next.careerStats
+        cs.appearances += 1
+        cs.goals += (s.matchReport.goals || 0)
+        cs.assists += (s.matchReport.assists || 0)
+        cs.seasonStats.apps += 1
+        cs.seasonStats.goals += (s.matchReport.goals || 0)
+        cs.seasonStats.ratings = [...(cs.seasonStats.ratings || []), s.matchReport.rating || 6.5]
+        cs.allRatings = [...(cs.allRatings || []), s.matchReport.rating || 6.5]
+        cs.averageRating = cs.allRatings.reduce((a: number, b: number) => a + b, 0) / cs.allRatings.length
+        n.push({text: `Rating: ${(s.matchReport.rating || 6.5).toFixed(1)}`, type: s.matchReport.rating >= 7.5 ? 'pos' : 'neg'})
+      }
+      if (s.factionEvent) next.currentFaction = s.factionEvent
+      next.storyProgress = prev.storyProgress + 1
+      if (s.chapterComplete) next.currentChapter = Math.min(prev.currentChapter + 1, (CHAPTER_NAMES[prev.currentWorld] || []).length - 1)
+      return next
+    })
+    return n
+  }
+
+  const checkMinigame = (sceneText: string, choiceText: string): string | null => {
+    const combined = (sceneText + ' ' + choiceText).toLowerCase()
+    if (currentWorld?.id === 'champions' && (combined.includes('penalty') || combined.includes('free kick') || combined.includes('spot kick'))) return 'penalty'
+    if (currentWorld?.id === 'arcane' && (combined.includes('duel') || combined.includes('cast') || combined.includes('spell battle'))) return 'magic'
+    if ((currentWorld?.id === 'hero' || currentWorld?.id === 'dragonfall' || currentWorld?.id === 'odyssey') && (combined.includes('fight') || combined.includes('battle') || combined.includes('combat') || combined.includes('clash'))) return 'combat'
+    if ((currentWorld?.id === 'shadow') && (combined.includes('fight') || combined.includes('takedown') || combined.includes('eliminate'))) return 'combat'
+    if (currentWorld?.id === 'neon' && (combined.includes('hack') || combined.includes('breach') || combined.includes('infiltrate') || combined.includes('firewall'))) return 'hack'
+    return null
+  }
+
+  const handleChoice = async (choice: any) => {
+    if (loading) return
+    let msg = ''
+    if (choice.id === 'D') {
+      const custom = window.prompt('What do you do?')
+      if (!custom) return
+      msg = `Player custom action: "${custom}". Create the consequence scene.`
+    } else {
+      msg = `Player chose "${choice.text}". Risk: ${choice.risk}. Create the consequence scene. Change at least 2 stats. Reference the villain ${player.villain?.name || ''} as the threat grows.`
+    }
+    setPlayer(p => ({...p, majorDecisions: [...p.majorDecisions, choice.text]}))
+    const minigame = checkMinigame(currentScene?.sceneText || '', choice.text)
+    if (minigame && Math.random() > 0.5) {
+      setActiveMinigame(minigame)
+      return
+    }
+    setLoading(true)
+    setHasError(false)
+    const result = await callAI(msg)
+    if (result) {
+      const n = applyScene(result)
+      setCurrentScene(result)
+      setNotifs(n)
+      setSceneHistory(h => [...h, result.sceneTitle])
+      if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
+      if (result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
+      if (result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
+        setShowTransferWindow(null)
+        if (decision === 'transfer' && club) {
+          setPlayer((prev: any) => ({...prev, worldState: {...prev.worldState, club: club.name}, careerStats: {...prev.careerStats, clubs: [...prev.careerStats.clubs, club.name]}}))
+          callAI(`Player just signed for ${club.name}. Create the first day at the new club scene.`).then(r => { if (r) { const n = applyScene(r); setCurrentScene(r); setNotifs(n); setSceneHistory(h => [...h, r.sceneTitle]) } })
+        } else {
+          callAI(`Player decided to stay at ${player.worldState?.club || 'current club'}. Create the scene where they recommit.`).then(r => { if (r) { const n = applyScene(r); setCurrentScene(r); setNotifs(n); setSceneHistory(h => [...h, r.sceneTitle]) } })
+        }
+      }})
+      if (result.seasonSummary) setShowSeasonSummary({...result.seasonSummary, playerName: player.name, position: player.position || 'Player', club: player.worldState?.club || 'Academy', onClose: () => {
+        setShowSeasonSummary(null)
+        setPlayer((prev: any) => {
+          const cs = {...prev.careerStats}
+          cs.currentYear = (cs.currentYear || 1) + 1
+          cs.age = (prev.age || 16) + 1
+          cs.seasonStats = {apps: 0, goals: 0, assists: 0, ratings: []}
+          return {...prev, careerStats: cs, age: cs.age}
+        })
+      }})
+      if (result.chapterComplete) {
+        const nextChapter = player.currentChapter + 1
+        const names = CHAPTER_NAMES[currentWorld?.id || ''] || []
+        if (names[nextChapter]) setShowChapterCard({worldName: currentWorld?.name || '', chapterNumber: nextChapter + 1, chapterName: names[nextChapter], actName: getAct(player.storyProgress + 1).name, year: currentWorld?.id === 'arcane' ? nextChapter + 1 : undefined, onContinue: () => setShowChapterCard(null)})
+      }
+      const prevAct = getAct(player.storyProgress - 1)
+      const newAct = getAct(player.storyProgress)
+      if (newAct.id !== prevAct.id && !result.isFinalScene) { setNextAct(newAct); setShowTransition(true) }
+      if (currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
+    } else {
+      setHasError(true)
+    }
+    setLoading(false)
+  }
+
+  const handleMinigameComplete = async (outcome: {won?:boolean,scored?:boolean,success?:boolean,healthRemaining?:number,description:string}) => {
+    const minigame = activeMinigame
+    setActiveMinigame(null)
+    const isSuccess = outcome.won ?? outcome.scored ?? outcome.success ?? false
+    setLoading(true)
+    const followUp = `Player just ${isSuccess ? 'succeeded' : 'failed'} in a ${minigame} challenge. ${outcome.description} Continue the story from this outcome with appropriate stat changes.`
+    const result = await callAI(followUp)
+    if (result) {
+      const n = applyScene(result)
+      setCurrentScene(result)
+      setNotifs(n)
+      setSceneHistory(h => [...h, result.sceneTitle])
+      if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality')}?width=900&height=400&nologo=true&model=flux`)
+    } else {
+      setHasError(true)
+    }
+    setLoading(false)
+  }
+
+  const handleRetry = async () => {
+    setHasError(false)
+    setLoading(true)
+    const result = await callAI('Continue the story from where we left off. Give the player a new meaningful choice.')
+    if (result) { const n = applyScene(result); setCurrentScene(result); setNotifs(n); setSceneHistory(h => [...h, result.sceneTitle]) }
+    else setHasError(true)
+    setLoading(false)
+  }
+
+  const handleSave = (slot?: number) => {
+    const targetSlot = slot || player.saveSlot || 1
+    try {
+      localStorage.setItem(`revenio_save_${targetSlot}`, JSON.stringify({
+        player: {...player, saveSlot: targetSlot},
+        worldId: currentWorld?.id,
+        worldName: currentWorld?.name,
+        worldIcon: currentWorld?.icon,
+        currentScene,
+        sceneHistory,
+        chapterName: CHAPTER_NAMES[currentWorld?.id || '']?.[player.currentChapter] || 'Chapter 1',
+        history: historyRef.current.slice(-10),
+        savedAt: new Date().toISOString(),
+      }))
+      setSaveMsg('SAVED ✓')
+      setShowSaveSlots(null)
+    } catch { setSaveMsg('FAILED') }
+    setTimeout(() => setSaveMsg(''), 2000)
+  }
+
+  const handleLoad = (slot?: number) => {
+    const targetSlot = slot || 1
+    try {
+      const raw = localStorage.getItem(`revenio_save_${targetSlot}`)
+      if (!raw) { alert('No save in this slot.'); return }
+      const d = JSON.parse(raw)
+      const w = WORLDS.find(x => x.id === d.worldId)
+      if (!w) { alert('Save data corrupted.'); return }
+      setPlayer(d.player)
+      setCurrentWorld(w)
+      setCurrentScene(d.currentScene)
+      setSceneHistory(d.sceneHistory || [])
+      historyRef.current = d.history || []
+      setShowSaveSlots(null)
+      setScreen('game')
+      setLoading(true)
+      callAI('Continue the story from where we left off. Reference what just happened and give the player a meaningful new choice.').then(result => {
+        if (result) { const n = applyScene(result); setCurrentScene(result); setNotifs(n); setSceneHistory(h => [...h, result.sceneTitle]) }
+        setLoading(false)
+      })
+    } catch { alert('Could not load save.') }
+  }
+
+  const handleSelectWorld = (w: any) => {
+    const villain = pickVillain(w.id)
+    const fresh = {
+      ...defaultPlayer(),
+      name: player.name, age: player.age, traits: player.traits, goal: player.goal, nationality: player.nationality,
+      currentWorld: w.id, currentLocation: w.locations?.[0] ?? '',
+      skills: {...w.startStat},
+      relationships: w.startRels.map((r: any) => ({...r})),
+      inventory: [...w.startItems],
+      quests: w.startQuests.map((q: any) => ({...q, done: false})),
+      newsHistory: [...w.startNews],
+      worldState: {sceneCount: 0, year: 1, dragonBonded: false},
+      villain,
+    }
+    setPlayer(fresh)
+    setCurrentWorld(w)
+    setCurrentScene(null)
+    setHasError(false)
+    setSceneHistory([])
+    historyRef.current = []
+    setWandWood(null); setWandCore(null); setWandLength(null)
+    setSaberColor(null); setCybernetic(null); setGreekWeapon(null)
+    setSelectedPosition(''); setSelectedPower(''); setSelectedCreed('')
+    setScreen('customcreation')
+  }
+
+  const finishCustomCreation = () => {
+    const w = WORLDS.find(x => x.id === player.currentWorld)
+    if (!w) return
+    let item: any = null
+    if (w.customCreation === 'wand') {
+      if (!wandWood || !wandCore || !wandLength) { alert('Choose your wand wood, core, and length'); return }
+      item = {type:'wand', name:`${wandWood.name} wand`, displayName:`${wandLength.name} ${wandWood.name}`, core:wandCore.name, length:wandLength.name, wood:wandWood.name, bonuses:[wandWood.bonus, wandCore.bonus, wandLength.bonus], statBonuses:{[wandWood.statKey]:wandWood.statVal, [wandCore.statKey]:(wandCore.statVal||0), [wandLength.statKey]:(wandLength.statVal||0)}, icon:''}
+    } else if (w.customCreation === 'saber') {
+      if (!saberColor) { alert('Choose your lightsaber color'); return }
+      item = {type:'saber', name:`${saberColor.color} Lightsaber`, displayName:`${saberColor.color} Lightsaber`, color:saberColor.color, hex:saberColor.hex, meaning:saberColor.meaning, faction:saberColor.faction, statBonuses:saberColor.stats, icon:''}
+    } else if (w.customCreation === 'implant') {
+      if (!cybernetic) { alert('Choose your cybernetic implant'); return }
+      item = {...cybernetic, type:'implant', displayName:cybernetic.name}
+    } else if (w.customCreation === 'weapon') {
+      if (!greekWeapon) { alert('Choose your divine weapon'); return }
+      item = {...greekWeapon, type:'weapon', displayName:greekWeapon.name}
+    } else if (w.customCreation === 'position') {
+      if (!selectedPosition) { alert('Choose your position'); return }
+      const posData = POSITIONS.find(p => p.pos === selectedPosition)
+      item = {type:'position', name:selectedPosition, displayName:selectedPosition, icon:'', statBonuses:posData?.stats || {}}
+    } else if (w.customCreation === 'power') {
+      if (!selectedPower) { alert('Choose your power'); return }
+      item = {type:'power', name:selectedPower, displayName:selectedPower, icon:'', statBonuses:{Power:8, Control:5}}
+    } else if (w.customCreation === 'creed') {
+      if (!selectedCreed) { alert('Choose your creed'); return }
+      item = {type:'creed', name:selectedCreed, displayName:'The Creed', icon:'', statBonuses:{Trust:5, Stealth:5}}
+    } else if (w.customCreation === 'dragon') {
+      item = {type:'dragon_pending', name:'Dragon Bond (not yet earned)', displayName:'Dragon Bond', icon:'', statBonuses:{}}
+    }
+    if (item?.statBonuses) {
+      setPlayer((prev: any) => {
+        const newSkills = {...prev.skills}
+        Object.entries(item.statBonuses).forEach(([k, v]: any) => { if (newSkills[k] !== undefined) newSkills[k] = Math.min(100, newSkills[k] + v) })
+        const newInventory = [...prev.inventory, item.displayName || item.name]
+        const newPos = item.type === 'position' ? item.name : prev.position
+        return {...prev, skills: newSkills, inventory: newInventory, position: newPos, customItem: item, currentFaction: item.faction || prev.currentFaction}
+      })
+    }
+    setScreen('game')
+    setLoading(true)
+    const freshPlayer = {...player, customItem: item, position: item?.type === 'position' ? item.name : player.position}
+    callAI(buildOpeningPrompt(freshPlayer, w, item), freshPlayer, w).then(result => {
+      if (result) { setCurrentScene(result); setSceneHistory([result.sceneTitle]); if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality')}?width=900&height=400&nologo=true&model=flux`) }
+      else setHasError(true)
+      setLoading(false)
+    })
+  }
+
+  // ── SPLASH ──
+  if (screen === 'splash') return (
+    <div style={{...G.app, ...G.center, background:'radial-gradient(ellipse at center,#0F0F20,#0A0A0C)'}}>
       {fonts}
-      <div style={G.center}>
-        <div style={G.muted}>Loading Revenio...</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>REVENIO</div>
+      <div style={{...G.muted,letterSpacing:'4px',fontSize:'12px',marginBottom:'32px'}}>EXPLORE THE LIFE YOU NEVER LIVED</div>
+      <button style={G.btnGold} onClick={() => setScreen('creation')}>BEGIN YOUR LEGEND</button>
+      <button style={{...G.btnGhost,marginTop:'8px'}} onClick={() => setShowSaveSlots('load')}>CONTINUE JOURNEY</button>
+      {showSaveSlots === 'load' && <SaveSlots mode="load" onSave={handleSave} onLoad={handleLoad} onClose={() => setShowSaveSlots(null)}/>}
+    </div>
+  )
+
+  // ── CREATION ──
+  if (screen === 'creation') {
+    const toggleTrait = (t: string) => setPlayer(p => ({...p, traits: p.traits.includes(t) ? p.traits.filter(x => x !== t) : p.traits.length < 3 ? [...p.traits, t] : p.traits}))
+    const finish = () => {
+      if (!player.name.trim()) { alert('Enter your name'); return }
+      if (player.traits.length < 1) { alert('Pick at least 1 trait'); return }
+      if (!player.goal) { alert('Choose a goal'); return }
+      if (!player.nationality) { alert('Choose your nationality'); return }
+      setScreen('worldselect')
+    }
+    return (
+      <div style={{...G.app, display:'flex', flexDirection:'column', alignItems:'center', padding:'40px 20px'}}>
+        {fonts}
+        <div style={{maxWidth:'640px', width:'100%'}}>
+          <div style={{textAlign:'center', marginBottom:'32px'}}>
+            <div style={{...G.gold, fontSize:'10px', letterSpacing:'4px', marginBottom:'8px'}}>CHAPTER I</div>
+            <div style={{fontFamily:"'Cinzel',serif", fontSize:'28px', fontWeight:700, letterSpacing:'2px'}}>FORGE YOUR IDENTITY</div>
+          </div>
+          <div style={{marginBottom:'20px'}}><label style={G.label}>YOUR NAME</label><input style={G.input} value={player.name} onChange={e => setPlayer(p => ({...p, name: e.target.value}))} placeholder="Enter your name..." maxLength={30}/></div>
+          <div style={{marginBottom:'20px'}}><label style={G.label}>YOUR AGE</label><input style={G.input} type="number" value={player.age} onChange={e => setPlayer(p => ({...p, age: parseInt(e.target.value) || 16}))} min={14} max={30}/></div>
+          <div style={{marginBottom:'20px'}}>
+            <label style={G.label}>YOUR NATIONALITY</label>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'6px'}}>
+              {NATIONALITIES.map(n => <button key={n} onClick={() => setPlayer(p => ({...p, nationality: n}))} style={{background:player.nationality===n?'#8B6914':'#1A1A24',border:`1px solid ${player.nationality===n?'#D4A843':'#3A3A4A'}`,color:player.nationality===n?'#F0C060':'#7A7A8A',padding:'6px 4px',cursor:'pointer',fontFamily:"'Rajdhani',sans-serif",fontSize:'12px',borderRadius:'2px'}}>{n}</button>)}
+            </div>
+          </div>
+          <div style={{marginBottom:'20px'}}>
+            <label style={G.label}>CHOOSE 3 TRAITS <span style={G.muted}>({player.traits.length}/3)</span></label>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:'8px'}}>
+              {TRAITS.map(t => <button key={t} onClick={() => toggleTrait(t)} style={{background:player.traits.includes(t)?'#8B6914':'#1A1A24',border:`1px solid ${player.traits.includes(t)?'#D4A843':'#3A3A4A'}`,color:player.traits.includes(t)?'#F0C060':'#7A7A8A',padding:'8px 4px',cursor:'pointer',fontFamily:"'Rajdhani',sans-serif",fontSize:'12px',fontWeight:600,borderRadius:'2px'}}>{t}</button>)}
+            </div>
+          </div>
+          <div style={{marginBottom:'32px'}}>
+            <label style={G.label}>YOUR MAIN GOAL</label>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:'8px'}}>
+              {GOALS.map(g => <button key={g} onClick={() => setPlayer(p => ({...p, goal: g}))} style={{background:player.goal===g?'#8B6914':'#1A1A24',border:`1px solid ${player.goal===g?'#D4A843':'#3A3A4A'}`,color:player.goal===g?'#F0C060':'#7A7A8A',padding:'12px',cursor:'pointer',fontFamily:"'Rajdhani',sans-serif",fontSize:'14px',fontWeight:600,borderRadius:'2px'}}>{g}</button>)}
+            </div>
+          </div>
+          <button style={{...G.btnGold, width:'100%'}} onClick={finish}>CHOOSE YOUR WORLD →</button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── WORLD SELECT ──
+  if (screen === 'worldselect') return (
+    <div style={{...G.app, padding:'30px 20px'}}>
+      {fonts}
+      <div style={{textAlign:'center', marginBottom:'32px'}}>
+        <div style={{...G.gold, fontSize:'10px', letterSpacing:'4px', marginBottom:'8px'}}>CHAPTER II</div>
+        <div style={{fontFamily:"'Cinzel',serif", fontSize:'28px', fontWeight:700, letterSpacing:'2px'}}>CHOOSE YOUR WORLD</div>
+        <div style={{...G.muted, fontSize:'13px', marginTop:'6px', letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
+      </div>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:'16px', maxWidth:'960px', margin:'0 auto'}}>
+        {WORLDS.map(w => (
+          <div key={w.id} onClick={() => handleSelectWorld(w)} style={{background:'#1A1A24', border:'1px solid #2A2A3A', padding:'20px', cursor:'pointer', borderRadius:'2px', transition:'all .2s'}} onMouseEnter={e => e.currentTarget.style.borderColor='#D4A843'} onMouseLeave={e => e.currentTarget.style.borderColor='#2A2A3A'}>
+            <div style={{fontSize:'28px', marginBottom:'10px'}}>{w.icon}</div>
+            <div style={{fontFamily:"'Cinzel',serif", fontSize:'15px', fontWeight:700, color:'#D4A843', marginBottom:'6px', letterSpacing:'1px'}}>{w.name}</div>
+            <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
+            <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
+          </div>
+        ))}
       </div>
     </div>
   )
+
+  return <div style={G.app}>{fonts}</div>
 }
