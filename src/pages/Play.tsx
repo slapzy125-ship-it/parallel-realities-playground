@@ -611,6 +611,7 @@ STORY PROGRESS: ${p.storyProgress} of ${getTotalScenes(w.id)}
 ACT: ${act.id} of ${getWorldActs(w.id).length} — ${act.name}
 SCENE: ${sceneInAct} of ${totalInAct} in this act
 ${w.id === 'champions' ? `CAREER: Apps ${p.careerStats?.appearances || 0}, Goals ${p.careerStats?.goals || 0}, Assists ${p.careerStats?.assists || 0}, Avg Rating ${p.careerStats?.averageRating?.toFixed(1) || 'N/A'}, Club ${p.worldState?.club || 'Academy'}, Year ${p.careerStats?.currentYear || 1}` : ''}
+${w.id === 'greed' ? `WEALTH: Net Worth $${(p.worldState?.netWorth || 0).toLocaleString()}, Total Commission $${(p.worldState?.totalCommission || 0).toLocaleString()}, Clients ${p.worldState?.clientCount || 0}, Legal Risk ${p.skills?.LegalRisk || 0}/100, Reputation ${p.skills?.Reputation || 0}, Year ${p.worldState?.year || 1987}` : ''}
 
 SCENE RULES (STRICT):
 - sceneText: MAX 40 words. Two short sentences. ONE concrete image. ONE line of dialogue. That's it.
