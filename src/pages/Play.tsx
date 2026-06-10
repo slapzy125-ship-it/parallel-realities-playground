@@ -1224,7 +1224,18 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       <div style={{...G.app, minHeight:'100vh'}}>
         {fonts}
         <div style={G.topbar}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,letterSpacing:'4px',color:'#D4A843'}}>REVENIO</div>
+          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,letterSpacing:'4px',color:'#D4A843'}}>REVENIO</div>
+            {tier === 'immortal' && (
+              <span style={{background:'linear-gradient(90deg,#D4A843,#F0C060,#E5E4E2)',color:'#0A0A0C',fontSize:'9px',letterSpacing:'2px',fontWeight:900,padding:'3px 8px',borderRadius:'2px'}}>IMMORTAL</span>
+            )}
+            {tier === 'legend' && (
+              <span style={{background:'#D4A843',color:'#0A0A0C',fontSize:'9px',letterSpacing:'2px',fontWeight:900,padding:'3px 8px',borderRadius:'2px'}}>LEGEND</span>
+            )}
+            {tier === 'free' && (
+              <span style={{border:'1px solid #2A2A3A',color:'#7A7A8A',fontSize:'9px',letterSpacing:'2px',padding:'3px 8px',borderRadius:'2px'}}>FREE</span>
+            )}
+          </div>
           <div style={{display:'flex',alignItems:'center',gap:'12px',flex:1,justifyContent:'center'}}>
             <div style={{textAlign:'right'}}>
               <div style={{fontSize:'13px',fontWeight:700,color:'#E8E4D8'}}>{player.name}</div>
@@ -1239,7 +1250,8 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           </div>
           <div style={{display:'flex',gap:'8px'}}>
             {saveMsg && <span style={{color:'#27AE60',fontSize:'11px',alignSelf:'center',letterSpacing:'2px'}}>{saveMsg}</span>}
-            <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>
+            {tier !== 'free' && <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>}
+            {tier === 'free' && <Link to="/experience" style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px',textDecoration:'none'}}>UPGRADE</Link>}
             <button onClick={()=>setScreen('worldselect')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>MENU</button>
           </div>
         </div>
