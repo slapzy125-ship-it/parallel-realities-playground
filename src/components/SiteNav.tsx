@@ -55,8 +55,12 @@ export function SiteNav() {
             <Link
               key={link.to}
               to={link.to}
-              className="hover:text-[var(--gold)] transition"
-              activeProps={{ className: "text-[var(--gold)]" }}
+              className={
+                link.accent
+                  ? "text-[#4A9EFF] hover:text-[#7BB8FF] transition"
+                  : "hover:text-[var(--gold)] transition"
+              }
+              activeProps={{ className: link.accent ? "text-[#7BB8FF]" : "text-[var(--gold)]" }}
               activeOptions={{ exact: link.exact }}
             >
               {link.label}
