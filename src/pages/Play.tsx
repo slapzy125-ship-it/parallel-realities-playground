@@ -614,6 +614,19 @@ ${w.id === 'champions' ? `CAREER: Apps ${p.careerStats?.appearances || 0}, Goals
 ${w.id === 'greed' ? `WEALTH: Net Worth $${(p.worldState?.netWorth || 0).toLocaleString()}, Total Commission $${(p.worldState?.totalCommission || 0).toLocaleString()}, Clients ${p.worldState?.clientCount || 0}, Legal Risk ${p.skills?.LegalRisk || 0}/100, Reputation ${p.skills?.Reputation || 0}, Year ${p.worldState?.year || 1987}` : ''}
 
 SCENE RULES (STRICT):
+
+CONSEQUENCES ARE REAL — THESE RULES ARE ABSOLUTE AND OVERRIDE EVERYTHING ELSE:
+1. WRONG CHOICES EXIST. Not every choice leads to a good outcome. If the player makes a reckless decision they face real consequences. A bad tackle in Champions Legacy causes an injury. A reckless spell in Arcane Academy backfires and hurts the player. A rushed hack in Neon Domination gets traced. A careless move in Shadow Guild gets a teammate killed. Never protect the player from bad outcomes.
+2. FAILURE STATES ARE PART OF THE STORY. Players can fail missions, lose matches, get caught, get injured, lose clients, lose allies, lose trust. These are not game overs — they are story beats that make the path harder. The player continues but carries the consequences.
+3. DEATH EXISTS IN APPROPRIATE WORLDS. In Dragonfall, Greed, Shadow Guild, and Galactic Frontier, characters the player cares about can die. In extreme circumstances the player character can be critically wounded, imprisoned, or ruined. The story continues from a much harder position.
+4. SPORTS REALISM. In Champions Legacy the player can miss penalties, have bad games, get injured, get dropped from the squad, get sold against their will, be frozen out by a manager, or have a career-threatening injury. Match ratings can be 4.5. The player can be dropped for a younger player. These are not punishments, they are realism.
+5. STATS MATTER FOR REAL. Low Shooting + long-range strike = likely miss. Stamina below 30 = fades in the second half. LegalRisk in Greed above 70 = every scene references the mounting pressure and choices become more limited. Stats are the physics of the world, not just numbers.
+6. CHOICES HAVE UNKNOWN OUTCOMES. Choice hints should not always reveal the result. Use hints like "this could go either way", "high risk", "consequences unknown", "irreversible". The player takes a risk and finds out next scene.
+7. NO SAFETY NET WRITING. Never auto-save the player from bad decisions. Three bad choices in a row → the fourth scene reflects accumulated damage, not a reset. The world remembers everything.
+8. EARNED VICTORIES ONLY. Good outcomes must feel earned. Built Charisma + smart relationship choices → charm succeeds. Burned bridges → same attempt fails. Victory proportional to decisions made.
+9. CHAMPIONS LEGACY SPECIFICALLY: players miss shots, have bad training sessions, get criticised by coaches, lose their starting position, get injured at the worst moment, face journalists writing negative pieces, have contract disputes that go badly, get whistled for fouls, get red cards, experience slumps lasting multiple scenes. A 7 in ten games followed by a 4.5 is realistic. An average of 7.8 all season is not.
+10. GREED WORLD SPECIFICALLY: LegalRisk is a countdown. At 80, Agent Moss makes a direct move. At 100, indictment. Pump-and-dump schemes work short term but raise LegalRisk significantly. Clients can sue. Trades can collapse. The market can crash at any moment, erasing paper wealth instantly.
+
 - sceneText: MAX 40 words. Two short sentences. ONE concrete image. ONE line of dialogue. That's it.
 - No prose, no metaphor, no scene-setting paragraphs. Action and dialogue only.
 - sceneTitle: MAX 5 words.
