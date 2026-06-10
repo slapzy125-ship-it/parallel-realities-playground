@@ -6,11 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const FREE_WORLDS = new Set(['arcane', 'champions'])
+const FREE_WORLDS = new Set(['arcane', 'champions', 'parallel'])
 const IMMORTAL_WORLDS = new Set(['rift'])
+const NO_CAP_WORLDS = new Set(['parallel']) // tier-gated client-side
 const ALLOWED_WORLDS = new Set([
   'arcane', 'champions', 'galactic', 'dragonfall', 'shadow',
-  'neon', 'odyssey', 'hero', 'rift',
+  'neon', 'odyssey', 'hero', 'rift', 'parallel',
 ])
 const FREE_SCENE_CAP = 5
 
@@ -121,7 +122,7 @@ serve(async (req) => {
     }
 
     // Free tier: enforce 5-scene cap per world server-side
-    if (tier === 'free') {
+    if (tier === 'free' && !NO_CAP_WORLDS.has(worldId)) {
       const { data: usage } = await admin
         .from('free_scene_usage')
         .select('count')
@@ -162,7 +163,7 @@ serve(async (req) => {
     const text = data.choices?.[0]?.message?.content ?? ''
 
     // ── Increment scene usage for free tier ────────────────────────────
-    if (tier === 'free' && !isOpening) {
+    if (tier === 'free' && !isOpening && !NO_CAP_WORLDS.has(worldId)) {
       const { data: existing } = await admin
         .from('free_scene_usage')
         .select('count')

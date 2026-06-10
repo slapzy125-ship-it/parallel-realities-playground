@@ -38,6 +38,7 @@ export function SiteNav() {
     { to: "/pricing", label: "Pricing" },
     { to: "/hardware", label: "Hardware" },
     { to: "/play", label: "Play" },
+    { to: "/parallel", label: "Parallel Life", accent: true as const },
   ];
 
   return (
@@ -54,8 +55,12 @@ export function SiteNav() {
             <Link
               key={link.to}
               to={link.to}
-              className="hover:text-[var(--gold)] transition"
-              activeProps={{ className: "text-[var(--gold)]" }}
+              className={
+                link.accent
+                  ? "text-[#4A9EFF] hover:text-[#7BB8FF] transition"
+                  : "hover:text-[var(--gold)] transition"
+              }
+              activeProps={{ className: link.accent ? "text-[#7BB8FF]" : "text-[var(--gold)]" }}
               activeOptions={{ exact: link.exact }}
             >
               {link.label}
@@ -102,8 +107,12 @@ export function SiteNav() {
                   <SheetClose asChild key={link.to}>
                     <Link
                       to={link.to}
-                      className="text-sm tracking-[0.2em] uppercase text-muted-foreground hover:text-[var(--gold)] transition"
-                      activeProps={{ className: "text-[var(--gold)]" }}
+                      className={
+                        link.accent
+                          ? "text-sm tracking-[0.2em] uppercase text-[#4A9EFF] hover:text-[#7BB8FF] transition"
+                          : "text-sm tracking-[0.2em] uppercase text-muted-foreground hover:text-[var(--gold)] transition"
+                      }
+                      activeProps={{ className: link.accent ? "text-[#7BB8FF]" : "text-[var(--gold)]" }}
                       activeOptions={{ exact: link.exact }}
                       onClick={() => setMobileOpen(false)}
                     >

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
+import { Route as ParallelRouteImport } from './routes/parallel'
 import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ const PricingRoute = PricingRouteImport.update({
 const PlayRoute = PlayRouteImport.update({
   id: '/play',
   path: '/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParallelRoute = ParallelRouteImport.update({
+  id: '/parallel',
+  path: '/parallel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HardwareRoute = HardwareRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
+  '/parallel': typeof ParallelRoute
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
+  '/parallel': typeof ParallelRoute
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
+  '/parallel': typeof ParallelRoute
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/hardware'
+    | '/parallel'
     | '/play'
     | '/pricing'
     | '/worlds'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/hardware'
+    | '/parallel'
     | '/play'
     | '/pricing'
     | '/worlds'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/hardware'
+    | '/parallel'
     | '/play'
     | '/pricing'
     | '/worlds'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   HardwareRoute: typeof HardwareRoute
+  ParallelRoute: typeof ParallelRoute
   PlayRoute: typeof PlayRoute
   PricingRoute: typeof PricingRoute
   WorldsRoute: typeof WorldsRoute
@@ -143,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/play'
       fullPath: '/play'
       preLoaderRoute: typeof PlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parallel': {
+      id: '/parallel'
+      path: '/parallel'
+      fullPath: '/parallel'
+      preLoaderRoute: typeof ParallelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hardware': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   HardwareRoute: HardwareRoute,
+  ParallelRoute: ParallelRoute,
   PlayRoute: PlayRoute,
   PricingRoute: PricingRoute,
   WorldsRoute: WorldsRoute,
