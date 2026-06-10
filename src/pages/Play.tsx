@@ -1315,6 +1315,24 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
             </>
           )}
 
+          {w.customCreation==='broker' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {BROKER_ORIGINS.map(b => card(selectedBroker?.name===b.name,()=>setSelectedBroker(b),(<>
+                <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'8px'}}>
+                  <span style={{fontSize:'26px'}}>{b.icon}</span>
+                  <span style={{color:'#D4A843',fontWeight:700,fontSize:'15px'}}>{b.name}</span>
+                </div>
+                <div style={{...G.muted,fontSize:'11px',lineHeight:1.5,marginBottom:'8px'}}>{b.desc}</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginBottom:'8px'}}>
+                  {Object.entries(b.stats).map(([k,v]) => (
+                    <span key={k} style={{fontSize:'10px',color:'#27AE60',background:'#0A0A0C',padding:'2px 6px',borderRadius:'2px'}}>{k} +{v as any}</span>
+                  ))}
+                </div>
+                <div style={{color:'#7A7A8A',fontStyle:'italic',fontSize:'11px',lineHeight:1.4}}>“{b.flavor}”</div>
+              </>),b.name))}
+            </div>
+          )}
+
           <div style={{textAlign:'center'}}>
             <button onClick={finishCustomCreation} style={G.btnGold}>CONFIRM &amp; BEGIN</button>
           </div>
