@@ -118,7 +118,7 @@ function Pricing() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--gold)] text-background text-[10px] tracking-[0.2em] uppercase px-4 py-1 font-medium">
                 Most Popular
               </div>
-              <h3 className="font-display text-3xl mb-2">Revenio Legend</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Legend</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">$10<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <p className="text-xs text-muted-foreground mb-8">Cancel anytime</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
