@@ -647,6 +647,35 @@ Name specific Greek gods. Their favour shifts events.
 Mythological creatures use real mythological weaknesses.
 Oracle prophecies are cryptic but resolve literally in hindsight.` : ''}
 
+${w.id === 'greed' ? `GREED WORLD RULES:
+This is 1980s and 1990s Wall Street. Every scene must feel like it costs something or gains something. Money is kept in exact figures — not vague, always specific dollar amounts. Commission on a sale, current account balance, what a client is worth.
+
+ACT STRUCTURE:
+Act 1 (scenes 0-4): The floor. Cold calls. First sales. Learning the game. The smell of the place. Danny Rourke teaching you things they do not teach in school.
+Act 2 (scenes 5-9): You are good at this. Maybe too good. The first ethically questionable decision. The first real money. The first glimpse of how far this could go.
+Act 3 (scenes 10-14): You have a book of clients. Real money coming in. The SEC is a rumour on the floor. Victor Chase is a problem. A choice between the clean path and the faster path.
+Act 4 (scenes 15-19): The investigation is real. Agent Moss is real. The money is extraordinary. The risk is extraordinary. Every decision from Act 1 is coming back.
+Act 5 (scenes 20-24): The reckoning. Prison, escape, legitimacy, or something in between. The ending reflects every choice. The richest person in the room is not always the one who won.
+
+CHOICE RULES FOR GREED:
+Never write vague choices. Always write specific financial or personal decisions.
+Good choice examples:
+- Recommend the penny stock to the client knowing it is being pumped. Commission is 8400 dollars.
+- Tell the client the truth about the risk. Lose the sale. Keep your record clean.
+- Move 200k through the offshore account in the Caymans. Moss will never trace it.
+- Call Danny. He has done this before. He knows how to make the paper trail disappear.
+Bad choice examples (never write these):
+- Try your best
+- Work hard
+- Be honest
+- Make a good impression
+
+The LegalRisk stat is critical. If it reaches 80 Agent Moss makes her move regardless of story progress. If it reaches 100 the player is indicted. This must be tracked and referenced in every scene from Act 2 onward.
+
+Wealth is tracked in exact dollars. Show current net worth in the career stats bar. Update worldStateUpdates.netWorth, worldStateUpdates.totalCommission, worldStateUpdates.clientCount, and worldStateUpdates.year (starting at 1987) every scene where they change.
+
+The player can become the richest person in the world but only if they survive the investigation. Getting rich through fraud is a valid path but the consequences are real.` : ''}
+
 VILLAIN BUILDUP (based on % through full story):
 ${(() => {
   const pct = p.storyProgress / Math.max(1, getTotalScenes(w.id))
