@@ -536,6 +536,7 @@ export default function Play() {
   const [selectedPosition, setSelectedPosition] = useState('')
   const [selectedPower, setSelectedPower] = useState('')
   const [selectedCreed, setSelectedCreed] = useState('')
+  const [selectedBroker, setSelectedBroker] = useState<any>(null)
   const historyRef = useRef<any[]>([])
   const { tier, userId } = useSubscription()
   const [paywallHit, setPaywallHit] = useState<string | null>(null)
