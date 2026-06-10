@@ -412,25 +412,25 @@ function ProfileForm({
       )}
 
       {step === 3 && (
-        <Step title="Your education and work"
-          intro="The paths you took, the doors you opened, and the ones you didn't.">
-          <TextareaField label="High school" hint="Name or describe it, and one thing you were known for there." value={profile.highSchool} onChange={(v) => set("highSchool", v)} />
-          <SelectField label="Did you go to college or university" value={profile.wentToCollege} onChange={(v) => set("wentToCollege", v)} options={["Yes","No"]} />
+        <Step title="What you spend your time on"
+          intro="School, work, a hobby, or nothing yet — whatever fills your days right now. Everything on this page is optional.">
+          <TextareaField label="High school (optional)" hint="Name or describe it, and one thing you were known for there." value={profile.highSchool} onChange={(v) => set("highSchool", v)} />
+          <SelectField label="Have you been to college or university? (optional)" value={profile.wentToCollege} onChange={(v) => set("wentToCollege", v)} options={["Yes","No","Still in high school","Plan to","Don't plan to"]} />
           {profile.wentToCollege === "Yes" && (
             <>
-              <Field label="Where you went" value={profile.collegeWhere} onChange={(v) => set("collegeWhere", v)} />
-              <Field label="What you studied" value={profile.collegeStudy} onChange={(v) => set("collegeStudy", v)} />
-              <TextareaField label="Why you chose it" value={profile.collegeWhy} onChange={(v) => set("collegeWhy", v)} />
+              <Field label="Where you went (optional)" value={profile.collegeWhere} onChange={(v) => set("collegeWhere", v)} />
+              <Field label="What you studied (optional)" value={profile.collegeStudy} onChange={(v) => set("collegeStudy", v)} />
+              <TextareaField label="Why you chose it (optional)" value={profile.collegeWhy} onChange={(v) => set("collegeWhy", v)} />
             </>
           )}
-          <TextareaField label="Other schools you got into but didn't attend" hint="Often the pivotal decision." value={profile.otherSchools} onChange={(v) => set("otherSchools", v)} />
-          <TextareaField label="Your career path so far" big value={profile.careerPath} onChange={(v) => set("careerPath", v)} />
-          <Field label="Current job title or role" value={profile.currentRole} onChange={(v) => set("currentRole", v)} />
-          <Field label="Industry or field" value={profile.industry} onChange={(v) => set("industry", v)} />
-          <SelectField label="Income range" value={profile.income} onChange={(v) => set("income", v)}
-            options={["Under 30k","30k to 60k","60k to 100k","100k to 150k","150k to 250k","250k plus"]} />
-          <SelectField label="Are you doing what you thought you'd be doing at this age?" value={profile.onTrack} onChange={(v) => set("onTrack", v)}
-            options={["Yes","No","Not sure"]} />
+          <TextareaField label="Other schools you got into but didn't attend (optional)" value={profile.otherSchools} onChange={(v) => set("otherSchools", v)} />
+          <TextareaField label="What do you spend most of your time on?" hint="This could be school, work, a hobby, sports, caregiving, gaming, music — or nothing in particular yet. Just be honest." big value={profile.careerPath} onChange={(v) => set("careerPath", v)} />
+          <Field label="If you have a job or role, what is it? (optional)" placeholder="Student, barista, intern, software engineer, none yet…" value={profile.currentRole} onChange={(v) => set("currentRole", v)} />
+          <Field label="Industry, field, or main interest (optional)" value={profile.industry} onChange={(v) => set("industry", v)} />
+          <SelectField label="Income range (optional)" value={profile.income} onChange={(v) => set("income", v)}
+            options={["No income yet","Under 30k","30k to 60k","60k to 100k","100k to 150k","150k to 250k","250k plus","Prefer not to say"]} />
+          <SelectField label="Are you where you thought you'd be at this age? (optional)" value={profile.onTrack} onChange={(v) => set("onTrack", v)}
+            options={["Yes","No","Not sure","Too early to tell"]} />
         </Step>
       )}
 
@@ -990,15 +990,21 @@ async function runSimulation(profile: Profile): Promise<Simulation> {
 
 RULES:
 1. Use the person's real name throughout: ${profile.firstName}.
-2. Reference real details from their profile constantly — their actual hometown (${profile.grewUp}), current city (${profile.livesNow}), partner (${profile.partnerName || "—"}), career (${profile.currentRole}, ${profile.industry}), strengths (${profile.strength}), weaknesses (${profile.weakness}).
+2. Reference real details from their profile constantly — their actual hometown (${profile.grewUp}), current city (${profile.livesNow}), partner (${profile.partnerName || "—"}), what they spend time on (${profile.currentRole || profile.careerPath || "—"}, ${profile.industry || "—"}), strengths (${profile.strength}), weaknesses (${profile.weakness}).
 3. Be specific and surprising. Do not just confirm their hypothesis. Real life is complicated.
-4. The butterfly effect is real. Show ripples in relationships, geography, opportunities, identity.
+4. Show how things would have played out differently — in relationships, places they end up, opportunities, who they become. Be concrete, not abstract.
 5. Reference real places, real industries, real career networks tied to their alternative path.
 6. Be emotionally honest. The alternate life isn't simply better or worse — it's genuinely different.
 7. Write in present tense, second person ("you did this, you felt this").
 8. Each section: 150–250 words. Detailed and specific.
 9. Reference their stated strengths and weaknesses and show how those traits played out differently.
 10. The final messageToRealSelf must be genuinely moving — a message from a parallel version of ${profile.firstName} across the multiverse. True, not sentimental.
+
+ALTERNATE TIMELINE RULE — CRITICAL:
+Never mention specific people from the real life timeline who the player would not have met on the alternate path. If the player's decision changed their location, school, or job, assume they did not meet anyone they met after that decision point. Only reference people who existed in their life BEFORE the decision was made — family, childhood friends, anyone from before "${profile.decisionWhen || "the decision"}". Their current partner (${profile.partnerName || "—"}), current friends, and current coworkers most likely never appear in this timeline unless they would have crossed paths anyway. Invent new people for the alternate life. Be honest about who is missing.
+
+LANGUAGE RULE — CRITICAL:
+Write at a clear conversational reading level. Use simple direct language. Every sentence should describe something specific and concrete — a place, a person, an event, a feeling shown through action. Never use abstract language. No therapy speak. No words like "ripple effect," "trajectory," "seminal," "journey of self-discovery," "transformative," "manifest," "energy," "alignment." Write like a smart friend telling you a story over a beer. Short sentences. Concrete details. Real places, real feelings, real consequences shown through what actually happens — not described in the abstract.
 
 RESPOND WITH ONLY THIS JSON — NO MARKDOWN, NO BACKTICKS:
 {"immediateAftermath":"…","firstYear":"…","formativeYears":"…","middleYears":"…","laterYears":"…","finalChapter":"…","messageToRealSelf":"…","keyDifferences":["…","…","…","…","…"],"overallJudgment":"one sentence — broadly better, worse, or just different, and why"}`;
