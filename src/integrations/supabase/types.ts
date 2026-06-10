@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      free_scene_usage: {
+        Row: {
+          count: number
+          updated_at: string
+          user_id: string
+          world_id: string
+        }
+        Insert: {
+          count?: number
+          updated_at?: string
+          user_id: string
+          world_id: string
+        }
+        Update: {
+          count?: number
+          updated_at?: string
+          user_id?: string
+          world_id?: string
+        }
+        Relationships: []
+      }
       simulation_messages: {
         Row: {
           content: string
@@ -139,6 +160,7 @@ export type Database = {
     }
     Functions: {
       count_today_simulations: { Args: { user_uuid: string }; Returns: number }
+      get_user_tier: { Args: { _user_id: string }; Returns: string }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
