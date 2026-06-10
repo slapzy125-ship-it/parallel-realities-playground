@@ -163,7 +163,7 @@ serve(async (req) => {
     const text = data.choices?.[0]?.message?.content ?? ''
 
     // ── Increment scene usage for free tier ────────────────────────────
-    if (tier === 'free' && !isOpening) {
+    if (tier === 'free' && !isOpening && !NO_CAP_WORLDS.has(worldId)) {
       const { data: existing } = await admin
         .from('free_scene_usage')
         .select('count')
