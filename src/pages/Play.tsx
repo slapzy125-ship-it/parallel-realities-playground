@@ -377,6 +377,31 @@ const WORLDS = [
     startNews:["The Eternal King's shadow has been seen at the Oracle Temple.",'Three heroes have already failed the first divine trial.','Olympus has gone silent — the gods are not answering prayers.'],
     customCreation:'weapon',
   },
+  {
+    id:'rift', name:'The Rift', icon:'🌀',
+    desc:'Where every version of you exists at once. Meet alternates from worlds you never chose. Decide which one of you survives.',
+    theme:'IDENTITY · CHOICE · INFINITY',
+    factions:['The Origin','The Shattered','The Returned','The Erased'],
+    factionDesc:{
+      'The Origin':'You as you began. Innocent. Unbroken. Unaware of what you become.',
+      'The Shattered':'You as you broke. Scarred. Powerful. Honest about the cost.',
+      'The Returned':'You as you might have been if you had said yes. Or no.',
+      'The Erased':'You from a timeline that was undone. They remember being deleted.',
+    },
+    factionTiming:'early',
+    startStat:{Identity:20,Will:25,Memory:20,Resonance:15,Anchor:0},
+    locations:['The Crossing','Mirror Halls','The Hollow Court','The Last Door','The Origin Point'],
+    startItems:['🌀 Anchor Stone'],
+    startQuests:[{name:'Which You Survives?',desc:'Only one version of you can leave The Rift. Decide who that is.'}],
+    startRels:[
+      {name:'Other You',type:'Self',val:50,dir:'neutral'},
+      {name:'The Watcher',type:'Witness',val:40,dir:'neutral'},
+      {name:'Echo',type:'Lost Self',val:35,dir:'neutral'},
+    ],
+    startNews:['Another version of you was seen at the Mirror Halls.','The Hollow Court has demanded a reckoning.','Three of your alternates have already been erased.'],
+    customCreation:'rift',
+    immortalOnly:true,
+  },
 ]
 
 const defaultPlayer = () => ({
