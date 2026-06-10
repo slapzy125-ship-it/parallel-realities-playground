@@ -111,7 +111,7 @@ function Worlds() {
 
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
                 <p className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)] mb-2">{w.tag}</p>
-                <h3 className="font-display text-2xl mb-2 leading-tight">{w.name}</h3>
+                <h2 className="font-display text-2xl mb-2 leading-tight">{w.name}</h2>
                 <p className="text-xs text-muted-foreground/90 leading-relaxed opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">{w.desc}</p>
               </div>
 
