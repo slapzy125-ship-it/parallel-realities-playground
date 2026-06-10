@@ -67,8 +67,6 @@ function Experience() {
     }
     openCheckout({
       priceId,
-      customerEmail: email,
-      customData: { userId },
       successUrl: `${window.location.origin}/play?checkout=success`,
     });
   };
