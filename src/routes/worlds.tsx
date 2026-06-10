@@ -17,6 +17,32 @@ export const Route = createFileRoute("/worlds")({
       { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
       { property: "og:title", content: "Pick Your World — Revenio" },
       { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
+      { property: "og:url", content: "https://revenio.net/worlds" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/worlds" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Revenio Worlds",
+          description: "Eight AI-powered worlds you can step into on Revenio.",
+          url: "https://revenio.net/worlds",
+          hasPart: [
+            { "@type": "CreativeWork", name: "Arcane Academy" },
+            { "@type": "CreativeWork", name: "Galactic Frontier" },
+            { "@type": "CreativeWork", name: "Hero Nexus" },
+            { "@type": "CreativeWork", name: "Dragonfall Kingdoms" },
+            { "@type": "CreativeWork", name: "Shadow Guild" },
+            { "@type": "CreativeWork", name: "Neon Dominion" },
+            { "@type": "CreativeWork", name: "Eternal Odyssey" },
+            { "@type": "CreativeWork", name: "Champions Legacy" },
+          ],
+        }),
+      },
     ],
   }),
   component: Worlds,
