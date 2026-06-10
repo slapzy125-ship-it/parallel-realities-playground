@@ -143,7 +143,7 @@ function Pricing() {
 
             {/* Immortal — $20 */}
             <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
-              <h3 className="font-display text-3xl mb-2">Revenio Immortal</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Immortal</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">$20<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <p className="text-xs text-muted-foreground mb-8">For the truly obsessed</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
