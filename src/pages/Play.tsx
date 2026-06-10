@@ -1022,14 +1022,37 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         <div style={{...G.muted, fontSize:'13px', marginTop:'6px', letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
       </div>
       <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:'16px', maxWidth:'960px', margin:'0 auto'}}>
-        {WORLDS.map(w => (
-          <div key={w.id} onClick={() => handleSelectWorld(w)} style={{background:'#1A1A24', border:'1px solid #2A2A3A', padding:'20px', cursor:'pointer', borderRadius:'2px', transition:'all .2s'}} onMouseEnter={e => e.currentTarget.style.borderColor='#D4A843'} onMouseLeave={e => e.currentTarget.style.borderColor='#2A2A3A'}>
-            <div style={{fontSize:'28px', marginBottom:'10px'}}>{w.icon}</div>
-            <div style={{fontFamily:"'Cinzel',serif", fontSize:'15px', fontWeight:700, color:'#D4A843', marginBottom:'6px', letterSpacing:'1px'}}>{w.name}</div>
-            <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
-            <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
-          </div>
-        ))}
+        {WORLDS.map(w => {
+          const isImmortalOnly = (w as any).immortalOnly
+          const locked =
+            (isImmortalOnly && tier !== 'immortal') ||
+            (!isImmortalOnly && tier === 'free' && !FREE_WORLD_IDS.has(w.id))
+          const requiredTier = isImmortalOnly ? 'Immortal' : 'Legend'
+          return (
+            <div
+              key={w.id}
+              onClick={() => locked ? null : handleSelectWorld(w)}
+              style={{background:'#1A1A24', border:`1px solid ${locked?'#2A2A3A':'#2A2A3A'}`, padding:'20px', cursor:locked?'not-allowed':'pointer', borderRadius:'2px', transition:'all .2s', opacity: locked?0.55:1, position:'relative'}}
+              onMouseEnter={e => { if (!locked) e.currentTarget.style.borderColor='#D4A843' }}
+              onMouseLeave={e => { if (!locked) e.currentTarget.style.borderColor='#2A2A3A' }}
+            >
+              {locked && (
+                <div style={{position:'absolute',top:'8px',right:'8px',background:'#0A0A0C',border:`1px solid ${isImmortalOnly?'#E5E4E2':'#D4A843'}`,color:isImmortalOnly?'#E5E4E2':'#D4A843',fontSize:'9px',letterSpacing:'2px',padding:'3px 6px',borderRadius:'2px'}}>
+                  🔒 {requiredTier.toUpperCase()}
+                </div>
+              )}
+              <div style={{fontSize:'28px', marginBottom:'10px'}}>{w.icon}</div>
+              <div style={{fontFamily:"'Cinzel',serif", fontSize:'15px', fontWeight:700, color:isImmortalOnly?'#E5E4E2':'#D4A843', marginBottom:'6px', letterSpacing:'1px'}}>{w.name}</div>
+              <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
+              <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
+              {locked && (
+                <Link to="/experience" style={{display:'block',marginTop:'10px',textAlign:'center',background:'#D4A843',color:'#0A0A0C',padding:'6px',fontSize:'10px',letterSpacing:'2px',textDecoration:'none',fontWeight:700}}>
+                  UPGRADE
+                </Link>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
