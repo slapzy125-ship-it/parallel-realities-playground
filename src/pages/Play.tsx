@@ -9,6 +9,7 @@ import TrophyPopup from '@/components/game/TrophyPopup'
 import ChapterCard from '@/components/game/ChapterCard'
 import TransferWindow from '@/components/game/TransferWindow'
 import SaveSlots from '@/components/game/SaveSlots'
+import { supabase } from '@/integrations/supabase/client'
 
 const TRAITS = ['Ambitious','Loyal','Brave','Competitive','Intelligent','Creative','Confident','Curious','Ruthless','Charismatic']
 const GOALS = ['Become a Legend','Gain Power','Build an Empire','Become Rich','Save the World','Discover the Unknown']
@@ -580,18 +581,15 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     if (!w) return null
     historyRef.current.push({role: 'user', content: msg})
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1200,
+      const { data, error } = await supabase.functions.invoke('ai-scene', {
+        body: {
           system: buildSystemPrompt(p, w),
           messages: historyRef.current,
-        })
+        },
       })
-      const data = await res.json()
-      const raw = (data.content || []).map((c: any) => c.text || '').join('')
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      const raw = (data?.content || []).map((c: any) => c.text || '').join('')
       const match = raw.match(/\{[\s\S]*\}/)
       if (!match) throw new Error('no json')
       const scene = JSON.parse(match[0])
@@ -599,10 +597,12 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       if (historyRef.current.length > 20) historyRef.current = historyRef.current.slice(-20)
       return scene
     } catch (e) {
+      console.error('callAI error:', e)
       historyRef.current.pop()
       return null
     }
   }
+
 
   const applyScene = (s: any): any[] => {
     const n: any[] = []
