@@ -1177,7 +1177,13 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       {name:'Never Compromise',quote:'Never compromise the Brotherhood.'},
       {name:'Walk in Darkness',quote:'Walk in the darkness, serve the light.'},
     ]
-    const heading = w.customCreation==='wand'?'YOUR WAND CHOOSES YOU':w.customCreation==='saber'?'CHOOSE YOUR LIGHTSABER':w.customCreation==='position'?'CHOOSE YOUR POSITION':w.customCreation==='implant'?'CHOOSE YOUR IMPLANT':w.customCreation==='weapon'?'CLAIM YOUR DIVINE WEAPON':w.customCreation==='power'?'DISCOVER YOUR POWER':w.customCreation==='creed'?'SWEAR YOUR CREED':w.customCreation==='dragon'?'THE DRAGONS OF THE REALM':'BEFORE YOU BEGIN'
+    const BROKER_ORIGINS = [
+      {name:'The Hungry Kid',icon:'🏙️',desc:'Queens born. Watched your father work himself to nothing. You swore you would not. You have no connections, no money, and the kind of hunger that makes people uncomfortable.',flavor:'You will do things people with safety nets never would.',stats:{Charisma:5,Ruthlessness:10}},
+      {name:'The College Boy',icon:'🎓',desc:'Finance degree from a state school nobody cares about. You know the theory. You have never made a real sale in your life. You are desperate to prove the degree meant something.',flavor:'You know how it is supposed to work. The floor will show you how it actually works.',stats:{Reputation:10,NetworkValue:5,Charisma:5}},
+      {name:'The Natural',icon:'🎯',desc:'You could always talk people into things. Teachers. Girls. Car dealers. You never studied finance. You just knew you belonged somewhere the talking never stopped.',flavor:'You do not know what a P/E ratio is. You do not need to yet.',stats:{Charisma:15,Ruthlessness:5}},
+      {name:'The Insider',icon:'🤝',desc:'Your uncle knows someone. You did not earn this interview. Everyone on the floor knows it. You have six months to prove it does not matter.',flavor:'The door was opened for you. Whether you walk through it is up to you.',stats:{NetworkValue:15,Reputation:5,LegalRisk:5}},
+    ]
+    const heading = w.customCreation==='wand'?'YOUR WAND CHOOSES YOU':w.customCreation==='saber'?'CHOOSE YOUR LIGHTSABER':w.customCreation==='position'?'CHOOSE YOUR POSITION':w.customCreation==='implant'?'CHOOSE YOUR IMPLANT':w.customCreation==='weapon'?'CLAIM YOUR DIVINE WEAPON':w.customCreation==='power'?'DISCOVER YOUR POWER':w.customCreation==='creed'?'SWEAR YOUR CREED':w.customCreation==='dragon'?'THE DRAGONS OF THE REALM':w.customCreation==='broker'?'HOW YOU GOT HERE':'BEFORE YOU BEGIN'
 
     return (
       <div style={{...G.app, padding:'30px 20px'}}>
