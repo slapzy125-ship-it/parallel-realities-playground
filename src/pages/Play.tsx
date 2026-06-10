@@ -962,8 +962,18 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       {fonts}
       <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>REVENIO</div>
       <div style={{...G.muted,letterSpacing:'4px',fontSize:'12px',marginBottom:'32px'}}>EXPLORE THE LIFE YOU NEVER LIVED</div>
-      <button style={G.btnGold} onClick={() => setScreen('creation')}>BEGIN YOUR LEGEND</button>
-      <button style={{...G.btnGhost,marginTop:'8px'}} onClick={() => setShowSaveSlots('load')}>CONTINUE JOURNEY</button>
+      {!userId ? (
+        <>
+          <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'14px',textAlign:'center',maxWidth:'420px'}}>SIGN IN TO BEGIN — YOUR STORY IS TIED TO YOUR ACCOUNT</div>
+          <Link to="/auth" style={{...G.btnGold,textDecoration:'none',display:'inline-block'}}>SIGN IN / SIGN UP</Link>
+          <Link to="/experience" style={{...G.btnGhost,marginTop:'8px',textDecoration:'none',display:'inline-block'}}>VIEW PLANS</Link>
+        </>
+      ) : (
+        <>
+          <button style={G.btnGold} onClick={() => setScreen('creation')}>BEGIN YOUR LEGEND</button>
+          {tier !== 'free' && <button style={{...G.btnGhost,marginTop:'8px'}} onClick={() => setShowSaveSlots('load')}>CONTINUE JOURNEY</button>}
+        </>
+      )}
       {showSaveSlots === 'load' && <SaveSlots mode="load" onSave={handleSave} onLoad={handleLoad} onClose={() => setShowSaveSlots(null)}/>}
     </div>
   )
