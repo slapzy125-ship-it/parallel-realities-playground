@@ -101,6 +101,7 @@ function Pricing() {
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>2 worlds: Champions Legacy & Arcane Academy</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>5 scenes per world</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — First Year only</span></li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Basic character creation</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Community access</li>
               </ul>
@@ -129,6 +130,7 @@ function Pricing() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Chapter cards & trophy popups</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>AI scene images</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Villain panel & full career stats</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — Formative Years (10 years)</span></li>
               </ul>
               <button
                 disabled={loading}
@@ -152,6 +154,7 @@ function Pricing() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Replay any past scene</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Export your full story as PDF</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Priority scene generation</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — Full lifetime + shareable card</span></li>
               </ul>
               <button
                 disabled={loading}
