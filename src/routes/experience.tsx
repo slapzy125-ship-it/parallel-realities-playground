@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useSubscription } from "@/hooks/useSubscription";
-import { supabase } from "@/integrations/supabase/client";
+
 import { toast } from "sonner";
 import { useEffect } from "react";
 
