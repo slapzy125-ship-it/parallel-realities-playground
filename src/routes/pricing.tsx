@@ -95,7 +95,7 @@ function Pricing() {
           <div className="grid md:grid-cols-3 gap-6">
             {/* Explorer — Free */}
             <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
-              <h3 className="font-display text-3xl mb-2">Revenio Explorer</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Explorer</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">FREE</p>
               <p className="text-xs text-muted-foreground mb-8">Forever, no card required</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
