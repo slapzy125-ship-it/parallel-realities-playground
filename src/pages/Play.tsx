@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from '@tanstack/react-router'
 import PenaltyKick from '@/components/minigames/PenaltyKick'
 import MagicDuel from '@/components/minigames/MagicDuel'
 import CombatStrike from '@/components/minigames/CombatStrike'
@@ -10,6 +11,11 @@ import ChapterCard from '@/components/game/ChapterCard'
 import TransferWindow from '@/components/game/TransferWindow'
 import SaveSlots from '@/components/game/SaveSlots'
 import { supabase } from '@/integrations/supabase/client'
+import { useSubscription, tierMeets } from '@/hooks/useSubscription'
+import { PaywallGate } from '@/components/PaywallGate'
+
+const FREE_WORLD_IDS = new Set(['arcane', 'champions'])
+const FREE_SCENE_CAP = 5
 
 const TRAITS = ['Ambitious','Loyal','Brave','Competitive','Intelligent','Creative','Confident','Curious','Ruthless','Charismatic']
 const GOALS = ['Become a Legend','Gain Power','Build an Empire','Become Rich','Save the World','Discover the Unknown']
