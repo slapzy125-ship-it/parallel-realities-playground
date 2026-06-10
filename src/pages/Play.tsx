@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Link } from '@tanstack/react-router'
 import PenaltyKick from '@/components/minigames/PenaltyKick'
 import MagicDuel from '@/components/minigames/MagicDuel'
 import CombatStrike from '@/components/minigames/CombatStrike'
@@ -10,6 +11,11 @@ import ChapterCard from '@/components/game/ChapterCard'
 import TransferWindow from '@/components/game/TransferWindow'
 import SaveSlots from '@/components/game/SaveSlots'
 import { supabase } from '@/integrations/supabase/client'
+import { useSubscription } from '@/hooks/useSubscription'
+import { PaywallGate } from '@/components/PaywallGate'
+
+const FREE_WORLD_IDS = new Set(['arcane', 'champions'])
+const FREE_SCENE_CAP = 5
 
 const TRAITS = ['Ambitious','Loyal','Brave','Competitive','Intelligent','Creative','Confident','Curious','Ruthless','Charismatic']
 const GOALS = ['Become a Legend','Gain Power','Build an Empire','Become Rich','Save the World','Discover the Unknown']
@@ -371,6 +377,31 @@ const WORLDS = [
     startNews:["The Eternal King's shadow has been seen at the Oracle Temple.",'Three heroes have already failed the first divine trial.','Olympus has gone silent — the gods are not answering prayers.'],
     customCreation:'weapon',
   },
+  {
+    id:'rift', name:'The Rift', icon:'🌀',
+    desc:'Where every version of you exists at once. Meet alternates from worlds you never chose. Decide which one of you survives.',
+    theme:'IDENTITY · CHOICE · INFINITY',
+    factions:['The Origin','The Shattered','The Returned','The Erased'],
+    factionDesc:{
+      'The Origin':'You as you began. Innocent. Unbroken. Unaware of what you become.',
+      'The Shattered':'You as you broke. Scarred. Powerful. Honest about the cost.',
+      'The Returned':'You as you might have been if you had said yes. Or no.',
+      'The Erased':'You from a timeline that was undone. They remember being deleted.',
+    },
+    factionTiming:'early',
+    startStat:{Identity:20,Will:25,Memory:20,Resonance:15,Anchor:0},
+    locations:['The Crossing','Mirror Halls','The Hollow Court','The Last Door','The Origin Point'],
+    startItems:['🌀 Anchor Stone'],
+    startQuests:[{name:'Which You Survives?',desc:'Only one version of you can leave The Rift. Decide who that is.'}],
+    startRels:[
+      {name:'Other You',type:'Self',val:50,dir:'neutral'},
+      {name:'The Watcher',type:'Witness',val:40,dir:'neutral'},
+      {name:'Echo',type:'Lost Self',val:35,dir:'neutral'},
+    ],
+    startNews:['Another version of you was seen at the Mirror Halls.','The Hollow Court has demanded a reckoning.','Three of your alternates have already been erased.'],
+    customCreation:'rift',
+    immortalOnly:true,
+  },
 ]
 
 const defaultPlayer = () => ({
@@ -453,6 +484,8 @@ export default function Play() {
   const [selectedPower, setSelectedPower] = useState('')
   const [selectedCreed, setSelectedCreed] = useState('')
   const historyRef = useRef<any[]>([])
+  const { tier, userId } = useSubscription()
+  const [paywallHit, setPaywallHit] = useState<string | null>(null)
 
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
 
@@ -575,7 +608,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
 {"sceneTitle":"title","sceneText":"60-80 words present tense one image one dialogue line","imagePrompt":"detailed cinematic scene description","choices":[{"id":"A","text":"specific realistic choice","type":"bold","risk":"Low","hint":"specific consequence","statPreview":{"StatName":5}},{"id":"B","text":"specific realistic choice","type":"strategic","risk":"Medium","hint":"specific consequence","statPreview":{"StatName":3}},{"id":"C","text":"specific realistic choice","type":"loyal","risk":"High","hint":"specific consequence","statPreview":{"StatName":-2}},{"id":"D","text":"Write your own action","type":"custom","risk":"Variable","hint":"anything goes","statPreview":{}}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":3,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["${newsSource}: specific headline"],"worldStateUpdates":{},"matchReport":null,"seasonSummary":null,"transferWindow":null,"chapterComplete":false,"factionEvent":"","isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
   }
 
-  const callAI = async (msg: string, pOverride?: any, wOverride?: any): Promise<any> => {
+  const callAI = async (msg: string, pOverride?: any, wOverride?: any, isOpening?: boolean): Promise<any> => {
     const p = pOverride ?? player
     const w = wOverride ?? currentWorld
     if (!w) return null
@@ -585,10 +618,24 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         body: {
           system: buildSystemPrompt(p, w),
           messages: historyRef.current,
+          worldId: w.id,
+          isOpening: !!isOpening,
         },
       })
-      if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      if (error) {
+        // Supabase wraps non-2xx; check the underlying message
+        const errMsg = (error as any)?.message || ''
+        if (errMsg.includes('paywall') || errMsg.includes('limit') || errMsg.includes('Legend') || errMsg.includes('Immortal')) {
+          setPaywallHit(errMsg.includes('Immortal') ? 'immortal' : 'legend')
+        }
+        throw error
+      }
+      if (data?.error) {
+        if (data.paywall || /limit|Legend|Immortal/.test(data.error)) {
+          setPaywallHit(/Immortal/.test(data.error) ? 'immortal' : 'legend')
+        }
+        throw new Error(data.error)
+      }
       const raw = (data?.content || []).map((c: any) => c.text || '').join('')
       const match = raw.match(/\{[\s\S]*\}/)
       if (!match) throw new Error('no json')
@@ -716,7 +763,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     }
     setPlayer(p => ({...p, majorDecisions: [...p.majorDecisions, choice.text]}))
     const minigame = checkMinigame(currentScene?.sceneText || '', choice.text)
-    if (minigame && Math.random() > 0.5) {
+    if (tier !== 'free' && minigame && Math.random() > 0.5) {
       setActiveMinigame(minigame)
       return
     }
@@ -728,9 +775,9 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       setCurrentScene(result)
       setNotifs(n)
       setSceneHistory(h => [...h, result.sceneTitle])
-      if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
-      if (result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
-      if (result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
+      if (tier !== 'free' && result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
+      if (tier !== 'free' && result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
+      if (tier !== 'free' && result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
         setShowTransferWindow(null)
         if (decision === 'transfer' && club) {
           setPlayer((prev: any) => ({...prev, worldState: {...prev.worldState, club: club.name}, careerStats: {...prev.careerStats, clubs: [...prev.careerStats.clubs, club.name]}}))
@@ -739,7 +786,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           callAI(`Player decided to stay at ${player.worldState?.club || 'current club'}. Create the scene where they recommit.`).then(r => { if (r) { const n = applyScene(r); setCurrentScene(r); setNotifs(n); setSceneHistory(h => [...h, r.sceneTitle]) } })
         }
       }})
-      if (result.seasonSummary) setShowSeasonSummary({...result.seasonSummary, playerName: player.name, position: player.position || 'Player', club: player.worldState?.club || 'Academy', onClose: () => {
+      if (tier !== 'free' && result.seasonSummary) setShowSeasonSummary({...result.seasonSummary, playerName: player.name, position: player.position || 'Player', club: player.worldState?.club || 'Academy', onClose: () => {
         setShowSeasonSummary(null)
         setPlayer((prev: any) => {
           const cs = {...prev.careerStats}
@@ -749,7 +796,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           return {...prev, careerStats: cs, age: cs.age}
         })
       }})
-      if (result.chapterComplete) {
+      if (tier !== 'free' && result.chapterComplete) {
         const nextChapter = player.currentChapter + 1
         const names = CHAPTER_NAMES[currentWorld?.id || ''] || []
         if (names[nextChapter]) setShowChapterCard({worldName: currentWorld?.name || '', chapterNumber: nextChapter + 1, chapterName: names[nextChapter], actName: getAct(player.storyProgress + 1).name, year: currentWorld?.id === 'arcane' ? nextChapter + 1 : undefined, onContinue: () => setShowChapterCard(null)})
@@ -757,7 +804,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       const prevAct = getAct(player.storyProgress - 1)
       const newAct = getAct(player.storyProgress)
       if (newAct.id !== prevAct.id && !result.isFinalScene) { setNextAct(newAct); setShowTransition(true) }
-      if (currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
+      if (tier !== 'free' && currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
     } else {
       setHasError(true)
     }
@@ -915,8 +962,18 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       {fonts}
       <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>REVENIO</div>
       <div style={{...G.muted,letterSpacing:'4px',fontSize:'12px',marginBottom:'32px'}}>EXPLORE THE LIFE YOU NEVER LIVED</div>
-      <button style={G.btnGold} onClick={() => setScreen('creation')}>BEGIN YOUR LEGEND</button>
-      <button style={{...G.btnGhost,marginTop:'8px'}} onClick={() => setShowSaveSlots('load')}>CONTINUE JOURNEY</button>
+      {!userId ? (
+        <>
+          <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'14px',textAlign:'center',maxWidth:'420px'}}>SIGN IN TO BEGIN — YOUR STORY IS TIED TO YOUR ACCOUNT</div>
+          <Link to="/auth" style={{...G.btnGold,textDecoration:'none',display:'inline-block'}}>SIGN IN / SIGN UP</Link>
+          <Link to="/experience" style={{...G.btnGhost,marginTop:'8px',textDecoration:'none',display:'inline-block'}}>VIEW PLANS</Link>
+        </>
+      ) : (
+        <>
+          <button style={G.btnGold} onClick={() => setScreen('creation')}>BEGIN YOUR LEGEND</button>
+          {tier !== 'free' && <button style={{...G.btnGhost,marginTop:'8px'}} onClick={() => setShowSaveSlots('load')}>CONTINUE JOURNEY</button>}
+        </>
+      )}
       {showSaveSlots === 'load' && <SaveSlots mode="load" onSave={handleSave} onLoad={handleLoad} onClose={() => setShowSaveSlots(null)}/>}
     </div>
   )
@@ -975,14 +1032,37 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         <div style={{...G.muted, fontSize:'13px', marginTop:'6px', letterSpacing:'2px'}}>Where will your alternate life unfold?</div>
       </div>
       <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:'16px', maxWidth:'960px', margin:'0 auto'}}>
-        {WORLDS.map(w => (
-          <div key={w.id} onClick={() => handleSelectWorld(w)} style={{background:'#1A1A24', border:'1px solid #2A2A3A', padding:'20px', cursor:'pointer', borderRadius:'2px', transition:'all .2s'}} onMouseEnter={e => e.currentTarget.style.borderColor='#D4A843'} onMouseLeave={e => e.currentTarget.style.borderColor='#2A2A3A'}>
-            <div style={{fontSize:'28px', marginBottom:'10px'}}>{w.icon}</div>
-            <div style={{fontFamily:"'Cinzel',serif", fontSize:'15px', fontWeight:700, color:'#D4A843', marginBottom:'6px', letterSpacing:'1px'}}>{w.name}</div>
-            <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
-            <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
-          </div>
-        ))}
+        {WORLDS.map(w => {
+          const isImmortalOnly = (w as any).immortalOnly
+          const locked =
+            (isImmortalOnly && tier !== 'immortal') ||
+            (!isImmortalOnly && tier === 'free' && !FREE_WORLD_IDS.has(w.id))
+          const requiredTier = isImmortalOnly ? 'Immortal' : 'Legend'
+          return (
+            <div
+              key={w.id}
+              onClick={() => locked ? null : handleSelectWorld(w)}
+              style={{background:'#1A1A24', border:`1px solid ${locked?'#2A2A3A':'#2A2A3A'}`, padding:'20px', cursor:locked?'not-allowed':'pointer', borderRadius:'2px', transition:'all .2s', opacity: locked?0.55:1, position:'relative'}}
+              onMouseEnter={e => { if (!locked) e.currentTarget.style.borderColor='#D4A843' }}
+              onMouseLeave={e => { if (!locked) e.currentTarget.style.borderColor='#2A2A3A' }}
+            >
+              {locked && (
+                <div style={{position:'absolute',top:'8px',right:'8px',background:'#0A0A0C',border:`1px solid ${isImmortalOnly?'#E5E4E2':'#D4A843'}`,color:isImmortalOnly?'#E5E4E2':'#D4A843',fontSize:'9px',letterSpacing:'2px',padding:'3px 6px',borderRadius:'2px'}}>
+                  🔒 {requiredTier.toUpperCase()}
+                </div>
+              )}
+              <div style={{fontSize:'28px', marginBottom:'10px'}}>{w.icon}</div>
+              <div style={{fontFamily:"'Cinzel',serif", fontSize:'15px', fontWeight:700, color:isImmortalOnly?'#E5E4E2':'#D4A843', marginBottom:'6px', letterSpacing:'1px'}}>{w.name}</div>
+              <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
+              <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
+              {locked && (
+                <Link to="/experience" style={{display:'block',marginTop:'10px',textAlign:'center',background:'#D4A843',color:'#0A0A0C',padding:'6px',fontSize:'10px',letterSpacing:'2px',textDecoration:'none',fontWeight:700}}>
+                  UPGRADE
+                </Link>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -1154,7 +1234,18 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       <div style={{...G.app, minHeight:'100vh'}}>
         {fonts}
         <div style={G.topbar}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,letterSpacing:'4px',color:'#D4A843'}}>REVENIO</div>
+          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,letterSpacing:'4px',color:'#D4A843'}}>REVENIO</div>
+            {tier === 'immortal' && (
+              <span style={{background:'linear-gradient(90deg,#D4A843,#F0C060,#E5E4E2)',color:'#0A0A0C',fontSize:'9px',letterSpacing:'2px',fontWeight:900,padding:'3px 8px',borderRadius:'2px'}}>IMMORTAL</span>
+            )}
+            {tier === 'legend' && (
+              <span style={{background:'#D4A843',color:'#0A0A0C',fontSize:'9px',letterSpacing:'2px',fontWeight:900,padding:'3px 8px',borderRadius:'2px'}}>LEGEND</span>
+            )}
+            {tier === 'free' && (
+              <span style={{border:'1px solid #2A2A3A',color:'#7A7A8A',fontSize:'9px',letterSpacing:'2px',padding:'3px 8px',borderRadius:'2px'}}>FREE</span>
+            )}
+          </div>
           <div style={{display:'flex',alignItems:'center',gap:'12px',flex:1,justifyContent:'center'}}>
             <div style={{textAlign:'right'}}>
               <div style={{fontSize:'13px',fontWeight:700,color:'#E8E4D8'}}>{player.name}</div>
@@ -1169,7 +1260,8 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           </div>
           <div style={{display:'flex',gap:'8px'}}>
             {saveMsg && <span style={{color:'#27AE60',fontSize:'11px',alignSelf:'center',letterSpacing:'2px'}}>{saveMsg}</span>}
-            <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>
+            {tier !== 'free' && <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>}
+            {tier === 'free' && <Link to="/experience" style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px',textDecoration:'none'}}>UPGRADE</Link>}
             <button onClick={()=>setScreen('worldselect')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>MENU</button>
           </div>
         </div>
@@ -1279,7 +1371,15 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
                   <div style={{color:'#E8E4D8',fontSize:'14px',lineHeight:1.7,whiteSpace:'pre-wrap' as const}}>{scene.sceneText}</div>
                 </div>
 
-                {scene.choices?.length > 0 && !scene.isFinalScene && (
+                {(paywallHit || (tier === 'free' && sceneHistory.length >= FREE_SCENE_CAP)) && (
+                  <PaywallGate
+                    requiredTier={paywallHit === 'immortal' ? 'immortal' : 'legend'}
+                    feature={paywallHit === 'immortal' ? 'This continuation requires Immortal' : `Free limit reached — ${FREE_SCENE_CAP} scenes per world`}
+                  >
+                    <div />
+                  </PaywallGate>
+                )}
+                {!paywallHit && !(tier === 'free' && sceneHistory.length >= FREE_SCENE_CAP) && scene.choices?.length > 0 && !scene.isFinalScene && (
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
                     {scene.choices.map((c:any,i:number) => (
                       <button key={i} onClick={()=>handleChoice(c)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',color:'#E8E4D8',padding:'12px',cursor:'pointer',textAlign:'left',borderRadius:'2px',transition:'all .2s',fontFamily:"'Rajdhani',sans-serif"}}
