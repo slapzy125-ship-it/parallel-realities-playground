@@ -1,0 +1,18 @@
+# Revenio
+
+> AI-powered parallel-universe simulation platform. Forge a new self, choose a world, and live a story that was never yours.
+
+Revenio lets you explore alternate lives through interactive AI-driven simulations across eight distinct worlds, plus Parallel Life — a documentary-style what-if mode built from your real biography.
+
+## Pages
+
+- [Home](/): Overview of Revenio and the parallel-universe experience.
+- [Worlds](/worlds): The eight simulation worlds you can step into.
+- [Play](/play): Start a simulation and choose your world.
+- [Parallel Life](/parallel): Documentary-style what-if mode based on your real life.
+- [Pricing](/pricing): Free, Legend, and Immortal subscription tiers.
+- [Hardware](/hardware): Companion hardware for immersive sessions.
+
+## Optional
+
+- [Sign in](/auth): Account access.
