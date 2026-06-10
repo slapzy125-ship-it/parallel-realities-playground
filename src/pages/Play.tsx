@@ -178,6 +178,36 @@ const VILLAIN_POOLS: Record<string,any[]> = {
     {name:'The Null',title:'The Equaliser',motivation:'His power was removed by a Nexus Institute experiment. Was told it was an acceptable loss. Discovered three other heroes had the same thing done to them. Is not attacking. Is making a statement.',firstHint:'A hero retires suddenly. The official statement says health reasons.',yearReveal:2},
     {name:'Director Aldous Crane',title:'The Necessary Evil',motivation:'Has been running illegal experiments on heroes for twelve years to make them more effective. Has saved more lives with his experiments than all the heroes combined. Cannot understand why anyone would want him stopped.',firstHint:'A hero comes back from a classified mission noticeably changed.',yearReveal:3},
   ],
+  greed:[
+    {
+      name:'Agent Sarah Moss',
+      title:'The Investigator',
+      motivation:'Has been watching this firm for two years. Lost a case once because the evidence was not airtight. Will not make that mistake again. Is not corrupt. Is not cruel. Is just very very patient.',
+      firstHint:'A colleague mentions that a woman in a grey suit was asking questions on the floor this morning. She left her card with the receptionist. Nobody picked it up.',
+      escalation:[
+        'A subpoena arrives for client records from three years ago.',
+        'A colleague you trusted is cooperating with the investigation.',
+        'Your accountant tells you there are questions about the offshore accounts.',
+        'Moss approaches you directly at a restaurant. She sits down without being invited. She orders water.',
+        'The indictment is sealed. She calls you personally before the news breaks.',
+      ],
+      finalMove:'She offers you a deal. The deal is reasonable. Whether you take it defines who you are.',
+    },
+    {
+      name:'Victor Chase',
+      title:'The Rival',
+      motivation:'Was the best broker on the floor before you arrived. Has been there seven years. Watched three people try to take his position. Watched all three fail. Considers this educational.',
+      firstHint:'Your best client calls to say someone else reached out. They describe the pitch. It is better than yours.',
+      escalation:[
+        'Chase takes two of your top clients in one week.',
+        'He starts a rumour about you with the compliance team.',
+        'He is promoted to floor manager. Your direct manager now reports to him.',
+        'He offers you a partnership. The terms are not what they appear to be.',
+        'You discover he has been shorting stocks in companies he recommended to clients.',
+      ],
+      finalMove:'You have evidence against him. Using it will destroy him. It will also expose how you got it.',
+    },
+  ],
 }
 
 const ACHIEVEMENTS: Record<string,{title:string,desc:string,tier:'bronze'|'silver'|'gold'|'platinum'}> = {
