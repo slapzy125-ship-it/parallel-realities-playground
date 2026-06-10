@@ -21,25 +21,41 @@ const TRAITS = ['Ambitious','Loyal','Brave','Competitive','Intelligent','Creativ
 const GOALS = ['Become a Legend','Gain Power','Build an Empire','Become Rich','Save the World','Discover the Unknown']
 const NATIONALITIES = ['English','Spanish','French','German','Brazilian','Argentine','Portuguese','Italian','Dutch','Belgian','Croatian','Senegalese','Nigerian','Moroccan','Japanese','American','Mexican','Colombian','Australian','Scottish','Welsh','Irish','Swedish','Norwegian']
 
-const ACTS = [
-  {id:1,name:'The Beginning',range:[0,4],desc:'Your story starts here.'},
-  {id:2,name:'Rising Tension',range:[5,9],desc:'The world reacts to you.'},
-  {id:3,name:'The Crisis',range:[10,14],desc:'Everything is at stake.'},
-  {id:4,name:'Confrontation',range:[15,19],desc:'Face your greatest challenge.'},
-  {id:5,name:'The Legend',range:[20,24],desc:'Your legacy is decided.'},
-]
-const getAct = (p:number) => ACTS.find(a => p >= a.range[0] && p <= a.range[1]) ?? ACTS[4]
-
-const CHAPTER_NAMES: Record<string,string[]> = {
-  arcane:['The Arrival','The Forbidden Floor','The Vanishing','The Weight of Secrets','The Trials','The Betrayal','The Reckoning'],
-  champions:['The Trial','First Contract','Breaking Through','The Transfer','Peak Years','The Final Push','Legacy Season'],
-  galactic:['First Flight','Choosing Sides','The War Begins','Behind Enemy Lines','The Turning Point'],
-  dragonfall:['The Tournament','The Alliance','Fire and Blood','The Dragon Bond','The Final War'],
-  shadow:['The Initiation','The First Contract','Into the Dark','The Brotherhood Test','The Reckoning'],
-  neon:['First Breach','Going Deeper','Corporate Enemy','The Network','Endgame'],
-  odyssey:["The Oracle's Call",'The First Trial','Divine Favour','The Dark Road','The Eternal Gate'],
-  hero:['Licence Granted','First Response','Rising Ranks','The Crisis','Final Stand'],
+// Per-world act structure. Each act = one chapter. `scenes` = how many scenes belong to that act.
+// Longer worlds → fuller arcs. Champions Legacy covers an entire football career (age 16 → 45).
+const WORLD_ACTS: Record<string, Array<{name:string, scenes:number}>> = {
+  arcane:     [{name:'The Arrival',scenes:10},{name:'The Forbidden Floor',scenes:10},{name:'The Vanishing',scenes:10},{name:'The Weight of Secrets',scenes:10},{name:'The Trials',scenes:12},{name:'The Betrayal',scenes:12},{name:'The Reckoning',scenes:14}],
+  champions:  [{name:'The Trial',scenes:10},{name:'First Contract',scenes:12},{name:'Breaking Through',scenes:12},{name:'The Transfer',scenes:14},{name:'Peak Years',scenes:16},{name:'The Final Push',scenes:12},{name:'Legacy Season',scenes:12}],
+  galactic:   [{name:'First Flight',scenes:10},{name:'Choosing Sides',scenes:12},{name:'The War Begins',scenes:14},{name:'Behind Enemy Lines',scenes:12},{name:'The Turning Point',scenes:14}],
+  dragonfall: [{name:'The Tournament',scenes:10},{name:'The Alliance',scenes:12},{name:'Fire and Blood',scenes:14},{name:'The Dragon Bond',scenes:12},{name:'The Final War',scenes:14}],
+  shadow:     [{name:'The Initiation',scenes:10},{name:'The First Contract',scenes:12},{name:'Into the Dark',scenes:14},{name:'The Brotherhood Test',scenes:12},{name:'The Reckoning',scenes:14}],
+  neon:       [{name:'First Breach',scenes:10},{name:'Going Deeper',scenes:12},{name:'Corporate Enemy',scenes:14},{name:'The Network',scenes:12},{name:'Endgame',scenes:14}],
+  odyssey:    [{name:"The Oracle's Call",scenes:10},{name:'The First Trial',scenes:12},{name:'Divine Favour',scenes:14},{name:'The Dark Road',scenes:12},{name:'The Eternal Gate',scenes:14}],
+  hero:       [{name:'Licence Granted',scenes:10},{name:'First Response',scenes:12},{name:'Rising Ranks',scenes:14},{name:'The Crisis',scenes:12},{name:'Final Stand',scenes:14}],
 }
+const DEFAULT_ACTS = [{name:'Beginning',scenes:10},{name:'Rising',scenes:12},{name:'Crisis',scenes:14},{name:'Confrontation',scenes:12},{name:'Legend',scenes:14}]
+
+const getWorldActs = (worldId?:string) => (worldId && WORLD_ACTS[worldId]) || DEFAULT_ACTS
+const getActRanges = (worldId?:string) => {
+  const acts = getWorldActs(worldId)
+  let start = 0
+  return acts.map((a, i) => {
+    const range:[number,number] = [start, start + a.scenes - 1]
+    start += a.scenes
+    return {id: i + 1, name: a.name, range, scenes: a.scenes}
+  })
+}
+const getAct = (p:number, worldId?:string) => {
+  const ranges = getActRanges(worldId)
+  return ranges.find(a => p >= a.range[0] && p <= a.range[1]) ?? ranges[ranges.length - 1]
+}
+const getTotalScenes = (worldId?:string) => getWorldActs(worldId).reduce((s,a) => s + a.scenes, 0)
+
+// Chapter names derived from act names — every act IS a chapter.
+const CHAPTER_NAMES: Record<string,string[]> = Object.fromEntries(
+  Object.entries(WORLD_ACTS).map(([k, acts]) => [k, acts.map(a => a.name)])
+)
+
 
 const WORLD_NEWS_SOURCE: Record<string,string> = {
   arcane:'The Daily Arcane',
