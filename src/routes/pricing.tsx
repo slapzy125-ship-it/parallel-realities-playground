@@ -154,6 +154,7 @@ function Pricing() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Replay any past scene</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Export your full story as PDF</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Priority scene generation</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — Full lifetime + shareable card</span></li>
               </ul>
               <button
                 disabled={loading}
