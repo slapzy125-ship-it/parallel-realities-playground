@@ -990,15 +990,21 @@ async function runSimulation(profile: Profile): Promise<Simulation> {
 
 RULES:
 1. Use the person's real name throughout: ${profile.firstName}.
-2. Reference real details from their profile constantly — their actual hometown (${profile.grewUp}), current city (${profile.livesNow}), partner (${profile.partnerName || "—"}), career (${profile.currentRole}, ${profile.industry}), strengths (${profile.strength}), weaknesses (${profile.weakness}).
+2. Reference real details from their profile constantly — their actual hometown (${profile.grewUp}), current city (${profile.livesNow}), partner (${profile.partnerName || "—"}), what they spend time on (${profile.currentRole || profile.careerPath || "—"}, ${profile.industry || "—"}), strengths (${profile.strength}), weaknesses (${profile.weakness}).
 3. Be specific and surprising. Do not just confirm their hypothesis. Real life is complicated.
-4. The butterfly effect is real. Show ripples in relationships, geography, opportunities, identity.
+4. Show how things would have played out differently — in relationships, places they end up, opportunities, who they become. Be concrete, not abstract.
 5. Reference real places, real industries, real career networks tied to their alternative path.
 6. Be emotionally honest. The alternate life isn't simply better or worse — it's genuinely different.
 7. Write in present tense, second person ("you did this, you felt this").
 8. Each section: 150–250 words. Detailed and specific.
 9. Reference their stated strengths and weaknesses and show how those traits played out differently.
 10. The final messageToRealSelf must be genuinely moving — a message from a parallel version of ${profile.firstName} across the multiverse. True, not sentimental.
+
+ALTERNATE TIMELINE RULE — CRITICAL:
+Never mention specific people from the real life timeline who the player would not have met on the alternate path. If the player's decision changed their location, school, or job, assume they did not meet anyone they met after that decision point. Only reference people who existed in their life BEFORE the decision was made — family, childhood friends, anyone from before "${profile.decisionWhen || "the decision"}". Their current partner (${profile.partnerName || "—"}), current friends, and current coworkers most likely never appear in this timeline unless they would have crossed paths anyway. Invent new people for the alternate life. Be honest about who is missing.
+
+LANGUAGE RULE — CRITICAL:
+Write at a clear conversational reading level. Use simple direct language. Every sentence should describe something specific and concrete — a place, a person, an event, a feeling shown through action. Never use abstract language. No therapy speak. No words like "ripple effect," "trajectory," "seminal," "journey of self-discovery," "transformative," "manifest," "energy," "alignment." Write like a smart friend telling you a story over a beer. Short sentences. Concrete details. Real places, real feelings, real consequences shown through what actually happens — not described in the abstract.
 
 RESPOND WITH ONLY THIS JSON — NO MARKDOWN, NO BACKTICKS:
 {"immediateAftermath":"…","firstYear":"…","formativeYears":"…","middleYears":"…","laterYears":"…","finalChapter":"…","messageToRealSelf":"…","keyDifferences":["…","…","…","…","…"],"overallJudgment":"one sentence — broadly better, worse, or just different, and why"}`;
