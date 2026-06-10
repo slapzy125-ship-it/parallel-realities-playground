@@ -11,7 +11,7 @@ import ChapterCard from '@/components/game/ChapterCard'
 import TransferWindow from '@/components/game/TransferWindow'
 import SaveSlots from '@/components/game/SaveSlots'
 import { supabase } from '@/integrations/supabase/client'
-import { useSubscription, tierMeets } from '@/hooks/useSubscription'
+import { useSubscription } from '@/hooks/useSubscription'
 import { PaywallGate } from '@/components/PaywallGate'
 
 const FREE_WORLD_IDS = new Set(['arcane', 'champions'])
