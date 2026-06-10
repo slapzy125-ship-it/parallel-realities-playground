@@ -484,6 +484,8 @@ export default function Play() {
   const [selectedPower, setSelectedPower] = useState('')
   const [selectedCreed, setSelectedCreed] = useState('')
   const historyRef = useRef<any[]>([])
+  const { tier, userId } = useSubscription()
+  const [paywallHit, setPaywallHit] = useState<string | null>(null)
 
   const fonts = <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
 
@@ -606,7 +608,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
 {"sceneTitle":"title","sceneText":"60-80 words present tense one image one dialogue line","imagePrompt":"detailed cinematic scene description","choices":[{"id":"A","text":"specific realistic choice","type":"bold","risk":"Low","hint":"specific consequence","statPreview":{"StatName":5}},{"id":"B","text":"specific realistic choice","type":"strategic","risk":"Medium","hint":"specific consequence","statPreview":{"StatName":3}},{"id":"C","text":"specific realistic choice","type":"loyal","risk":"High","hint":"specific consequence","statPreview":{"StatName":-2}},{"id":"D","text":"Write your own action","type":"custom","risk":"Variable","hint":"anything goes","statPreview":{}}],"statChanges":{"StatName":5,"StatName2":-2},"xpGained":15,"reputationChange":3,"relationshipChanges":[{"name":"Name","change":10,"dir":"friend"}],"inventoryUnlocks":[],"questUpdates":[],"newQuests":[],"newAchievements":[],"newsUpdates":["${newsSource}: specific headline"],"worldStateUpdates":{},"matchReport":null,"seasonSummary":null,"transferWindow":null,"chapterComplete":false,"factionEvent":"","isFinalScene":false,"legacyTitle":"","legacyEnding":""}`
   }
 
-  const callAI = async (msg: string, pOverride?: any, wOverride?: any): Promise<any> => {
+  const callAI = async (msg: string, pOverride?: any, wOverride?: any, isOpening?: boolean): Promise<any> => {
     const p = pOverride ?? player
     const w = wOverride ?? currentWorld
     if (!w) return null
@@ -616,10 +618,24 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         body: {
           system: buildSystemPrompt(p, w),
           messages: historyRef.current,
+          worldId: w.id,
+          isOpening: !!isOpening,
         },
       })
-      if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      if (error) {
+        // Supabase wraps non-2xx; check the underlying message
+        const errMsg = (error as any)?.message || ''
+        if (errMsg.includes('paywall') || errMsg.includes('limit') || errMsg.includes('Legend') || errMsg.includes('Immortal')) {
+          setPaywallHit(errMsg.includes('Immortal') ? 'immortal' : 'legend')
+        }
+        throw error
+      }
+      if (data?.error) {
+        if (data.paywall || /limit|Legend|Immortal/.test(data.error)) {
+          setPaywallHit(/Immortal/.test(data.error) ? 'immortal' : 'legend')
+        }
+        throw new Error(data.error)
+      }
       const raw = (data?.content || []).map((c: any) => c.text || '').join('')
       const match = raw.match(/\{[\s\S]*\}/)
       if (!match) throw new Error('no json')
@@ -747,7 +763,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     }
     setPlayer(p => ({...p, majorDecisions: [...p.majorDecisions, choice.text]}))
     const minigame = checkMinigame(currentScene?.sceneText || '', choice.text)
-    if (minigame && Math.random() > 0.5) {
+    if (tier !== 'free' && minigame && Math.random() > 0.5) {
       setActiveMinigame(minigame)
       return
     }
@@ -759,9 +775,9 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       setCurrentScene(result)
       setNotifs(n)
       setSceneHistory(h => [...h, result.sceneTitle])
-      if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
-      if (result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
-      if (result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
+      if (tier !== 'free' && result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
+      if (tier !== 'free' && result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
+      if (tier !== 'free' && result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
         setShowTransferWindow(null)
         if (decision === 'transfer' && club) {
           setPlayer((prev: any) => ({...prev, worldState: {...prev.worldState, club: club.name}, careerStats: {...prev.careerStats, clubs: [...prev.careerStats.clubs, club.name]}}))
@@ -770,7 +786,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           callAI(`Player decided to stay at ${player.worldState?.club || 'current club'}. Create the scene where they recommit.`).then(r => { if (r) { const n = applyScene(r); setCurrentScene(r); setNotifs(n); setSceneHistory(h => [...h, r.sceneTitle]) } })
         }
       }})
-      if (result.seasonSummary) setShowSeasonSummary({...result.seasonSummary, playerName: player.name, position: player.position || 'Player', club: player.worldState?.club || 'Academy', onClose: () => {
+      if (tier !== 'free' && result.seasonSummary) setShowSeasonSummary({...result.seasonSummary, playerName: player.name, position: player.position || 'Player', club: player.worldState?.club || 'Academy', onClose: () => {
         setShowSeasonSummary(null)
         setPlayer((prev: any) => {
           const cs = {...prev.careerStats}
@@ -780,7 +796,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           return {...prev, careerStats: cs, age: cs.age}
         })
       }})
-      if (result.chapterComplete) {
+      if (tier !== 'free' && result.chapterComplete) {
         const nextChapter = player.currentChapter + 1
         const names = CHAPTER_NAMES[currentWorld?.id || ''] || []
         if (names[nextChapter]) setShowChapterCard({worldName: currentWorld?.name || '', chapterNumber: nextChapter + 1, chapterName: names[nextChapter], actName: getAct(player.storyProgress + 1).name, year: currentWorld?.id === 'arcane' ? nextChapter + 1 : undefined, onContinue: () => setShowChapterCard(null)})
@@ -788,7 +804,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       const prevAct = getAct(player.storyProgress - 1)
       const newAct = getAct(player.storyProgress)
       if (newAct.id !== prevAct.id && !result.isFinalScene) { setNextAct(newAct); setShowTransition(true) }
-      if (currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
+      if (tier !== 'free' && currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
     } else {
       setHasError(true)
     }
