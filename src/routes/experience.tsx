@@ -6,7 +6,7 @@ import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/experience")({
   head: () => ({
@@ -39,11 +39,6 @@ function Experience() {
   const router = useRouter();
   const { openCheckout, loading } = usePaddleCheckout();
   const { tier, isActive, userId } = useSubscription();
-  const [email, setEmail] = useState<string | undefined>();
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? undefined));
-  }, [userId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
