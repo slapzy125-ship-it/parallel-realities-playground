@@ -6,11 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const FREE_WORLDS = new Set(['arcane', 'champions'])
+const FREE_WORLDS = new Set(['arcane', 'champions', 'parallel'])
 const IMMORTAL_WORLDS = new Set(['rift'])
+const NO_CAP_WORLDS = new Set(['parallel']) // tier-gated client-side
 const ALLOWED_WORLDS = new Set([
   'arcane', 'champions', 'galactic', 'dragonfall', 'shadow',
-  'neon', 'odyssey', 'hero', 'rift',
+  'neon', 'odyssey', 'hero', 'rift', 'parallel',
 ])
 const FREE_SCENE_CAP = 5
 
