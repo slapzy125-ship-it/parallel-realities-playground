@@ -101,6 +101,7 @@ function Pricing() {
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>2 worlds: Champions Legacy & Arcane Academy</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>5 scenes per world</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — First Year only</span></li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Basic character creation</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Community access</li>
               </ul>
