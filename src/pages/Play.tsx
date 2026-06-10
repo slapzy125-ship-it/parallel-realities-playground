@@ -495,10 +495,6 @@ export default function Play() {
     }
   }, [trophyQueue, currentTrophy])
 
-  useEffect(() => {
-    setImageError(false)
-    setImageLoaded(false)
-  }, [sceneImage])
 
   const pickVillain = (worldId: string) => {
     const pool = VILLAIN_POOLS[worldId] || []
@@ -779,7 +775,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       setCurrentScene(result)
       setNotifs(n)
       setSceneHistory(h => [...h, result.sceneTitle])
-      if (tier !== 'free' && result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality, realistic')}?width=900&height=400&nologo=true&model=flux`)
+      setSceneHistory(h => [...h, result.sceneTitle])
       if (tier !== 'free' && result.matchReport) setShowMatchReport({...result.matchReport, playerName: player.name, position: player.position || 'Player', onClose: () => setShowMatchReport(null)})
       if (tier !== 'free' && result.transferWindow) setShowTransferWindow({...result.transferWindow, playerName: player.name, currentClub: player.worldState?.club || 'Academy', position: player.position || 'Player', marketValue: `£${player.careerStats?.marketValue || 0}m`, onDecide: (decision: string, club?: any) => {
         setShowTransferWindow(null)
@@ -827,7 +823,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       setCurrentScene(result)
       setNotifs(n)
       setSceneHistory(h => [...h, result.sceneTitle])
-      if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality')}?width=900&height=400&nologo=true&model=flux`)
+      setSceneHistory(h => [...h, result.sceneTitle])
     } else {
       setHasError(true)
     }
@@ -954,7 +950,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     setLoading(true)
     const freshPlayer = {...player, customItem: item, position: item?.type === 'position' ? item.name : player.position}
     callAI(buildOpeningPrompt(freshPlayer, w, item), freshPlayer, w).then(result => {
-      if (result) { setCurrentScene(result); setSceneHistory([result.sceneTitle]); if (result.imagePrompt) setSceneImage(`https://image.pollinations.ai/prompt/${encodeURIComponent(result.imagePrompt + ', cinematic, dramatic lighting, high quality')}?width=900&height=400&nologo=true&model=flux`) }
+      if (result) { setCurrentScene(result); setSceneHistory([result.sceneTitle]); }
       else setHasError(true)
       setLoading(false)
     })
