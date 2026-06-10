@@ -1361,8 +1361,29 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
             {!loading && !hasError && scene && (
               <>
                 {sceneImage && (
-                  <div style={{width:'100%',maxHeight:'320px',overflow:'hidden',borderRadius:'2px',border:'1px solid #2A2A3A'}}>
-                    <img src={sceneImage} alt={scene.sceneTitle} style={{width:'100%',display:'block'}}/>
+                  <div style={{width:'100%', height:'200px', marginBottom:'16px', borderRadius:'2px', overflow:'hidden', background:'linear-gradient(135deg,#0F0F14,#1A1A24)', position:'relative'}}>
+                    {!imageLoaded && !imageError && (
+                      <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:'8px'}}>
+                        <div style={{width:'24px', height:'24px', border:'2px solid #2A2A3A', borderTopColor:'#D4A843', borderRadius:'50%', animation:'spin 1s linear infinite'}}/>
+                        <div style={{color:'#3A3A4A', fontSize:'10px', letterSpacing:'3px'}}>LOADING IMAGE...</div>
+                      </div>
+                    )}
+                    {!imageError && (
+                      <img
+                        src={sceneImage}
+                        style={{width:'100%', height:'100%', objectFit:'cover', display:imageLoaded?'block':'none'}}
+                        onLoad={() => setImageLoaded(true)}
+                        onError={() => setImageError(true)}
+                      />
+                    )}
+                    {imageError && (
+                      <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg,#0F0F14,#1A1A24)'}}>
+                        <div style={{textAlign:'center'}}>
+                          <div style={{fontSize:'32px', marginBottom:'8px', opacity:0.3}}>🎬</div>
+                          <div style={{color:'#2A2A3A', fontSize:'10px', letterSpacing:'3px'}}>SCENE {player.storyProgress + 1}</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div style={G.surface}>
