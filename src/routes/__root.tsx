@@ -77,6 +77,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "iQHuy2aq_EbBF5wmZEXnWi46_kKJn4SE8HTieYuNVa4" },
       { title: "Revenio — Explore the Life You Never Lived" },
       { name: "description", content: "Revenio is an AI-powered parallel-universe simulation platform. Forge a new self, choose a world, and live a story that was never yours." },
       { name: "author", content: "Revenio" },
