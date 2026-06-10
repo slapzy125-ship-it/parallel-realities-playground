@@ -966,7 +966,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         <>
           <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'14px',textAlign:'center',maxWidth:'420px'}}>SIGN IN TO BEGIN — YOUR STORY IS TIED TO YOUR ACCOUNT</div>
           <Link to="/auth" style={{...G.btnGold,textDecoration:'none',display:'inline-block'}}>SIGN IN / SIGN UP</Link>
-          <Link to="/experience" style={{...G.btnGhost,marginTop:'8px',textDecoration:'none',display:'inline-block'}}>VIEW PLANS</Link>
+          <Link to="/pricing" style={{...G.btnGhost,marginTop:'8px',textDecoration:'none',display:'inline-block'}}>VIEW PLANS</Link>
         </>
       ) : (
         <>
@@ -1056,7 +1056,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
               <div style={{...G.muted, fontSize:'12px', lineHeight:1.5}}>{w.desc}</div>
               <div style={{...G.muted, fontSize:'10px', letterSpacing:'2px', marginTop:'8px', borderTop:'1px solid #2A2A3A', paddingTop:'8px'}}>{w.theme}</div>
               {locked && (
-                <Link to="/experience" style={{display:'block',marginTop:'10px',textAlign:'center',background:'#D4A843',color:'#0A0A0C',padding:'6px',fontSize:'10px',letterSpacing:'2px',textDecoration:'none',fontWeight:700}}>
+                <Link to="/pricing" style={{display:'block',marginTop:'10px',textAlign:'center',background:'#D4A843',color:'#0A0A0C',padding:'6px',fontSize:'10px',letterSpacing:'2px',textDecoration:'none',fontWeight:700}}>
                   UPGRADE
                 </Link>
               )}
@@ -1261,7 +1261,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
           <div style={{display:'flex',gap:'8px'}}>
             {saveMsg && <span style={{color:'#27AE60',fontSize:'11px',alignSelf:'center',letterSpacing:'2px'}}>{saveMsg}</span>}
             {tier !== 'free' && <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>}
-            {tier === 'free' && <Link to="/experience" style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px',textDecoration:'none'}}>UPGRADE</Link>}
+            {tier === 'free' && <Link to="/pricing" style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px',textDecoration:'none'}}>UPGRADE</Link>}
             <button onClick={()=>setScreen('worldselect')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>MENU</button>
           </div>
         </div>
