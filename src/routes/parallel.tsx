@@ -17,6 +17,10 @@ export const Route = createFileRoute("/parallel")({
         content:
           "See the alternate version of your own life, written from your real profile and one different decision.",
       },
+      { property: "og:url", content: "https://revenio.net/parallel" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/parallel" },
     ],
   }),
   component: ParallelPage,

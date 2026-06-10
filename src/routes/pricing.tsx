@@ -15,6 +15,24 @@ export const Route = createFileRoute("/pricing")({
       { name: "description", content: "Unlock all 8 worlds, unlimited scenes, and exclusive features. Plans from $10/month." },
       { property: "og:title", content: "Revenio Pricing — Live Every Story" },
       { property: "og:description", content: "Start free. Upgrade to unlock all worlds, unlimited scenes, AI scene art, and more." },
+      { property: "og:url", content: "https://revenio.net/pricing" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/pricing" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
     ],
   }),
   component: Pricing,
@@ -95,7 +113,7 @@ function Pricing() {
           <div className="grid md:grid-cols-3 gap-6">
             {/* Explorer — Free */}
             <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
-              <h3 className="font-display text-3xl mb-2">Revenio Explorer</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Explorer</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">FREE</p>
               <p className="text-xs text-muted-foreground mb-8">Forever, no card required</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
@@ -118,7 +136,7 @@ function Pricing() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--gold)] text-background text-[10px] tracking-[0.2em] uppercase px-4 py-1 font-medium">
                 Most Popular
               </div>
-              <h3 className="font-display text-3xl mb-2">Revenio Legend</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Legend</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">$10<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <p className="text-xs text-muted-foreground mb-8">Cancel anytime</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
@@ -143,7 +161,7 @@ function Pricing() {
 
             {/* Immortal — $20 */}
             <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
-              <h3 className="font-display text-3xl mb-2">Revenio Immortal</h3>
+              <h2 className="font-display text-3xl mb-2">Revenio Immortal</h2>
               <p className="text-2xl font-display text-[var(--gold)] mb-1">$20<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <p className="text-xs text-muted-foreground mb-8">For the truly obsessed</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">

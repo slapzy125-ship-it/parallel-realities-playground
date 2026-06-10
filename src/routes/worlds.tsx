@@ -17,6 +17,32 @@ export const Route = createFileRoute("/worlds")({
       { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
       { property: "og:title", content: "Pick Your World — Revenio" },
       { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
+      { property: "og:url", content: "https://revenio.net/worlds" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/worlds" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Revenio Worlds",
+          description: "Eight AI-powered worlds you can step into on Revenio.",
+          url: "https://revenio.net/worlds",
+          hasPart: [
+            { "@type": "CreativeWork", name: "Arcane Academy" },
+            { "@type": "CreativeWork", name: "Galactic Frontier" },
+            { "@type": "CreativeWork", name: "Hero Nexus" },
+            { "@type": "CreativeWork", name: "Dragonfall Kingdoms" },
+            { "@type": "CreativeWork", name: "Shadow Guild" },
+            { "@type": "CreativeWork", name: "Neon Dominion" },
+            { "@type": "CreativeWork", name: "Eternal Odyssey" },
+            { "@type": "CreativeWork", name: "Champions Legacy" },
+          ],
+        }),
+      },
     ],
   }),
   component: Worlds,
@@ -111,7 +137,7 @@ function Worlds() {
 
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
                 <p className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)] mb-2">{w.tag}</p>
-                <h3 className="font-display text-2xl mb-2 leading-tight">{w.name}</h3>
+                <h2 className="font-display text-2xl mb-2 leading-tight">{w.name}</h2>
                 <p className="text-xs text-muted-foreground/90 leading-relaxed opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">{w.desc}</p>
               </div>
 

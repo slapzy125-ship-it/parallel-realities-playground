@@ -10,6 +10,10 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Step into AI worlds. Pick a world. Live a story. One headset. Endless worlds." },
       { property: "og:title", content: "Revenio — Be Someone Else" },
       { property: "og:description", content: "AI worlds you can step into. Coming 2031." },
+      { property: "og:url", content: "https://revenio.net/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/" },
     ],
   }),
   component: Home,
