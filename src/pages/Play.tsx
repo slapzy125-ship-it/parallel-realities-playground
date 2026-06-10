@@ -592,6 +592,7 @@ WORLD STYLE: ${
   w.id==='shadow'?'Assassins Creed. Brotherhood weight, moral grey. Trust earned slow, broken fast.':
   w.id==='neon'?'Cyberpunk 2077. Neon and grit. Augments cost identity. The city is a character.':
   w.id==='odyssey'?'Greek myth. Gods are real, petty, magnificent. Fate is weight.':
+  w.id==='greed'?'1980s and 1990s Wall Street. Gordon Gekko energy. Specific dollar amounts. Cigarette smoke, brick phones, ticker tape. Every line costs or earns something.':
   'Cinematic. Specific. Vivid.'}
 VILLAIN THIS RUN: ${villain ? `${villain.name} — ${villain.motivation || villain.description || ''}` : 'Unknown'}
 CHAPTER: ${p.currentChapter + 1} — ${chapterName}
