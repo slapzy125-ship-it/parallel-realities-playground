@@ -8,7 +8,17 @@ const corsHeaders = {
 
 const FREE_WORLDS = new Set(['arcane', 'champions'])
 const IMMORTAL_WORLDS = new Set(['rift'])
+const ALLOWED_WORLDS = new Set([
+  'arcane', 'champions', 'galactic', 'dragonfall', 'shadow',
+  'neon', 'odyssey', 'hero', 'rift',
+])
 const FREE_SCENE_CAP = 5
+
+// Hard limits to prevent abuse / cost inflation
+const MAX_TOTAL_BODY_BYTES = 200_000        // ~200KB total request
+const MAX_SYSTEM_CHARS = 20_000
+const MAX_MESSAGES = 24
+const MAX_MESSAGE_CHARS = 8_000
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -41,12 +51,56 @@ serve(async (req) => {
     if (userErr || !userResp?.user) return json({ error: 'Invalid session.' }, 401)
     const userId = userResp.user.id
 
-    const body = await req.json()
+    // ── Read + size-cap the body ───────────────────────────────────────
+    const rawBody = await req.text()
+    if (rawBody.length > MAX_TOTAL_BODY_BYTES) {
+      return json({ error: 'Request too large.' }, 413)
+    }
+    let body: any
+    try {
+      body = JSON.parse(rawBody)
+    } catch {
+      return json({ error: 'Invalid request body.' }, 400)
+    }
+
     const { system, messages, worldId, isOpening } = body as {
-      system?: string
-      messages?: Array<{ role: string; content: string }>
-      worldId?: string
-      isOpening?: boolean
+      system?: unknown
+      messages?: unknown
+      worldId?: unknown
+      isOpening?: unknown
+    }
+
+    // ── Validate worldId (required, allowlisted) ───────────────────────
+    if (typeof worldId !== 'string' || !ALLOWED_WORLDS.has(worldId)) {
+      return json({ error: 'Invalid or missing worldId.' }, 400)
+    }
+
+    // ── Validate system prompt (size-cap only; accepted from client) ───
+    let systemStr: string | undefined
+    if (system !== undefined && system !== null) {
+      if (typeof system !== 'string') return json({ error: 'Invalid system prompt.' }, 400)
+      if (system.length > MAX_SYSTEM_CHARS) return json({ error: 'System prompt too large.' }, 400)
+      systemStr = system
+    }
+
+    // ── Validate messages: array, capped count, capped length, no client system role ──
+    if (!Array.isArray(messages)) return json({ error: 'Invalid messages.' }, 400)
+    if (messages.length > MAX_MESSAGES) return json({ error: 'Too many messages.' }, 400)
+    const cleanMessages: Array<{ role: string; content: string }> = []
+    for (const m of messages) {
+      if (!m || typeof m !== 'object') return json({ error: 'Invalid message entry.' }, 400)
+      const role = (m as any).role
+      const content = (m as any).content
+      if (typeof role !== 'string' || typeof content !== 'string') {
+        return json({ error: 'Invalid message entry.' }, 400)
+      }
+      // Strip any client-supplied system messages — only the server-controlled system is honored
+      if (role === 'system') continue
+      if (role !== 'user' && role !== 'assistant') continue
+      if (content.length > MAX_MESSAGE_CHARS) {
+        return json({ error: 'Message too long.' }, 400)
+      }
+      cleanMessages.push({ role, content })
     }
 
     // ── Server-side tier check ─────────────────────────────────────────
@@ -58,36 +112,35 @@ serve(async (req) => {
       tier = 'immortal'
     }
 
-    if (worldId) {
-      if (IMMORTAL_WORLDS.has(worldId) && tier !== 'immortal') {
-        return json({ error: 'This world is reserved for Immortal subscribers.' }, 403)
-      }
-      if (tier === 'free' && !FREE_WORLDS.has(worldId)) {
-        return json({ error: 'This world requires a Legend subscription.' }, 403)
-      }
+    // ── Tier gates (now unconditional — worldId is required) ───────────
+    if (IMMORTAL_WORLDS.has(worldId) && tier !== 'immortal') {
+      return json({ error: 'This world is reserved for Immortal subscribers.' }, 403)
+    }
+    if (tier === 'free' && !FREE_WORLDS.has(worldId)) {
+      return json({ error: 'This world requires a Legend subscription.' }, 403)
+    }
 
-      // Free tier: enforce 5-scene cap per world server-side
-      if (tier === 'free') {
-        const { data: usage } = await admin
-          .from('free_scene_usage')
-          .select('count')
-          .eq('user_id', userId)
-          .eq('world_id', worldId)
-          .maybeSingle()
-        const used = usage?.count ?? 0
-        if (used >= FREE_SCENE_CAP) {
-          return json(
-            { error: 'You have reached the 5-scene free limit for this world. Upgrade to Legend to continue.', paywall: true },
-            403,
-          )
-        }
+    // Free tier: enforce 5-scene cap per world server-side
+    if (tier === 'free') {
+      const { data: usage } = await admin
+        .from('free_scene_usage')
+        .select('count')
+        .eq('user_id', userId)
+        .eq('world_id', worldId)
+        .maybeSingle()
+      const used = usage?.count ?? 0
+      if (used >= FREE_SCENE_CAP) {
+        return json(
+          { error: 'You have reached the 5-scene free limit for this world. Upgrade to Legend to continue.', paywall: true },
+          403,
+        )
       }
     }
 
     // ── Call Lovable AI Gateway ────────────────────────────────────────
     const chatMessages = [
-      ...(system ? [{ role: 'system', content: system }] : []),
-      ...(messages || []),
+      ...(systemStr ? [{ role: 'system', content: systemStr }] : []),
+      ...cleanMessages,
     ]
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -101,14 +154,15 @@ serve(async (req) => {
 
     if (!response.ok) {
       const text = await response.text()
-      return json({ error: `Gateway ${response.status}: ${text}` }, response.status)
+      console.error(`AI gateway error ${response.status}: ${text}`)
+      return json({ error: 'AI service temporarily unavailable. Please try again.' }, 502)
     }
 
     const data = await response.json()
     const text = data.choices?.[0]?.message?.content ?? ''
 
     // ── Increment scene usage for free tier ────────────────────────────
-    if (tier === 'free' && worldId && !isOpening) {
+    if (tier === 'free' && !isOpening) {
       const { data: existing } = await admin
         .from('free_scene_usage')
         .select('count')
@@ -126,6 +180,7 @@ serve(async (req) => {
 
     return json({ content: [{ type: 'text', text }], tier })
   } catch (error) {
-    return json({ error: (error as Error).message }, 500)
+    console.error('ai-scene unhandled error:', error)
+    return json({ error: 'An internal error occurred. Please try again.' }, 500)
   }
 })
