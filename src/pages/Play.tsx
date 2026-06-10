@@ -474,6 +474,8 @@ export default function Play() {
   const [trophyQueue, setTrophyQueue] = useState<any[]>([])
   const [currentTrophy, setCurrentTrophy] = useState<any>(null)
   const [sceneImage, setSceneImage] = useState('')
+  const [imageError, setImageError] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
   const [wandWood, setWandWood] = useState<any>(null)
   const [wandCore, setWandCore] = useState<any>(null)
   const [wandLength, setWandLength] = useState<any>(null)
@@ -495,6 +497,11 @@ export default function Play() {
       setTrophyQueue(q => q.slice(1))
     }
   }, [trophyQueue, currentTrophy])
+
+  useEffect(() => {
+    setImageError(false)
+    setImageLoaded(false)
+  }, [sceneImage])
 
   const pickVillain = (worldId: string) => {
     const pool = VILLAIN_POOLS[worldId] || []
