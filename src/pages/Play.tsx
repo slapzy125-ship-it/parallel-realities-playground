@@ -1363,10 +1363,10 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         </div>
 
         {/* Overlays */}
-        {activeMinigame === 'penalty' && <PenaltyKick onComplete={handleMinigameComplete} />}
-        {activeMinigame === 'magic' && <MagicDuel onComplete={handleMinigameComplete} />}
-        {activeMinigame === 'combat' && <CombatStrike onComplete={handleMinigameComplete} />}
-        {activeMinigame === 'hack' && <HackTerminal onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'penalty' && <PenaltyKick playerName={player.name} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'magic' && <MagicDuel playerName={player.name} opponentName={player.villain?.name || 'Rival'} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'combat' && <CombatStrike playerName={player.name} opponentName={player.villain?.name || 'Adversary'} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'hack' && <HackTerminal playerName={player.name} targetName={player.villain?.name || 'Mainframe'} onComplete={handleMinigameComplete} />}
 
         {showDragonBond && (
           <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.94)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000,padding:'20px',overflowY:'auto'}}>
