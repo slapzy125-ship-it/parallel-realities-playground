@@ -15,6 +15,24 @@ export const Route = createFileRoute("/pricing")({
       { name: "description", content: "Unlock all 8 worlds, unlimited scenes, and exclusive features. Plans from $10/month." },
       { property: "og:title", content: "Revenio Pricing — Live Every Story" },
       { property: "og:description", content: "Start free. Upgrade to unlock all worlds, unlimited scenes, AI scene art, and more." },
+      { property: "og:url", content: "https://revenio.net/pricing" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/pricing" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
     ],
   }),
   component: Pricing,
