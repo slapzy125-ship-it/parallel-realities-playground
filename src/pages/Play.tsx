@@ -67,6 +67,7 @@ const WORLD_NEWS_SOURCE: Record<string,string> = {
   neon:'NeonNet Feed',
   odyssey:"The Oracle's Echo",
   hero:'Hero Watch Daily',
+  greed:'The Floor Report',
 }
 
 const WAND_WOODS = [
