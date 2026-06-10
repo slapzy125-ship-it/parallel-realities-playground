@@ -15,6 +15,23 @@ export const Route = createFileRoute("/hardware")({
       { name: "description", content: "Revenio One. Two looks. Built to step inside. Coming 2031." },
       { property: "og:title", content: "Revenio One — The Headset" },
       { property: "og:description", content: "Onyx and Luxe. One headset. Endless worlds." },
+      { property: "og:url", content: "https://revenio.net/hardware" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/hardware" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "Revenio One",
+          description: "The Revenio One headset. Two looks — Onyx and Luxe. Hand tracking, AI worlds, endless stories. Coming 2031.",
+          brand: { "@type": "Brand", name: "Revenio" },
+          category: "VR Headset",
+        }),
+      },
     ],
   }),
   component: Hardware,
