@@ -122,7 +122,7 @@ serve(async (req) => {
     }
 
     // Free tier: enforce 5-scene cap per world server-side
-    if (tier === 'free') {
+    if (tier === 'free' && !NO_CAP_WORLDS.has(worldId)) {
       const { data: usage } = await admin
         .from('free_scene_usage')
         .select('count')
