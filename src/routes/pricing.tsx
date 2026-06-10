@@ -130,6 +130,7 @@ function Pricing() {
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Chapter cards & trophy popups</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>AI scene images</li>
                 <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Villain panel & full career stats</li>
+                <li className="flex items-start gap-3"><span className="text-[#3B82F6] mt-0.5">+</span><span><span className="text-[#3B82F6]">Parallel Life</span> — Formative Years (10 years)</span></li>
               </ul>
               <button
                 disabled={loading}
