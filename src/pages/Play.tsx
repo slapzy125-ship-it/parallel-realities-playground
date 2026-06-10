@@ -534,7 +534,7 @@ export default function Play() {
   }
 
   const buildSystemPrompt = (p: any, w: any): string => {
-    const act = getAct(p.storyProgress)
+    const act = getAct(p.storyProgress, w.id)
     const sceneInAct = p.storyProgress - act.range[0] + 1
     const totalInAct = act.range[1] - act.range[0] + 1
     const villain = p.villain
@@ -813,10 +813,10 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       if (tier !== 'free' && result.chapterComplete) {
         const nextChapter = player.currentChapter + 1
         const names = CHAPTER_NAMES[currentWorld?.id || ''] || []
-        if (names[nextChapter]) setShowChapterCard({worldName: currentWorld?.name || '', chapterNumber: nextChapter + 1, chapterName: names[nextChapter], actName: getAct(player.storyProgress + 1).name, year: currentWorld?.id === 'arcane' ? nextChapter + 1 : undefined, onContinue: () => setShowChapterCard(null)})
+        if (names[nextChapter]) setShowChapterCard({worldName: currentWorld?.name || '', chapterNumber: nextChapter + 1, chapterName: names[nextChapter], actName: getAct(player.storyProgress + 1, currentWorld?.id).name, year: currentWorld?.id === 'arcane' ? nextChapter + 1 : undefined, onContinue: () => setShowChapterCard(null)})
       }
-      const prevAct = getAct(player.storyProgress - 1)
-      const newAct = getAct(player.storyProgress)
+      const prevAct = getAct(player.storyProgress - 1, currentWorld?.id)
+      const newAct = getAct(player.storyProgress, currentWorld?.id)
       if (newAct.id !== prevAct.id && !result.isFinalScene) { setNextAct(newAct); setShowTransition(true) }
       if (tier !== 'free' && currentWorld?.id === 'dragonfall' && !player.worldState?.dragonBonded && player.storyProgress >= 6 && Math.random() > 0.6) setShowDragonBond(true)
     } else {
@@ -1237,7 +1237,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
 
   // ───────── GAME ─────────
   if (screen === 'game') {
-    const act = getAct(player.storyProgress)
+    const act = getAct(player.storyProgress, currentWorld?.id)
     const sceneInAct = Math.max(0, player.storyProgress - act.range[0])
     const totalInAct = act.range[1] - act.range[0] + 1
     const xpPct = Math.min(100, (player.xp / Math.max(1, player.xpNext)) * 100)
