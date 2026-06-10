@@ -10,7 +10,13 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign In — Revenio" },
-      { name: "description", content: "Access your Revenio account." },
+      { name: "description", content: "Access your Revenio account to manage your AI worlds, save your progress, and continue the parallel lives you've already begun." },
+      { property: "og:title", content: "Sign In — Revenio" },
+      { property: "og:description", content: "Sign in to Revenio to keep your worlds, characters, and story progress synced across every device." },
+      { property: "og:url", content: "https://revenio.net/auth" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://revenio.net/auth" },
     ],
   }),
   component: Auth,
