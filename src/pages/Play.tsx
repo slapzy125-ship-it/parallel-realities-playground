@@ -32,6 +32,7 @@ const WORLD_ACTS: Record<string, Array<{name:string, scenes:number}>> = {
   neon:       [{name:'First Breach',scenes:10},{name:'Going Deeper',scenes:12},{name:'Corporate Enemy',scenes:14},{name:'The Network',scenes:12},{name:'Endgame',scenes:14}],
   odyssey:    [{name:"The Oracle's Call",scenes:10},{name:'The First Trial',scenes:12},{name:'Divine Favour',scenes:14},{name:'The Dark Road',scenes:12},{name:'The Eternal Gate',scenes:14}],
   hero:       [{name:'Licence Granted',scenes:10},{name:'First Response',scenes:12},{name:'Rising Ranks',scenes:14},{name:'The Crisis',scenes:12},{name:'Final Stand',scenes:14}],
+  greed:      [{name:'The Cold Call',scenes:10},{name:'First Commission',scenes:10},{name:'Moving Up',scenes:12},{name:'Your Own Book',scenes:12},{name:'The Inner Circle',scenes:12},{name:'The Investigation',scenes:12},{name:'The Reckoning',scenes:12}],
 }
 const DEFAULT_ACTS = [{name:'Beginning',scenes:10},{name:'Rising',scenes:12},{name:'Crisis',scenes:14},{name:'Confrontation',scenes:12},{name:'Legend',scenes:14}]
 
