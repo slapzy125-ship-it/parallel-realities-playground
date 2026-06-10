@@ -1288,7 +1288,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
             <div style={G.surface}>
               <div style={G.sideLabel}>ACT {act.id}</div>
               <div style={{fontFamily:"'Cinzel',serif",fontSize:'14px',color:'#F0C060',marginBottom:'4px'}}>{act.name}</div>
-              <div style={{...G.muted,fontSize:'11px',marginBottom:'8px',lineHeight:1.4}}>{act.desc}</div>
+              <div style={{...G.muted,fontSize:'11px',marginBottom:'8px',lineHeight:1.4}}>Chapter {act.id} of {getWorldActs(w?.id).length}</div>
               <div style={{display:'flex',justifyContent:'space-between',fontSize:'10px',color:'#7A7A8A',marginBottom:'4px'}}><span>SCENE</span><span>{sceneInAct + 1}/{totalInAct}</span></div>
               <div style={{height:'4px',background:'#0A0A0C',borderRadius:'2px',overflow:'hidden'}}>
                 <div style={{height:'100%',width:`${((sceneInAct + 1)/totalInAct)*100}%`,background:'#D4A843'}}/>
