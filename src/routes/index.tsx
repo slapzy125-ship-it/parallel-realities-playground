@@ -61,7 +61,7 @@ function Home() {
               <span className="ml-3 inline-block transition-transform group-hover:translate-x-1">→</span>
             </Link>
             <Link
-              to="/experience"
+              to="/pricing"
               className="px-10 py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500"
             >
               How It Works

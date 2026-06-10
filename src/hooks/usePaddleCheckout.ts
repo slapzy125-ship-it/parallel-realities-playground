@@ -27,7 +27,7 @@ export function usePaddleCheckout() {
           displayMode: "overlay",
           successUrl:
             options.successUrl ||
-            `${window.location.origin}/experience?checkout=success`,
+            `${window.location.origin}/pricing?checkout=success`,
           allowLogout: false,
           variant: "one-page",
         },

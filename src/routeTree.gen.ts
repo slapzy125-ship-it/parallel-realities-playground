@@ -10,9 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as HardwareRouteImport } from './routes/hardware'
-import { Route as ExperienceRouteImport } from './routes/experience'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -20,6 +20,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
   path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayRoute = PlayRouteImport.update({
@@ -30,11 +35,6 @@ const PlayRoute = PlayRouteImport.update({
 const HardwareRoute = HardwareRouteImport.update({
   id: '/hardware',
   path: '/hardware',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExperienceRoute = ExperienceRouteImport.update({
-  id: '/experience',
-  path: '/experience',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -57,18 +57,18 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
   '/play': typeof PlayRoute
+  '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
   '/play': typeof PlayRoute
+  '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -76,9 +76,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/experience': typeof ExperienceRoute
   '/hardware': typeof HardwareRoute
   '/play': typeof PlayRoute
+  '/pricing': typeof PricingRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -87,27 +87,27 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/experience'
     | '/hardware'
     | '/play'
+    | '/pricing'
     | '/worlds'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/experience'
     | '/hardware'
     | '/play'
+    | '/pricing'
     | '/worlds'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
     | '/auth'
-    | '/experience'
     | '/hardware'
     | '/play'
+    | '/pricing'
     | '/worlds'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -115,9 +115,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
-  ExperienceRoute: typeof ExperienceRoute
   HardwareRoute: typeof HardwareRoute
   PlayRoute: typeof PlayRoute
+  PricingRoute: typeof PricingRoute
   WorldsRoute: typeof WorldsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -129,6 +129,13 @@ declare module '@tanstack/react-router' {
       path: '/worlds'
       fullPath: '/worlds'
       preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play': {
@@ -143,13 +150,6 @@ declare module '@tanstack/react-router' {
       path: '/hardware'
       fullPath: '/hardware'
       preLoaderRoute: typeof HardwareRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/experience': {
-      id: '/experience'
-      path: '/experience'
-      fullPath: '/experience'
-      preLoaderRoute: typeof ExperienceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -179,22 +179,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
-  ExperienceRoute: ExperienceRoute,
   HardwareRoute: HardwareRoute,
   PlayRoute: PlayRoute,
+  PricingRoute: PricingRoute,
   WorldsRoute: WorldsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

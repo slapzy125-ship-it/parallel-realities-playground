@@ -42,7 +42,7 @@ export function PaywallGate({ requiredTier, feature, children, fallback }: Paywa
           : "This is a Legend feature. Subscribe to unlock."}
       </div>
       <Link
-        to="/experience"
+        to="/pricing"
         style={{
           display: "inline-block",
           background: "#D4A843",
