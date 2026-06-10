@@ -1,11 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/experience")({
   head: () => ({
@@ -20,21 +21,9 @@ export const Route = createFileRoute("/experience")({
 });
 
 const steps = [
-  {
-    n: "01",
-    t: "Pick Your World",
-    d: "Eight worlds. Magic, space, kingdoms, heroes, and more. Pick the one you want.",
-  },
-  {
-    n: "02",
-    t: "Step Inside",
-    d: "The AI sets up your role, your friends, your enemies — live, on the fly. No two runs are the same.",
-  },
-  {
-    n: "03",
-    t: "Live the Story",
-    d: "Every choice sticks. Every chat moves the story. Every run ends a different way.",
-  },
+  { n: "01", t: "Pick Your World", d: "Eight worlds. Magic, space, kingdoms, heroes, and more. Pick the one you want." },
+  { n: "02", t: "Step Inside", d: "The AI sets up your role, your friends, your enemies — live, on the fly. No two runs are the same." },
+  { n: "03", t: "Live the Story", d: "Every choice sticks. Every chat moves the story. Every run ends a different way." },
 ];
 
 const features = [
@@ -47,30 +36,47 @@ const features = [
 ];
 
 function Experience() {
+  const router = useRouter();
   const { openCheckout, loading } = usePaddleCheckout();
-  const { tier, isActive } = useSubscription();
+  const { tier, isActive, userId } = useSubscription();
+  const [email, setEmail] = useState<string | undefined>();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? undefined));
+  }, [userId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("checkout") === "success") {
       toast.success("Welcome aboard! Your subscription is being activated.");
       window.history.replaceState({}, "", "/experience");
+      // Redirect back to the game after a brief delay so they see the toast
+      setTimeout(() => router.navigate({ to: "/play" }), 1500);
     }
-  }, []);
+  }, [router]);
 
-  const handleSubscribe = (priceId: string, tierName: "legend" | "infinite") => {
-    if (isActive && tier === tierName) {
-      toast.info(`You're already on Revenio ${tierName === "legend" ? "Legend" : "Infinite"}.`);
+  const handleSubscribe = (priceId: string, tierName: "legend" | "immortal") => {
+    if (!userId) {
+      toast.info("Sign in to subscribe — your account keeps your story.");
+      router.navigate({ to: "/auth" });
       return;
     }
-    openCheckout({ priceId });
+    if (isActive && tier === tierName) {
+      toast.info(`You're already on Revenio ${tierName === "legend" ? "Legend" : "Immortal"}.`);
+      return;
+    }
+    openCheckout({
+      priceId,
+      customerEmail: email,
+      customData: { userId },
+      successUrl: `${window.location.origin}/play?checkout=success`,
+    });
   };
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
       <PaymentTestModeBanner />
       <SiteNav />
-
 
       {/* Hero */}
       <section className="relative pt-40 pb-20 px-6 text-center">
@@ -129,6 +135,11 @@ function Experience() {
             <h2 className="font-display text-5xl md:text-7xl font-light">
               Pick your<br /><span className="italic text-gold-gradient">path.</span>
             </h2>
+            {!userId && (
+              <p className="mt-8 text-sm text-muted-foreground">
+                <Link to="/auth" className="text-[var(--gold)] underline">Sign in</Link> to subscribe and keep your story across devices.
+              </p>
+            )}
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -137,90 +148,66 @@ function Experience() {
               <h3 className="font-display text-3xl mb-2">Revenio Explorer</h3>
               <p className="text-2xl font-display text-[var(--gold)] mb-8">FREE</p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Access to 2 Worlds</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Arcane Academy</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Champions Legacy</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>3 Simulations Per Day</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Basic Character Creation</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Save 1 Character</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Standard AI Speed</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Community Access</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>2 worlds: Champions Legacy & Arcane Academy</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>5 scenes per world</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Basic character creation</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Community access</li>
               </ul>
-              <button className="mt-8 w-full py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
-                Start Free
-              </button>
+              <Link
+                to={userId ? "/play" : "/auth"}
+                className="mt-8 w-full py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500 text-center"
+              >
+                {userId ? "Start Free" : "Sign Up Free"}
+              </Link>
             </div>
 
-            {/* Legend — $9.99 */}
+            {/* Legend — $10 */}
             <div className="bg-[var(--onyx)] border-2 border-[var(--gold)]/60 p-8 flex flex-col relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--gold)] text-background text-[10px] tracking-[0.2em] uppercase px-4 py-1 font-medium">
                 Most Popular
               </div>
               <h3 className="font-display text-3xl mb-2">Revenio Legend</h3>
-              <p className="text-2xl font-display text-[var(--gold)] mb-8">$9.99<span className="text-sm text-muted-foreground font-sans">/month</span></p>
+              <p className="text-2xl font-display text-[var(--gold)] mb-8">$10<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Access to All 8 Worlds</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Unlimited Simulations</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Advanced Character Creation</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Unlimited Character Saves</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Story Progress Tracking</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Equipment</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Faster AI Responses</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Character Slots</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future World Access</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>All 8 worlds unlocked</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Unlimited scenes</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>3 save slots</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>All minigames & match reports</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Season summaries, transfer windows</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Chapter cards & trophy popups</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>AI scene images</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Villain panel & full career stats</li>
               </ul>
               <button
                 disabled={loading}
-                onClick={() => handleSubscribe("revenio_legend_monthly", "legend")}
+                onClick={() => handleSubscribe("legend_monthly", "legend")}
                 className="mt-8 w-full py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)] disabled:opacity-50"
               >
                 {isActive && tier === "legend" ? "Current Plan" : loading ? "Loading..." : "Become A Legend"}
               </button>
             </div>
 
-            {/* Infinite — $19.99 */}
+            {/* Immortal — $20 */}
             <div className="bg-[var(--onyx)] border border-border p-8 flex flex-col">
-              <h3 className="font-display text-3xl mb-2">Revenio Infinite</h3>
-              <p className="text-2xl font-display text-[var(--gold)] mb-8">$19.99<span className="text-sm text-muted-foreground font-sans">/month</span></p>
+              <h3 className="font-display text-3xl mb-2">Revenio Immortal</h3>
+              <p className="text-2xl font-display text-[var(--gold)] mb-8">$20<span className="text-sm text-muted-foreground font-sans">/month</span></p>
               <ul className="space-y-3 text-sm text-muted-foreground flex-1">
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Everything In Legend</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Early Access To New Worlds</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Storylines</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Founder Rewards</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Premium Equipment Sets</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>AI Companion Characters</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Exclusive Cosmetics</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Revenio One Discounts</li>
-                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Future Hardware Benefits</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Everything in Legend</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>The Rift — exclusive 9th world</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Early access to new worlds</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>IMMORTAL badge in the game topbar</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Replay any past scene</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Export your full story as PDF</li>
+                <li className="flex items-start gap-3"><span className="text-[var(--gold)] mt-0.5">+</span>Priority scene generation</li>
               </ul>
               <button
                 disabled={loading}
-                onClick={() => handleSubscribe("revenio_infinite_monthly", "infinite")}
-                className="mt-8 w-full py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500 disabled:opacity-50"
+                onClick={() => handleSubscribe("immortal_monthly", "immortal")}
+                className="mt-8 w-full py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500"
               >
-                {isActive && tier === "infinite" ? "Current Plan" : loading ? "Loading..." : "Enter Infinite"}
+                {isActive && tier === "immortal" ? "Current Plan" : loading ? "Loading..." : "Become Immortal"}
               </button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative py-40 px-6 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-[var(--gradient-radial-gold)] opacity-50" />
-        <div className="relative max-w-3xl mx-auto">
-          <div className="gold-hairline w-24 mx-auto mb-8" />
-          <h2 className="font-display text-5xl md:text-7xl font-light mb-8 leading-tight">
-            Your story<br />
-            <span className="italic text-gold-gradient">starts now.</span>
-          </h2>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/worlds" className="px-10 py-4 bg-[var(--gold)] text-background text-xs tracking-[0.3em] uppercase font-medium hover:bg-[var(--gold-bright)] transition-all duration-500 shadow-[var(--shadow-gold)]">
-              Explore Worlds
-            </Link>
-            <Link to="/auth" className="px-10 py-4 border border-[var(--gold)]/60 text-[var(--gold)] text-xs tracking-[0.3em] uppercase hover:bg-[var(--gold)]/10 transition-all duration-500">
-              Create Account
-            </Link>
           </div>
         </div>
       </section>
@@ -229,4 +216,3 @@ function Experience() {
     </main>
   );
 }
-

@@ -5,12 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { getMySubscription } from "@/utils/payments.functions";
 
-export type Tier = "free" | "legend" | "infinite";
+export type Tier = "free" | "legend" | "immortal";
 
-function tierFromProductId(productId?: string | null): Tier {
-  if (productId === "revenio_infinite") return "infinite";
+const TIER_RANK: Record<Tier, number> = { free: 0, legend: 1, immortal: 2 };
+
+export function tierFromProductId(productId?: string | null): Tier {
+  if (productId === "revenio_immortal") return "immortal";
   if (productId === "revenio_legend") return "legend";
   return "free";
+}
+
+export function tierMeets(current: Tier, required: Tier): boolean {
+  return TIER_RANK[current] >= TIER_RANK[required];
 }
 
 export function useSubscription() {
