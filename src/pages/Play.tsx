@@ -1361,7 +1361,15 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
                   <div style={{color:'#E8E4D8',fontSize:'14px',lineHeight:1.7,whiteSpace:'pre-wrap' as const}}>{scene.sceneText}</div>
                 </div>
 
-                {scene.choices?.length > 0 && !scene.isFinalScene && (
+                {(paywallHit || (tier === 'free' && sceneHistory.length >= FREE_SCENE_CAP)) && (
+                  <PaywallGate
+                    requiredTier={paywallHit === 'immortal' ? 'immortal' : 'legend'}
+                    feature={paywallHit === 'immortal' ? 'This continuation requires Immortal' : `Free limit reached — ${FREE_SCENE_CAP} scenes per world`}
+                  >
+                    <div />
+                  </PaywallGate>
+                )}
+                {!paywallHit && !(tier === 'free' && sceneHistory.length >= FREE_SCENE_CAP) && scene.choices?.length > 0 && !scene.isFinalScene && (
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
                     {scene.choices.map((c:any,i:number) => (
                       <button key={i} onClick={()=>handleChoice(c)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',color:'#E8E4D8',padding:'12px',cursor:'pointer',textAlign:'left',borderRadius:'2px',transition:'all .2s',fontFamily:"'Rajdhani',sans-serif"}}
