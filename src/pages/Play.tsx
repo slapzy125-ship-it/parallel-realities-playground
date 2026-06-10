@@ -987,5 +987,528 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     </div>
   )
 
-  return <div style={G.app}>{fonts}</div>
+  // ───────── CUSTOM CREATION ─────────
+  if (screen === 'customcreation') {
+    const w = currentWorld
+    if (!w) return null
+    const card = (selected: boolean, onClick: () => void, children: any, key?: any) => (
+      <div key={key} onClick={onClick} style={{background:'#1A1A24',border:`1px solid ${selected?'#D4A843':'#2A2A3A'}`,padding:'14px',borderRadius:'2px',cursor:'pointer',transition:'all .2s'}}>{children}</div>
+    )
+    const POWERS = ['Kinetic Force','Temporal Sense','Bioelectric Surge','Adaptive Armor','Neural Override','Gravitational Pull']
+    const CREEDS = [
+      {name:'Stay Your Blade',quote:'Stay your blade from the flesh of an innocent.'},
+      {name:'Hide in Plain Sight',quote:'Hide in plain sight. Be one with the crowd.'},
+      {name:'Never Compromise',quote:'Never compromise the Brotherhood.'},
+      {name:'Walk in Darkness',quote:'Walk in the darkness, serve the light.'},
+    ]
+    const heading = w.customCreation==='wand'?'YOUR WAND CHOOSES YOU':w.customCreation==='saber'?'CHOOSE YOUR LIGHTSABER':w.customCreation==='position'?'CHOOSE YOUR POSITION':w.customCreation==='implant'?'CHOOSE YOUR IMPLANT':w.customCreation==='weapon'?'CLAIM YOUR DIVINE WEAPON':w.customCreation==='power'?'DISCOVER YOUR POWER':w.customCreation==='creed'?'SWEAR YOUR CREED':w.customCreation==='dragon'?'THE DRAGONS OF THE REALM':'BEFORE YOU BEGIN'
+
+    return (
+      <div style={{...G.app, padding:'30px 20px'}}>
+        {fonts}
+        <div style={{maxWidth:'960px',margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:'28px'}}>
+            <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'8px'}}>BEFORE YOU BEGIN</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:'24px',fontWeight:700,letterSpacing:'2px',color:'#F0C060'}}>{heading}</div>
+            <div style={{...G.muted,fontSize:'13px',marginTop:'6px'}}>{w.name}</div>
+          </div>
+
+          {w.customCreation==='wand' && (
+            <>
+              <div style={G.sideLabel}>WAND WOOD</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'10px',marginBottom:'20px'}}>
+                {WAND_WOODS.map(x => card(wandWood?.name===x.name,()=>setWandWood(x),(<>
+                  <div style={{color:'#D4A843',fontWeight:700,fontSize:'14px',marginBottom:'4px'}}>{x.name}</div>
+                  <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.trait} · {x.bonus}</div>
+                  <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.desc}</div>
+                </>),x.name))}
+              </div>
+              <div style={G.sideLabel}>WAND CORE</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'10px',marginBottom:'20px'}}>
+                {WAND_CORES.map(x => card(wandCore?.name===x.name,()=>setWandCore(x),(<>
+                  <div style={{color:'#D4A843',fontWeight:700,fontSize:'14px',marginBottom:'4px'}}>{x.name}</div>
+                  <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.bonus}</div>
+                  <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.desc}</div>
+                </>),x.name))}
+              </div>
+              <div style={G.sideLabel}>WAND LENGTH</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'10px',marginBottom:'24px'}}>
+                {WAND_LENGTHS.map(x => card(wandLength?.name===x.name,()=>setWandLength(x),(<>
+                  <div style={{color:'#D4A843',fontWeight:700,fontSize:'14px',marginBottom:'4px'}}>{x.name}</div>
+                  <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.bonus}</div>
+                  <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.desc}</div>
+                </>),x.name))}
+              </div>
+            </>
+          )}
+
+          {w.customCreation==='saber' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {SABER_COLORS.map(x => card(saberColor?.color===x.color,()=>setSaberColor(x),(
+                <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
+                  <div style={{width:'6px',alignSelf:'stretch',background:x.hex,boxShadow:`0 0 12px ${x.hex}`,borderRadius:'2px',minHeight:'60px'}}/>
+                  <div>
+                    <div style={{color:x.hex,fontWeight:700,fontSize:'14px',marginBottom:'4px'}}>{x.color}</div>
+                    <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.faction}</div>
+                    <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.meaning}</div>
+                  </div>
+                </div>
+              ),x.color))}
+            </div>
+          )}
+
+          {w.customCreation==='position' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',marginBottom:'24px'}}>
+              {POSITIONS.map(x => card(selectedPosition===x.pos,()=>setSelectedPosition(x.pos),(<>
+                <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'4px'}}>
+                  <span style={{fontSize:'20px'}}>{x.icon}</span>
+                  <span style={{color:'#D4A843',fontWeight:700,fontSize:'14px'}}>{x.pos}</span>
+                  <span style={{...G.muted,fontSize:'10px',letterSpacing:'2px'}}>{x.short}</span>
+                </div>
+                <div style={{...G.muted,fontSize:'11px'}}>{x.desc}</div>
+              </>),x.pos))}
+            </div>
+          )}
+
+          {w.customCreation==='implant' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {CYBERNETIC_IMPLANTS.map(x => card(cybernetic?.name===x.name,()=>setCybernetic(x),(<>
+                <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'6px'}}>
+                  <span style={{fontSize:'22px'}}>{x.icon}</span>
+                  <span style={{color:'#D4A843',fontWeight:700,fontSize:'14px'}}>{x.name}</span>
+                </div>
+                <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.bonus}</div>
+                <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.desc}</div>
+              </>),x.name))}
+            </div>
+          )}
+
+          {w.customCreation==='weapon' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {GREEK_WEAPONS.map(x => card(greekWeapon?.name===x.name,()=>setGreekWeapon(x),(<>
+                <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'6px'}}>
+                  <span style={{fontSize:'22px'}}>{x.icon}</span>
+                  <span style={{color:'#D4A843',fontWeight:700,fontSize:'14px'}}>{x.name}</span>
+                </div>
+                <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{x.faction} · {x.bonus}</div>
+                <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{x.desc}</div>
+              </>),x.name))}
+            </div>
+          )}
+
+          {w.customCreation==='power' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {POWERS.map(p => card(selectedPower===p,()=>setSelectedPower(p),(
+                <div style={{color:'#D4A843',fontWeight:700,fontSize:'14px',textAlign:'center'}}>{p}</div>
+              ),p))}
+            </div>
+          )}
+
+          {w.customCreation==='creed' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {CREEDS.map(c => card(selectedCreed===c.name,()=>setSelectedCreed(c.name),(<>
+                <div style={{color:'#D4A843',fontWeight:700,fontSize:'14px',marginBottom:'6px'}}>{c.name}</div>
+                <div style={{...G.muted,fontStyle:'italic',fontSize:'12px',lineHeight:1.5}}>“{c.quote}”</div>
+              </>),c.name))}
+            </div>
+          )}
+
+          {w.customCreation==='dragon' && (
+            <>
+              <div style={{...G.muted,fontSize:'12px',textAlign:'center',marginBottom:'16px',lineHeight:1.6}}>
+                You do not choose a dragon. A dragon chooses <em>you</em>. As your story unfolds, one of these will find you.
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'12px',marginBottom:'24px'}}>
+                {DRAGON_BREEDS.map(d => (
+                  <div key={d.name} style={{background:'#1A1A24',border:'1px solid #2A2A3A',padding:'14px',borderRadius:'2px'}}>
+                    <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'6px'}}>
+                      <span style={{fontSize:'22px'}}>{d.icon}</span>
+                      <span style={{color:'#D4A843',fontWeight:700,fontSize:'14px'}}>{d.name}</span>
+                    </div>
+                    <div style={{...G.muted,fontSize:'11px',marginBottom:'4px'}}>{d.element}</div>
+                    <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{d.bond}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div style={{textAlign:'center'}}>
+            <button onClick={finishCustomCreation} style={G.btnGold}>CONFIRM &amp; BEGIN</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ───────── GAME ─────────
+  if (screen === 'game') {
+    const act = getAct(player.storyProgress)
+    const sceneInAct = Math.max(0, player.storyProgress - act.range[0])
+    const totalInAct = act.range[1] - act.range[0] + 1
+    const xpPct = Math.min(100, (player.xp / Math.max(1, player.xpNext)) * 100)
+    const scene = currentScene
+    const w = currentWorld
+
+    return (
+      <div style={{...G.app, minHeight:'100vh'}}>
+        {fonts}
+        <div style={G.topbar}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',fontWeight:900,letterSpacing:'4px',color:'#D4A843'}}>REVENIO</div>
+          <div style={{display:'flex',alignItems:'center',gap:'12px',flex:1,justifyContent:'center'}}>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:'13px',fontWeight:700,color:'#E8E4D8'}}>{player.name}</div>
+              <div style={{...G.muted,fontSize:'10px',letterSpacing:'1px'}}>{player.nationality} · {player.currentFaction || w?.name}</div>
+            </div>
+            <div style={{minWidth:'140px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:'10px',color:'#7A7A8A',marginBottom:'2px'}}><span>LVL {player.level}</span><span>{player.xp}/{player.xpNext}</span></div>
+              <div style={{height:'4px',background:'#1A1A24',borderRadius:'2px',overflow:'hidden'}}>
+                <div style={{height:'100%',width:`${xpPct}%`,background:'linear-gradient(90deg,#8B6914,#D4A843)'}}/>
+              </div>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:'8px'}}>
+            {saveMsg && <span style={{color:'#27AE60',fontSize:'11px',alignSelf:'center',letterSpacing:'2px'}}>{saveMsg}</span>}
+            <button onClick={()=>setShowSaveSlots('save')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>SAVE</button>
+            <button onClick={()=>setScreen('worldselect')} style={{...G.btnGhost,padding:'6px 14px',fontSize:'11px'}}>MENU</button>
+          </div>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'220px 1fr 240px',gap:'16px',padding:'16px',maxWidth:'1400px',margin:'0 auto'}}>
+          {/* LEFT */}
+          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={G.surface}>
+              <div style={G.sideLabel}>ACT {act.id}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:'14px',color:'#F0C060',marginBottom:'4px'}}>{act.name}</div>
+              <div style={{...G.muted,fontSize:'11px',marginBottom:'8px',lineHeight:1.4}}>{act.desc}</div>
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:'10px',color:'#7A7A8A',marginBottom:'4px'}}><span>SCENE</span><span>{sceneInAct + 1}/{totalInAct}</span></div>
+              <div style={{height:'4px',background:'#0A0A0C',borderRadius:'2px',overflow:'hidden'}}>
+                <div style={{height:'100%',width:`${((sceneInAct + 1)/totalInAct)*100}%`,background:'#D4A843'}}/>
+              </div>
+            </div>
+
+            {w?.id === 'champions' && (
+              <div style={G.surface}>
+                <div style={G.sideLabel}>CAREER</div>
+                {[
+                  ['Apps', player.careerStats?.appearances || 0],
+                  ['Goals', player.careerStats?.goals || 0],
+                  ['Assists', player.careerStats?.assists || 0],
+                  ['Avg', (player.careerStats?.averageRating || 0).toFixed(1)],
+                  ['Age', player.careerStats?.age || player.age],
+                  ['Caps', player.careerStats?.internationalCaps || 0],
+                ].map(([k,v])=>(
+                  <div key={k as string} style={{display:'flex',justifyContent:'space-between',fontSize:'11px',padding:'3px 0'}}>
+                    <span style={{color:'#7A7A8A'}}>{k}</span><span style={{color:'#F0C060',fontFamily:"'Orbitron',monospace"}}>{v as any}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>STATS</div>
+              {Object.entries(player.skills).slice(0,8).map(([k,v]:any) => (
+                <div key={k} style={{marginBottom:'6px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:'10px',color:'#7A7A8A',marginBottom:'2px'}}><span>{k}</span><span style={{color:'#F0C060'}}>{v}</span></div>
+                  <div style={{height:'3px',background:'#0A0A0C',borderRadius:'2px',overflow:'hidden'}}>
+                    <div style={{height:'100%',width:`${Math.min(100, Number(v))}%`,background:'#D4A843'}}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {player.quests?.length > 0 && (
+              <div style={G.surface}>
+                <div style={G.sideLabel}>QUESTS</div>
+                {player.quests.filter((q:any) => !q.done).slice(0,4).map((q:any,i:number) => (
+                  <div key={i} style={{marginBottom:'8px',paddingBottom:'8px',borderBottom:'1px solid #2A2A3A'}}>
+                    <div style={{color:'#F0C060',fontSize:'12px',fontWeight:600,marginBottom:'2px'}}>{q.name}</div>
+                    <div style={{...G.muted,fontSize:'10px',lineHeight:1.4}}>{q.desc}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={G.surface}>
+              <div onClick={()=>setHistoryOpen(!historyOpen)} style={{...G.sideLabel,cursor:'pointer',display:'flex',justifyContent:'space-between'}}>
+                <span>HISTORY</span><span>{historyOpen?'−':'+'}</span>
+              </div>
+              {historyOpen && sceneHistory.slice(-8).map((s,i) => (
+                <div key={i} style={{...G.muted,fontSize:'10px',padding:'3px 0',borderBottom:'1px solid #2A2A3A'}}>{s}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* MIDDLE */}
+          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+            {notifs.length > 0 && (
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+                {notifs.map((n:any,i:number) => (
+                  <span key={i} style={{background:n.color?`${n.color}22`:'#1A1A24',color:n.color||'#D4A843',border:`1px solid ${n.color||'#8B6914'}`,padding:'4px 10px',fontSize:'11px',borderRadius:'2px',letterSpacing:'1px'}}>
+                    {n.text || n.msg}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {loading && (
+              <div style={{...G.surface,textAlign:'center',padding:'40px'}}>
+                <div style={{width:'40px',height:'40px',margin:'0 auto 16px',border:'3px solid #2A2A3A',borderTopColor:'#D4A843',borderRadius:'50%',animation:'spin 1s linear infinite'}}/>
+                <div style={{...G.gold,fontSize:'11px',letterSpacing:'4px'}}>GENERATING YOUR FATE…</div>
+                <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+              </div>
+            )}
+
+            {hasError && (
+              <div style={{...G.surface,borderColor:'#E74C3C',textAlign:'center'}}>
+                <div style={{color:'#E74C3C',fontSize:'13px',marginBottom:'10px',letterSpacing:'2px'}}>THE STORY FALTERED</div>
+                <button onClick={handleRetry} style={G.btnGold}>RETRY</button>
+              </div>
+            )}
+
+            {!loading && !hasError && scene && (
+              <>
+                {sceneImage && (
+                  <div style={{width:'100%',maxHeight:'320px',overflow:'hidden',borderRadius:'2px',border:'1px solid #2A2A3A'}}>
+                    <img src={sceneImage} alt={scene.sceneTitle} style={{width:'100%',display:'block'}}/>
+                  </div>
+                )}
+                <div style={G.surface}>
+                  <div style={{...G.muted,fontSize:'10px',letterSpacing:'3px',marginBottom:'4px'}}>{w?.name?.toUpperCase()} · {act.name.toUpperCase()} · {CHAPTER_NAMES[w?.id||'']?.[player.currentChapter] || ''}</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:'20px',fontWeight:700,color:'#F0C060',marginBottom:'12px'}}>{scene.sceneTitle}</div>
+                  <div style={{color:'#E8E4D8',fontSize:'14px',lineHeight:1.7,whiteSpace:'pre-wrap' as const}}>{scene.sceneText}</div>
+                </div>
+
+                {scene.choices?.length > 0 && !scene.isFinalScene && (
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
+                    {scene.choices.map((c:any,i:number) => (
+                      <button key={i} onClick={()=>handleChoice(c)} style={{background:'#1A1A24',border:'1px solid #2A2A3A',color:'#E8E4D8',padding:'12px',cursor:'pointer',textAlign:'left',borderRadius:'2px',transition:'all .2s',fontFamily:"'Rajdhani',sans-serif"}}
+                        onMouseEnter={e => e.currentTarget.style.borderColor='#D4A843'} onMouseLeave={e => e.currentTarget.style.borderColor='#2A2A3A'}>
+                        <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
+                          <span style={{...G.gold,fontSize:'10px',letterSpacing:'2px'}}>{c.type || `OPTION ${c.id||i+1}`}</span>
+                          {c.risk && <span style={{color:c.risk==='high'?'#E74C3C':c.risk==='medium'?'#E67E22':'#27AE60',fontSize:'9px',letterSpacing:'2px'}}>{String(c.risk).toUpperCase()}</span>}
+                        </div>
+                        <div style={{fontSize:'13px',marginBottom:'6px',lineHeight:1.4}}>{c.text}</div>
+                        {c.hint && <div style={{...G.muted,fontSize:'11px',fontStyle:'italic',marginBottom:'6px'}}>{c.hint}</div>}
+                        {c.statPreview && (
+                          <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
+                            {Object.entries(c.statPreview).map(([k,v]:any)=>(
+                              <span key={k} style={{fontSize:'10px',color:Number(v)>=0?'#27AE60':'#E74C3C',background:'#0A0A0C',padding:'2px 6px',borderRadius:'2px'}}>{k} {Number(v)>=0?'+':''}{v}</span>
+                            ))}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {scene.isFinalScene && (
+                  <div style={{...G.surface,borderColor:'#D4A843',textAlign:'center'}}>
+                    <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'8px'}}>YOUR STORY ENDS HERE</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',color:'#F0C060',marginBottom:'16px'}}>{scene.endingTitle || 'The Legend'}</div>
+                    <button onClick={()=>setScreen('legacy')} style={G.btnGold}>VIEW LEGACY</button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* RIGHT */}
+          <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={G.surface}>
+              <div style={G.sideLabel}>RELATIONSHIPS</div>
+              {player.relationships?.slice(0,6).map((r:any,i:number) => {
+                const color = r.dir==='friend'?'#27AE60':r.dir==='rival'?'#E74C3C':'#7A7A8A'
+                return (
+                  <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px'}}>
+                    <div style={{width:'28px',height:'28px',borderRadius:'50%',background:'#0A0A0C',border:`1px solid ${color}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color}}>{r.name?.[0]}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:'11px',color:'#E8E4D8',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{r.name}</div>
+                      <div style={{height:'3px',background:'#0A0A0C',borderRadius:'2px',overflow:'hidden',marginTop:'2px'}}>
+                        <div style={{height:'100%',width:`${r.val}%`,background:color}}/>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>INVENTORY</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'4px'}}>
+                {Array.from({length:8}).map((_,i) => (
+                  <div key={i} style={{aspectRatio:'1',background:'#0A0A0C',border:'1px solid #2A2A3A',borderRadius:'2px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',padding:'2px',textAlign:'center'}}>
+                    {player.inventory?.[i] ? player.inventory[i].split(' ')[0] : ''}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {player.villain && (
+              <div style={{...G.surface,borderColor:'#8B2A2A',background:'#1A0E10'}}>
+                <div style={{color:'#E74C3C',fontSize:'9px',letterSpacing:'4px',borderBottom:'1px solid #5A1A1A',paddingBottom:'6px',marginBottom:'10px'}}>THE THREAT</div>
+                <div style={{color:'#E74C3C',fontWeight:700,fontSize:'13px',marginBottom:'4px'}}>{player.villain.name}</div>
+                <div style={{...G.muted,fontSize:'11px',fontStyle:'italic',marginBottom:'6px'}}>{player.villain.title || player.villain.role}</div>
+                <div style={{...G.muted,fontSize:'11px',lineHeight:1.4}}>{player.villain.firstHint || player.villain.firstAppearance}</div>
+              </div>
+            )}
+
+            <div style={G.surface}>
+              <div style={G.sideLabel}>{(WORLD_NEWS_SOURCE[w?.id||'']||'NEWS').toUpperCase()}</div>
+              {player.newsHistory?.slice(-4).map((n:string,i:number) => (
+                <div key={i} style={{...G.muted,fontSize:'11px',padding:'4px 0',borderBottom:'1px solid #2A2A3A',lineHeight:1.4}}>{n}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Overlays */}
+        {activeMinigame === 'penalty' && <PenaltyKick playerName={player.name} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'magic' && <MagicDuel playerName={player.name} opponentName={player.villain?.name || 'Rival'} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'combat' && <CombatStrike playerName={player.name} opponentName={player.villain?.name || 'Adversary'} onComplete={handleMinigameComplete} />}
+        {activeMinigame === 'hack' && <HackTerminal playerName={player.name} targetName={player.villain?.name || 'Mainframe'} onComplete={handleMinigameComplete} />}
+
+        {showDragonBond && (
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.94)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000,padding:'20px',overflowY:'auto'}}>
+            <div style={{background:'#0F0F14',border:'1px solid #D4A843',borderRadius:'4px',padding:'24px',maxWidth:'520px',width:'100%'}}>
+              <div style={{textAlign:'center',marginBottom:'16px'}}>
+                <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'4px'}}>A DRAGON HAS FOUND YOU</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:'20px',color:'#F0C060'}}>Choose Wisely</div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'12px'}}>
+                {DRAGON_BREEDS.map(d => (
+                  <div key={d.name} onClick={()=>setBondedDragon(d)} style={{background:'#1A1A24',border:`1px solid ${bondedDragon?.name===d.name?'#D4A843':'#2A2A3A'}`,padding:'10px',cursor:'pointer',borderRadius:'2px'}}>
+                    <div style={{display:'flex',gap:'6px',alignItems:'center',marginBottom:'4px'}}>
+                      <span style={{fontSize:'18px'}}>{d.icon}</span>
+                      <span style={{color:'#D4A843',fontWeight:700,fontSize:'12px'}}>{d.name}</span>
+                    </div>
+                    <div style={{...G.muted,fontSize:'10px'}}>{d.element}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{textAlign:'center'}}>
+                <button onClick={()=>{
+                  if (!bondedDragon) { alert('Choose a dragon'); return }
+                  const dragonName = window.prompt(`Name your ${bondedDragon.name}:`) || bondedDragon.name
+                  setPlayer((p:any) => ({...p, worldState:{...p.worldState, dragonBonded:true, dragonName, dragonBreed:bondedDragon.name}, inventory:[...p.inventory, `🐉 ${dragonName}`], achievements:[...p.achievements,'dragon_bonded']}))
+                  setTrophyQueue(q => [...q, {achKey:'dragon_bonded', ...ACHIEVEMENTS.dragon_bonded}])
+                  setShowDragonBond(false); setBondedDragon(null)
+                }} style={G.btnGold}>BOND</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showMatchReport && <MatchReport {...showMatchReport} />}
+        {showSeasonSummary && <SeasonSummary {...showSeasonSummary} />}
+        {showTransferWindow && <TransferWindow {...showTransferWindow} />}
+        {showChapterCard && <ChapterCard chapterNumber={showChapterCard.chapterNumber} chapterName={showChapterCard.chapterName} actName={showChapterCard.actName} onClose={showChapterCard.onContinue} />}
+        {showSaveSlots && <SaveSlots mode={showSaveSlots} currentSlot={player.saveSlot} onSave={handleSave} onLoad={handleLoad} onClose={()=>setShowSaveSlots(null)} />}
+        {currentTrophy && <TrophyPopup title={currentTrophy.title} desc={currentTrophy.desc} tier={currentTrophy.tier} onDone={()=>setCurrentTrophy(null)} />}
+      </div>
+    )
+  }
+
+  // ───────── LEGACY ─────────
+  if (screen === 'legacy') {
+    const w = currentWorld
+    const cs = player.careerStats || {}
+    const topSkill = Object.entries(player.skills).sort(([,a]:any,[,b]:any)=>b-a)[0]
+    return (
+      <div style={{...G.app, padding:'40px 20px'}}>
+        {fonts}
+        <div style={{maxWidth:'780px',margin:'0 auto',textAlign:'center'}}>
+          <div style={{...G.gold,fontSize:'10px',letterSpacing:'4px',marginBottom:'8px'}}>{w?.name?.toUpperCase() || 'YOUR JOURNEY'}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'36px',fontWeight:900,color:'#F0C060',marginBottom:'6px'}}>{player.name}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',color:'#D4A843',fontStyle:'italic',marginBottom:'32px'}}>{currentScene?.endingTitle || currentScene?.sceneTitle || 'The Legend'}</div>
+
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'10px',marginBottom:'24px'}}>
+            {[
+              {l:'LEVEL',v:player.level},
+              {l:'SCENES',v:player.storyProgress},
+              {l:'ACHIEVEMENTS',v:player.achievements?.length || 0},
+              {l:'REPUTATION',v:player.reputation},
+            ].map(s => (
+              <div key={s.l} style={{...G.surface,padding:'14px',textAlign:'center'}}>
+                <div style={{...G.muted,fontSize:'9px',letterSpacing:'2px',marginBottom:'4px'}}>{s.l}</div>
+                <div style={{color:'#F0C060',fontFamily:"'Orbitron',monospace",fontSize:'20px',fontWeight:700}}>{s.v}</div>
+              </div>
+            ))}
+          </div>
+
+          {w?.id === 'champions' && (
+            <div style={{...G.surface,marginBottom:'24px'}}>
+              <div style={{...G.sideLabel,textAlign:'center'}}>CAREER</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'10px'}}>
+                {[
+                  ['Apps', cs.appearances || 0],
+                  ['Goals', cs.goals || 0],
+                  ['Assists', cs.assists || 0],
+                  ['Avg Rating', (cs.averageRating || 0).toFixed(2)],
+                  ['Int. Caps', cs.internationalCaps || 0],
+                  ['World Cups', cs.worldCupAppearances || 0],
+                ].map(([k,v])=>(
+                  <div key={k as string} style={{background:'#0A0A0C',padding:'10px',borderRadius:'2px'}}>
+                    <div style={{...G.muted,fontSize:'9px',letterSpacing:'2px',marginBottom:'2px'}}>{k}</div>
+                    <div style={{color:'#F0C060',fontFamily:"'Orbitron',monospace",fontSize:'16px'}}>{v as any}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {topSkill && (
+            <div style={{...G.surface,borderColor:'#D4A843',marginBottom:'24px'}}>
+              <div style={{...G.gold,fontSize:'9px',letterSpacing:'4px',marginBottom:'6px'}}>SIGNATURE STRENGTH</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:'18px',color:'#F0C060'}}>{topSkill[0]} · {topSkill[1] as any}</div>
+            </div>
+          )}
+
+          {sceneHistory.length > 0 && (
+            <div style={{...G.surface,marginBottom:'16px',textAlign:'left'}}>
+              <div style={G.sideLabel}>YOUR JOURNEY</div>
+              {sceneHistory.map((s,i) => (
+                <div key={i} style={{...G.muted,fontSize:'11px',padding:'3px 0'}}>{i+1}. {s}</div>
+              ))}
+            </div>
+          )}
+
+          {player.majorDecisions?.length > 0 && (
+            <div style={{...G.surface,marginBottom:'16px',textAlign:'left'}}>
+              <div style={G.sideLabel}>MAJOR DECISIONS</div>
+              {player.majorDecisions.map((d:string,i:number) => (
+                <div key={i} style={{...G.muted,fontSize:'11px',padding:'3px 0'}}>• {d}</div>
+              ))}
+            </div>
+          )}
+
+          {player.achievements?.length > 0 && (
+            <div style={{...G.surface,marginBottom:'24px',textAlign:'left'}}>
+              <div style={G.sideLabel}>ACHIEVEMENTS</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:'8px'}}>
+                {player.achievements.map((key:string,i:number) => {
+                  const a = ACHIEVEMENTS[key]
+                  if (!a) return null
+                  const tierColor = a.tier==='platinum'?'#E5E4E2':a.tier==='gold'?'#FFD700':a.tier==='silver'?'#C0C0C0':'#CD7F32'
+                  return (
+                    <div key={i} style={{background:'#0A0A0C',border:`1px solid ${tierColor}`,padding:'8px',borderRadius:'2px'}}>
+                      <div style={{color:tierColor,fontSize:'11px',fontWeight:700,marginBottom:'2px'}}>🏆 {a.title}</div>
+                      <div style={{...G.muted,fontSize:'10px',lineHeight:1.3}}>{a.desc}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <div style={{display:'flex',gap:'12px',justifyContent:'center'}}>
+            <button onClick={()=>{setCurrentWorld(null);setCurrentScene(null);setSceneHistory([]);setNotifs([]);setPlayer(defaultPlayer());setScreen('worldselect')}} style={G.btnGold}>NEW WORLD</button>
+            <button onClick={()=>{setCurrentWorld(null);setCurrentScene(null);setSceneHistory([]);setNotifs([]);setPlayer(defaultPlayer());setScreen('creation')}} style={G.btnGhost}>NEW CHARACTER</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }
