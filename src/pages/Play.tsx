@@ -989,6 +989,17 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       item = {type:'creed', name:selectedCreed, displayName:'The Creed', icon:'', statBonuses:{Trust:5, Stealth:5}}
     } else if (w.customCreation === 'dragon') {
       item = {type:'dragon_pending', name:'Dragon Bond (not yet earned)', displayName:'Dragon Bond', icon:'', statBonuses:{}}
+    } else if (w.customCreation === 'broker') {
+      if (!selectedBroker) { alert('Choose your origin story'); return }
+      item = {
+        type:'broker',
+        name:selectedBroker.name,
+        displayName:selectedBroker.name,
+        desc:selectedBroker.desc,
+        flavor:selectedBroker.flavor,
+        icon:selectedBroker.icon,
+        statBonuses:selectedBroker.stats,
+      }
     }
     if (item?.statBonuses) {
       setPlayer((prev: any) => {
