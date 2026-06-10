@@ -21,13 +21,18 @@ export function tierMeets(current: Tier, required: Tier): boolean {
 
 export function useSubscription() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const fetchSub = useServerFn(getMySubscription);
   const env = getPaddleEnvironment();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null);
+      setUserEmail(data.user?.email ?? null);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setUserId(session?.user?.id ?? null);
+      setUserEmail(session?.user?.email ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -56,7 +61,14 @@ export function useSubscription() {
   const sub = data?.subscription as any;
   const active = !!sub && ["active", "trialing"].includes(sub.status) &&
     (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-  const tier: Tier = active ? tierFromProductId(sub?.product_id) : "free";
+  let tier: Tier = active ? tierFromProductId(sub?.product_id) : "free";
+  let isActive = active;
 
-  return { subscription: sub, tier, isActive: active, isLoading, userId, refetch };
+  // Hardcoded test bypass: grant Immortal to specific tester account
+  if (userEmail?.toLowerCase() === "slapzy125@gmail.com") {
+    tier = "immortal";
+    isActive = true;
+  }
+
+  return { subscription: sub, tier, isActive, isLoading, userId, refetch };
 }

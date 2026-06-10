@@ -51,7 +51,12 @@ serve(async (req) => {
 
     // ── Server-side tier check ─────────────────────────────────────────
     const { data: tierRow } = await admin.rpc('get_user_tier', { _user_id: userId })
-    const tier: 'free' | 'legend' | 'immortal' = (tierRow as any) ?? 'free'
+    let tier: 'free' | 'legend' | 'immortal' = (tierRow as any) ?? 'free'
+
+    // Hardcoded test bypass: grant Immortal to specific tester account
+    if (userResp.user.email?.toLowerCase() === 'slapzy125@gmail.com') {
+      tier = 'immortal'
+    }
 
     if (worldId) {
       if (IMMORTAL_WORLDS.has(worldId) && tier !== 'immortal') {
