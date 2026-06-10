@@ -1417,6 +1417,31 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
               </div>
             )}
 
+            {w?.id === 'greed' && (() => {
+              const fmt$ = (n:number) => `$${(n||0).toLocaleString()}`
+              const legalRisk = player.skills?.LegalRisk || 0
+              const rows: Array<[string, string, string?]> = [
+                ['Net Worth', fmt$(player.worldState?.netWorth || 0)],
+                ['Commission', fmt$(player.worldState?.totalCommission || 0)],
+                ['Clients', String(player.worldState?.clientCount || 0)],
+                ['Legal Risk', `${legalRisk}/100`, legalRisk > 60 ? '#E74C3C' : '#F0C060'],
+                ['Reputation', String(player.skills?.Reputation || 0)],
+                ['Year', String(player.worldState?.year || 1987)],
+              ]
+              return (
+                <div style={G.surface}>
+                  <div style={G.sideLabel}>WALL STREET</div>
+                  {rows.map(([k,v,color]) => (
+                    <div key={k} style={{display:'flex',justifyContent:'space-between',fontSize:'11px',padding:'3px 0'}}>
+                      <span style={{color:'#7A7A8A'}}>{k}</span>
+                      <span style={{color:color||'#F0C060',fontFamily:"'Orbitron',monospace"}}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
+
             <div style={G.surface}>
               <div style={G.sideLabel}>STATS</div>
               {Object.entries(player.skills).slice(0,8).map(([k,v]:any) => (
