@@ -957,7 +957,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     historyRef.current = []
     setWandWood(null); setWandCore(null); setWandLength(null)
     setSaberColor(null); setCybernetic(null); setGreekWeapon(null)
-    setSelectedPosition(''); setSelectedPower(''); setSelectedCreed('')
+    setSelectedPosition(''); setSelectedPower(''); setSelectedCreed(''); setSelectedBroker(null)
     setScreen('customcreation')
   }
 
