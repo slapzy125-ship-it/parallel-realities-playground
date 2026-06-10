@@ -32,6 +32,7 @@ const WORLD_ACTS: Record<string, Array<{name:string, scenes:number}>> = {
   neon:       [{name:'First Breach',scenes:10},{name:'Going Deeper',scenes:12},{name:'Corporate Enemy',scenes:14},{name:'The Network',scenes:12},{name:'Endgame',scenes:14}],
   odyssey:    [{name:"The Oracle's Call",scenes:10},{name:'The First Trial',scenes:12},{name:'Divine Favour',scenes:14},{name:'The Dark Road',scenes:12},{name:'The Eternal Gate',scenes:14}],
   hero:       [{name:'Licence Granted',scenes:10},{name:'First Response',scenes:12},{name:'Rising Ranks',scenes:14},{name:'The Crisis',scenes:12},{name:'Final Stand',scenes:14}],
+  greed:      [{name:'The Cold Call',scenes:10},{name:'First Commission',scenes:10},{name:'Moving Up',scenes:12},{name:'Your Own Book',scenes:12},{name:'The Inner Circle',scenes:12},{name:'The Investigation',scenes:12},{name:'The Reckoning',scenes:12}],
 }
 const DEFAULT_ACTS = [{name:'Beginning',scenes:10},{name:'Rising',scenes:12},{name:'Crisis',scenes:14},{name:'Confrontation',scenes:12},{name:'Legend',scenes:14}]
 
@@ -66,6 +67,7 @@ const WORLD_NEWS_SOURCE: Record<string,string> = {
   neon:'NeonNet Feed',
   odyssey:"The Oracle's Echo",
   hero:'Hero Watch Daily',
+  greed:'The Floor Report',
 }
 
 const WAND_WOODS = [
@@ -175,6 +177,36 @@ const VILLAIN_POOLS: Record<string,any[]> = {
   hero:[
     {name:'The Null',title:'The Equaliser',motivation:'His power was removed by a Nexus Institute experiment. Was told it was an acceptable loss. Discovered three other heroes had the same thing done to them. Is not attacking. Is making a statement.',firstHint:'A hero retires suddenly. The official statement says health reasons.',yearReveal:2},
     {name:'Director Aldous Crane',title:'The Necessary Evil',motivation:'Has been running illegal experiments on heroes for twelve years to make them more effective. Has saved more lives with his experiments than all the heroes combined. Cannot understand why anyone would want him stopped.',firstHint:'A hero comes back from a classified mission noticeably changed.',yearReveal:3},
+  ],
+  greed:[
+    {
+      name:'Agent Sarah Moss',
+      title:'The Investigator',
+      motivation:'Has been watching this firm for two years. Lost a case once because the evidence was not airtight. Will not make that mistake again. Is not corrupt. Is not cruel. Is just very very patient.',
+      firstHint:'A colleague mentions that a woman in a grey suit was asking questions on the floor this morning. She left her card with the receptionist. Nobody picked it up.',
+      escalation:[
+        'A subpoena arrives for client records from three years ago.',
+        'A colleague you trusted is cooperating with the investigation.',
+        'Your accountant tells you there are questions about the offshore accounts.',
+        'Moss approaches you directly at a restaurant. She sits down without being invited. She orders water.',
+        'The indictment is sealed. She calls you personally before the news breaks.',
+      ],
+      finalMove:'She offers you a deal. The deal is reasonable. Whether you take it defines who you are.',
+    },
+    {
+      name:'Victor Chase',
+      title:'The Rival',
+      motivation:'Was the best broker on the floor before you arrived. Has been there seven years. Watched three people try to take his position. Watched all three fail. Considers this educational.',
+      firstHint:'Your best client calls to say someone else reached out. They describe the pitch. It is better than yours.',
+      escalation:[
+        'Chase takes two of your top clients in one week.',
+        'He starts a rumour about you with the compliance team.',
+        'He is promoted to floor manager. Your direct manager now reports to him.',
+        'He offers you a partnership. The terms are not what they appear to be.',
+        'You discover he has been shorting stocks in companies he recommended to clients.',
+      ],
+      finalMove:'You have evidence against him. Using it will destroy him. It will also expose how you got it.',
+    },
   ],
 }
 
@@ -394,29 +426,35 @@ const WORLDS = [
     customCreation:'weapon',
   },
   {
-    id:'rift', name:'The Rift', icon:'🌀',
-    desc:'Where every version of you exists at once. Meet alternates from worlds you never chose. Decide which one of you survives.',
-    theme:'IDENTITY · CHOICE · INFINITY',
-    factions:['The Origin','The Shattered','The Returned','The Erased'],
+    id:'greed', name:'Greed: The Floor', icon:'💹',
+    desc:'New York 1987. You are broke, ambitious, and standing outside a brokerage firm on your first day. Everyone in that building started where you are. Most of them are still there.',
+    theme:'WEALTH · POWER · CONSEQUENCE',
+    villain:'The System',
+    villainDesc:'There is no single villain. There is the SEC investigator who has been watching your firm for two years. There is the rival broker who wants your clients. There is your own ambition which has never once told you to stop.',
+    factions:['Stratton & Pierce','Manhattan Elite','The Independents','Federal Oversight'],
     factionDesc:{
-      'The Origin':'You as you began. Innocent. Unbroken. Unaware of what you become.',
-      'The Shattered':'You as you broke. Scarred. Powerful. Honest about the cost.',
-      'The Returned':'You as you might have been if you had said yes. Or no.',
-      'The Erased':'You from a timeline that was undone. They remember being deleted.',
+      'Stratton & Pierce':'The corrupt boiler room firm that gives you your first job. High pressure, high reward, legally questionable. The fastest path to money. Also the fastest path to prison.',
+      'Manhattan Elite':'The legitimate old money firms on the upper floors. Slower money but cleaner. Harder to get into. Once you are in the doors open everywhere.',
+      'The Independents':'Brokers who left the big firms and went out alone. Maximum freedom, maximum risk, no safety net.',
+      'Federal Oversight':'You do not join this faction. They join you. When the SEC starts watching it changes every decision you make.',
     },
     factionTiming:'early',
-    startStat:{Identity:20,Will:25,Memory:20,Resonance:15,Anchor:0},
-    locations:['The Crossing','Mirror Halls','The Hollow Court','The Last Door','The Origin Point'],
-    startItems:['🌀 Anchor Stone'],
-    startQuests:[{name:'Which You Survives?',desc:'Only one version of you can leave The Rift. Decide who that is.'}],
+    startStat:{Wealth:0,Charisma:40,Ruthlessness:20,Reputation:10,NetworkValue:0,LegalRisk:0},
+    locations:['The Floor','Client Calls','The Club','Federal Building','The Hamptons','Your Office'],
+    startItems:['📞 Cold Call List','💼 Entry Level Suit'],
+    startQuests:[{name:'First Sale',desc:'Make your first commission. Any way you can.'}],
     startRels:[
-      {name:'Other You',type:'Self',val:50,dir:'neutral'},
-      {name:'The Watcher',type:'Witness',val:40,dir:'neutral'},
-      {name:'Echo',type:'Lost Self',val:35,dir:'neutral'},
+      {name:'Danny Rourke',type:'Mentor',val:50,dir:'friend'},
+      {name:'Victor Chase',type:'Rival',val:20,dir:'rival'},
+      {name:'Agent Sarah Moss',type:'Investigator',val:30,dir:'rival'},
+      {name:'Christine Walsh',type:'Client',val:60,dir:'friend'},
     ],
-    startNews:['Another version of you was seen at the Mirror Halls.','The Hollow Court has demanded a reckoning.','Three of your alternates have already been erased.'],
-    customCreation:'rift',
-    immortalOnly:true,
+    startNews:[
+      'The Floor: Record commission week reported at Stratton and Pierce.',
+      'The Floor: SEC opens preliminary inquiry into three downtown brokerages.',
+      'The Floor: New hire class of 87 largest in firm history.',
+    ],
+    customCreation:'broker',
   },
 ]
 
@@ -498,6 +536,7 @@ export default function Play() {
   const [selectedPosition, setSelectedPosition] = useState('')
   const [selectedPower, setSelectedPower] = useState('')
   const [selectedCreed, setSelectedCreed] = useState('')
+  const [selectedBroker, setSelectedBroker] = useState<any>(null)
   const historyRef = useRef<any[]>([])
   const { tier, userId } = useSubscription()
   const [paywallHit, setPaywallHit] = useState<string | null>(null)
@@ -529,6 +568,7 @@ export default function Play() {
       shadow: `Write the opening scene of an Assassins Creed inspired story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, creed: ${item?.name || 'unknown'}. They have just completed initiation and received their hidden blade. Handler Zero is cold and professional. Asha watches with uncertain alliance. Create a scene with real assassin brotherhood texture. Include one line of dialogue from Handler Zero. End with a real decision about the first job.`,
       neon: `Write the opening scene of a Cyberpunk inspired story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, augmentation: ${item?.name || 'unknown'} — ${item?.desc || ''}. Operating in a city where the villain is 18 months from completing a plan to merge human consciousness with AI. Sable is their contact — urgent and paranoid. Create a vivid cyberpunk opening with specific technology details. Include one line of dialogue. End with a real first move decision where every option has a genuine cost.`,
       odyssey: `Write the opening scene of a Greek mythology story for ${p.name}. Age ${p.age}, traits: ${p.traits.join(', ')}, goal: ${p.goal}, divine weapon: ${item?.name || 'unknown'} — ${item?.desc || ''}. They have arrived at the Oracle Temple after weeks of travel. Sage Pyrene has been waiting specifically for them. General Vorn's soldiers block the entrance demanding tribute. Create a vivid scene with specific Greek world details. Include one line of cryptic dialogue from Pyrene. End with a real decision about how to get past Vorn's soldiers.`,
+      greed: `You are writing the opening scene of a 1980s Wall Street story for ${p.name}. Their background is ${item?.name || 'unknown'} — ${item?.desc || ''}. It is their first day on the floor at Stratton and Pierce. Danny Rourke is the veteran broker who has been assigned to show them around. Victor Chase clocks the new arrival from across the floor and says nothing. The floor is loud, chaotic, and smells like cigarettes and desperation and money. Create a vivid specific opening scene that establishes the world immediately. Include one line of dialogue from Danny Rourke that tells you everything about who he is. End with a real first decision — something small but revealing about the kind of broker this person is going to become.`,
     }
     return openers[w.id] ?? `${p.name} enters ${w.name} for the first time. Create a dramatic opening scene that pulls them in immediately.`
   }
@@ -552,6 +592,7 @@ WORLD STYLE: ${
   w.id==='shadow'?'Assassins Creed. Brotherhood weight, moral grey. Trust earned slow, broken fast.':
   w.id==='neon'?'Cyberpunk 2077. Neon and grit. Augments cost identity. The city is a character.':
   w.id==='odyssey'?'Greek myth. Gods are real, petty, magnificent. Fate is weight.':
+  w.id==='greed'?'1980s and 1990s Wall Street. Gordon Gekko energy. Specific dollar amounts. Cigarette smoke, brick phones, ticker tape. Every line costs or earns something.':
   'Cinematic. Specific. Vivid.'}
 VILLAIN THIS RUN: ${villain ? `${villain.name} — ${villain.motivation || villain.description || ''}` : 'Unknown'}
 CHAPTER: ${p.currentChapter + 1} — ${chapterName}
@@ -570,6 +611,7 @@ STORY PROGRESS: ${p.storyProgress} of ${getTotalScenes(w.id)}
 ACT: ${act.id} of ${getWorldActs(w.id).length} — ${act.name}
 SCENE: ${sceneInAct} of ${totalInAct} in this act
 ${w.id === 'champions' ? `CAREER: Apps ${p.careerStats?.appearances || 0}, Goals ${p.careerStats?.goals || 0}, Assists ${p.careerStats?.assists || 0}, Avg Rating ${p.careerStats?.averageRating?.toFixed(1) || 'N/A'}, Club ${p.worldState?.club || 'Academy'}, Year ${p.careerStats?.currentYear || 1}` : ''}
+${w.id === 'greed' ? `WEALTH: Net Worth $${(p.worldState?.netWorth || 0).toLocaleString()}, Total Commission $${(p.worldState?.totalCommission || 0).toLocaleString()}, Clients ${p.worldState?.clientCount || 0}, Legal Risk ${p.skills?.LegalRisk || 0}/100, Reputation ${p.skills?.Reputation || 0}, Year ${p.worldState?.year || 1987}` : ''}
 
 SCENE RULES (STRICT):
 - sceneText: MAX 40 words. Two short sentences. ONE concrete image. ONE line of dialogue. That's it.
@@ -604,6 +646,35 @@ ${w.id === 'odyssey' ? `ODYSSEY RULES:
 Name specific Greek gods. Their favour shifts events.
 Mythological creatures use real mythological weaknesses.
 Oracle prophecies are cryptic but resolve literally in hindsight.` : ''}
+
+${w.id === 'greed' ? `GREED WORLD RULES:
+This is 1980s and 1990s Wall Street. Every scene must feel like it costs something or gains something. Money is kept in exact figures — not vague, always specific dollar amounts. Commission on a sale, current account balance, what a client is worth.
+
+ACT STRUCTURE:
+Act 1 (scenes 0-4): The floor. Cold calls. First sales. Learning the game. The smell of the place. Danny Rourke teaching you things they do not teach in school.
+Act 2 (scenes 5-9): You are good at this. Maybe too good. The first ethically questionable decision. The first real money. The first glimpse of how far this could go.
+Act 3 (scenes 10-14): You have a book of clients. Real money coming in. The SEC is a rumour on the floor. Victor Chase is a problem. A choice between the clean path and the faster path.
+Act 4 (scenes 15-19): The investigation is real. Agent Moss is real. The money is extraordinary. The risk is extraordinary. Every decision from Act 1 is coming back.
+Act 5 (scenes 20-24): The reckoning. Prison, escape, legitimacy, or something in between. The ending reflects every choice. The richest person in the room is not always the one who won.
+
+CHOICE RULES FOR GREED:
+Never write vague choices. Always write specific financial or personal decisions.
+Good choice examples:
+- Recommend the penny stock to the client knowing it is being pumped. Commission is 8400 dollars.
+- Tell the client the truth about the risk. Lose the sale. Keep your record clean.
+- Move 200k through the offshore account in the Caymans. Moss will never trace it.
+- Call Danny. He has done this before. He knows how to make the paper trail disappear.
+Bad choice examples (never write these):
+- Try your best
+- Work hard
+- Be honest
+- Make a good impression
+
+The LegalRisk stat is critical. If it reaches 80 Agent Moss makes her move regardless of story progress. If it reaches 100 the player is indicted. This must be tracked and referenced in every scene from Act 2 onward.
+
+Wealth is tracked in exact dollars. Show current net worth in the career stats bar. Update worldStateUpdates.netWorth, worldStateUpdates.totalCommission, worldStateUpdates.clientCount, and worldStateUpdates.year (starting at 1987) every scene where they change.
+
+The player can become the richest person in the world but only if they survive the investigation. Getting rich through fraud is a valid path but the consequences are real.` : ''}
 
 VILLAIN BUILDUP (based on % through full story):
 ${(() => {
@@ -918,7 +989,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
     historyRef.current = []
     setWandWood(null); setWandCore(null); setWandLength(null)
     setSaberColor(null); setCybernetic(null); setGreekWeapon(null)
-    setSelectedPosition(''); setSelectedPower(''); setSelectedCreed('')
+    setSelectedPosition(''); setSelectedPower(''); setSelectedCreed(''); setSelectedBroker(null)
     setScreen('customcreation')
   }
 
@@ -950,6 +1021,17 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       item = {type:'creed', name:selectedCreed, displayName:'The Creed', icon:'', statBonuses:{Trust:5, Stealth:5}}
     } else if (w.customCreation === 'dragon') {
       item = {type:'dragon_pending', name:'Dragon Bond (not yet earned)', displayName:'Dragon Bond', icon:'', statBonuses:{}}
+    } else if (w.customCreation === 'broker') {
+      if (!selectedBroker) { alert('Choose your origin story'); return }
+      item = {
+        type:'broker',
+        name:selectedBroker.name,
+        displayName:selectedBroker.name,
+        desc:selectedBroker.desc,
+        flavor:selectedBroker.flavor,
+        icon:selectedBroker.icon,
+        statBonuses:selectedBroker.stats,
+      }
     }
     if (item?.statBonuses) {
       setPlayer((prev: any) => {
@@ -1095,7 +1177,13 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
       {name:'Never Compromise',quote:'Never compromise the Brotherhood.'},
       {name:'Walk in Darkness',quote:'Walk in the darkness, serve the light.'},
     ]
-    const heading = w.customCreation==='wand'?'YOUR WAND CHOOSES YOU':w.customCreation==='saber'?'CHOOSE YOUR LIGHTSABER':w.customCreation==='position'?'CHOOSE YOUR POSITION':w.customCreation==='implant'?'CHOOSE YOUR IMPLANT':w.customCreation==='weapon'?'CLAIM YOUR DIVINE WEAPON':w.customCreation==='power'?'DISCOVER YOUR POWER':w.customCreation==='creed'?'SWEAR YOUR CREED':w.customCreation==='dragon'?'THE DRAGONS OF THE REALM':'BEFORE YOU BEGIN'
+    const BROKER_ORIGINS = [
+      {name:'The Hungry Kid',icon:'🏙️',desc:'Queens born. Watched your father work himself to nothing. You swore you would not. You have no connections, no money, and the kind of hunger that makes people uncomfortable.',flavor:'You will do things people with safety nets never would.',stats:{Charisma:5,Ruthlessness:10}},
+      {name:'The College Boy',icon:'🎓',desc:'Finance degree from a state school nobody cares about. You know the theory. You have never made a real sale in your life. You are desperate to prove the degree meant something.',flavor:'You know how it is supposed to work. The floor will show you how it actually works.',stats:{Reputation:10,NetworkValue:5,Charisma:5}},
+      {name:'The Natural',icon:'🎯',desc:'You could always talk people into things. Teachers. Girls. Car dealers. You never studied finance. You just knew you belonged somewhere the talking never stopped.',flavor:'You do not know what a P/E ratio is. You do not need to yet.',stats:{Charisma:15,Ruthlessness:5}},
+      {name:'The Insider',icon:'🤝',desc:'Your uncle knows someone. You did not earn this interview. Everyone on the floor knows it. You have six months to prove it does not matter.',flavor:'The door was opened for you. Whether you walk through it is up to you.',stats:{NetworkValue:15,Reputation:5,LegalRisk:5}},
+    ]
+    const heading = w.customCreation==='wand'?'YOUR WAND CHOOSES YOU':w.customCreation==='saber'?'CHOOSE YOUR LIGHTSABER':w.customCreation==='position'?'CHOOSE YOUR POSITION':w.customCreation==='implant'?'CHOOSE YOUR IMPLANT':w.customCreation==='weapon'?'CLAIM YOUR DIVINE WEAPON':w.customCreation==='power'?'DISCOVER YOUR POWER':w.customCreation==='creed'?'SWEAR YOUR CREED':w.customCreation==='dragon'?'THE DRAGONS OF THE REALM':w.customCreation==='broker'?'HOW YOU GOT HERE':'BEFORE YOU BEGIN'
 
     return (
       <div style={{...G.app, padding:'30px 20px'}}>
@@ -1227,6 +1315,24 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
             </>
           )}
 
+          {w.customCreation==='broker' && (
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:'12px',marginBottom:'24px'}}>
+              {BROKER_ORIGINS.map(b => card(selectedBroker?.name===b.name,()=>setSelectedBroker(b),(<>
+                <div style={{display:'flex',gap:'10px',alignItems:'center',marginBottom:'8px'}}>
+                  <span style={{fontSize:'26px'}}>{b.icon}</span>
+                  <span style={{color:'#D4A843',fontWeight:700,fontSize:'15px'}}>{b.name}</span>
+                </div>
+                <div style={{...G.muted,fontSize:'11px',lineHeight:1.5,marginBottom:'8px'}}>{b.desc}</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:'4px',marginBottom:'8px'}}>
+                  {Object.entries(b.stats).map(([k,v]) => (
+                    <span key={k} style={{fontSize:'10px',color:'#27AE60',background:'#0A0A0C',padding:'2px 6px',borderRadius:'2px'}}>{k} +{v as any}</span>
+                  ))}
+                </div>
+                <div style={{color:'#7A7A8A',fontStyle:'italic',fontSize:'11px',lineHeight:1.4}}>“{b.flavor}”</div>
+              </>),b.name))}
+            </div>
+          )}
+
           <div style={{textAlign:'center'}}>
             <button onClick={finishCustomCreation} style={G.btnGold}>CONFIRM &amp; BEGIN</button>
           </div>
@@ -1310,6 +1416,31 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
                 ))}
               </div>
             )}
+
+            {w?.id === 'greed' && (() => {
+              const fmt$ = (n:number) => `$${(n||0).toLocaleString()}`
+              const legalRisk = player.skills?.LegalRisk || 0
+              const rows: Array<[string, string, string?]> = [
+                ['Net Worth', fmt$(player.worldState?.netWorth || 0)],
+                ['Commission', fmt$(player.worldState?.totalCommission || 0)],
+                ['Clients', String(player.worldState?.clientCount || 0)],
+                ['Legal Risk', `${legalRisk}/100`, legalRisk > 60 ? '#E74C3C' : '#F0C060'],
+                ['Reputation', String(player.skills?.Reputation || 0)],
+                ['Year', String(player.worldState?.year || 1987)],
+              ]
+              return (
+                <div style={G.surface}>
+                  <div style={G.sideLabel}>WALL STREET</div>
+                  {rows.map(([k,v,color]) => (
+                    <div key={k} style={{display:'flex',justifyContent:'space-between',fontSize:'11px',padding:'3px 0'}}>
+                      <span style={{color:'#7A7A8A'}}>{k}</span>
+                      <span style={{color:color||'#F0C060',fontFamily:"'Orbitron',monospace"}}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
 
             <div style={G.surface}>
               <div style={G.sideLabel}>STATS</div>
