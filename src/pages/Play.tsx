@@ -9,6 +9,7 @@ import TrophyPopup from '@/components/game/TrophyPopup'
 import ChapterCard from '@/components/game/ChapterCard'
 import TransferWindow from '@/components/game/TransferWindow'
 import SaveSlots from '@/components/game/SaveSlots'
+import { supabase } from '@/integrations/supabase/client'
 
 const TRAITS = ['Ambitious','Loyal','Brave','Competitive','Intelligent','Creative','Confident','Curious','Ruthless','Charismatic']
 const GOALS = ['Become a Legend','Gain Power','Build an Empire','Become Rich','Save the World','Discover the Unknown']
