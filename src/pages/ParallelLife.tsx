@@ -412,25 +412,25 @@ function ProfileForm({
       )}
 
       {step === 3 && (
-        <Step title="Your education and work"
-          intro="The paths you took, the doors you opened, and the ones you didn't.">
-          <TextareaField label="High school" hint="Name or describe it, and one thing you were known for there." value={profile.highSchool} onChange={(v) => set("highSchool", v)} />
-          <SelectField label="Did you go to college or university" value={profile.wentToCollege} onChange={(v) => set("wentToCollege", v)} options={["Yes","No"]} />
+        <Step title="What you spend your time on"
+          intro="School, work, a hobby, or nothing yet — whatever fills your days right now. Everything on this page is optional.">
+          <TextareaField label="High school (optional)" hint="Name or describe it, and one thing you were known for there." value={profile.highSchool} onChange={(v) => set("highSchool", v)} />
+          <SelectField label="Have you been to college or university? (optional)" value={profile.wentToCollege} onChange={(v) => set("wentToCollege", v)} options={["Yes","No","Still in high school","Plan to","Don't plan to"]} />
           {profile.wentToCollege === "Yes" && (
             <>
-              <Field label="Where you went" value={profile.collegeWhere} onChange={(v) => set("collegeWhere", v)} />
-              <Field label="What you studied" value={profile.collegeStudy} onChange={(v) => set("collegeStudy", v)} />
-              <TextareaField label="Why you chose it" value={profile.collegeWhy} onChange={(v) => set("collegeWhy", v)} />
+              <Field label="Where you went (optional)" value={profile.collegeWhere} onChange={(v) => set("collegeWhere", v)} />
+              <Field label="What you studied (optional)" value={profile.collegeStudy} onChange={(v) => set("collegeStudy", v)} />
+              <TextareaField label="Why you chose it (optional)" value={profile.collegeWhy} onChange={(v) => set("collegeWhy", v)} />
             </>
           )}
-          <TextareaField label="Other schools you got into but didn't attend" hint="Often the pivotal decision." value={profile.otherSchools} onChange={(v) => set("otherSchools", v)} />
-          <TextareaField label="Your career path so far" big value={profile.careerPath} onChange={(v) => set("careerPath", v)} />
-          <Field label="Current job title or role" value={profile.currentRole} onChange={(v) => set("currentRole", v)} />
-          <Field label="Industry or field" value={profile.industry} onChange={(v) => set("industry", v)} />
-          <SelectField label="Income range" value={profile.income} onChange={(v) => set("income", v)}
-            options={["Under 30k","30k to 60k","60k to 100k","100k to 150k","150k to 250k","250k plus"]} />
-          <SelectField label="Are you doing what you thought you'd be doing at this age?" value={profile.onTrack} onChange={(v) => set("onTrack", v)}
-            options={["Yes","No","Not sure"]} />
+          <TextareaField label="Other schools you got into but didn't attend (optional)" value={profile.otherSchools} onChange={(v) => set("otherSchools", v)} />
+          <TextareaField label="What do you spend most of your time on?" hint="This could be school, work, a hobby, sports, caregiving, gaming, music — or nothing in particular yet. Just be honest." big value={profile.careerPath} onChange={(v) => set("careerPath", v)} />
+          <Field label="If you have a job or role, what is it? (optional)" placeholder="Student, barista, intern, software engineer, none yet…" value={profile.currentRole} onChange={(v) => set("currentRole", v)} />
+          <Field label="Industry, field, or main interest (optional)" value={profile.industry} onChange={(v) => set("industry", v)} />
+          <SelectField label="Income range (optional)" value={profile.income} onChange={(v) => set("income", v)}
+            options={["No income yet","Under 30k","30k to 60k","60k to 100k","100k to 150k","150k to 250k","250k plus","Prefer not to say"]} />
+          <SelectField label="Are you where you thought you'd be at this age? (optional)" value={profile.onTrack} onChange={(v) => set("onTrack", v)}
+            options={["Yes","No","Not sure","Too early to tell"]} />
         </Step>
       )}
 
