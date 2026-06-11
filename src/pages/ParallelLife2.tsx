@@ -184,15 +184,17 @@ What I think would have been different: ${profile.initialHypothesis}
 What I most want to know: ${profile.mostWantToKnow}`
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-scene', {
-        body: {
+      const response = await fetch('https://parallel-realities-playground.vercel.app/api/anthropic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4000,
           system: systemPrompt,
           messages: [{ role: 'user', content: userMsg }]
-        }
+        })
       })
-      if (error) throw error
+      const data = await response.json()
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
       const match = raw.match(/\{[\s\S]*\}/)
       if (!match) throw new Error('no json')
