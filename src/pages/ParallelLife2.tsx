@@ -141,7 +141,9 @@ ABSOLUTE RULES:
 9. The final message: write as if the alternate version reached across the multiverse. Honest not sentimental. End with their real first name.
 
 Return ONLY this exact JSON with no markdown no backticks:
-{"overallJudgment":"one sentence","immediateAftermath":"150-200 words","firstYear":"150-200 words","formativeYears":"150-200 words","middleYears":"150-200 words","laterYears":"150-200 words","oldAge":"150-200 words","turningPoint1":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint2":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint3":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"sideBySide":[{"age":"22","realLife":"30 words","alternateLife":"30 words","category":"Location"},{"age":"25","realLife":"30 words","alternateLife":"30 words","category":"Career"},{"age":"28","realLife":"30 words","alternateLife":"30 words","category":"Relationships"},{"age":"30","realLife":"30 words","alternateLife":"30 words","category":"How you felt"},{"age":"35","realLife":"30 words","alternateLife":"30 words","category":"What defined you"}],"butterflyChain":["chain 1","chain 2","chain 3","chain 4","chain 5"],"keyDifferences":["diff 1","diff 2","diff 3","diff 4","diff 5"],"regretScore":65,"regretExplanation":"100 words","messageFromOtherSelf":"200 words ending with first name"}`
+{"overallJudgment":"one sentence","immediateAftermath":"150-200 words","firstYear":"150-200 words","formativeYears":"150-200 words","middleYears":"150-200 words","laterYears":"150-200 words","oldAge":"150-200 words","turningPoint1":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint2":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint3":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"sideBySide":[{"age":"22","realLife":"30 words","alternateLife":"30 words","category":"Location"},{"age":"25","realLife":"30 words","alternateLife":"30 words","category":"Career"},{"age":"28","realLife":"30 words","alternateLife":"30 words","category":"Relationships"},{"age":"30","realLife":"30 words","alternateLife":"30 words","category":"How you felt"},{"age":"35","realLife":"30 words","alternateLife":"30 words","category":"What defined you"}],"butterflyChain":["chain 1","chain 2","chain 3","chain 4","chain 5"],"keyDifferences":["diff 1","diff 2","diff 3","diff 4","diff 5"],"regretScore":65,"regretExplanation":"100 words","messageFromOtherSelf":"200 words ending with first name"}
+
+CRITICAL: Your entire response must be a single valid JSON object. No text before it. No text after it. No markdown. No backticks. No explanation. Just the raw JSON object starting with { and ending with }`
 
     const userMsg = `Here is my complete life profile:
 Name: ${profile.firstName}, Age: ${profile.age}
@@ -196,9 +198,14 @@ What I most want to know: ${profile.mostWantToKnow}`
       })
       const data = await response.json()
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
-      const match = raw.match(/\{[\s\S]*\}/)
-      if (!match) throw new Error('no json')
-      const result = JSON.parse(match[0])
+      let result
+      try {
+        result = JSON.parse(raw)
+      } catch {
+        const match = raw.match(/\{[\s\S]*\}/)
+        if (!match) throw new Error('no json')
+        result = JSON.parse(match[0])
+      }
       setSim(result)
       setStep('result')
     } catch(e) {
