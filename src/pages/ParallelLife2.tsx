@@ -196,8 +196,12 @@ What I most want to know: ${profile.mostWantToKnow}`
           messages: [{ role: 'user', content: userMsg }]
         })
       })
-      const data = await response.json()
+      const responseText = await response.text()
+      console.log('Vercel proxy status:', response.status)
+      console.log('Vercel proxy response:', responseText.slice(0, 500))
+      const data = JSON.parse(responseText)
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
+      console.log('Raw AI response:', raw.slice(0, 500))
       let result
       try {
         result = JSON.parse(raw)
