@@ -39,6 +39,7 @@ export function SiteNav() {
     { to: "/hardware", label: "Hardware" },
     { to: "/play", label: "Play" },
     { to: "/parallel", label: "Parallel Life", accent: true as const },
+    { to: "/parallel2", label: "Parallel 2.0", accent: true as const },
   ];
 
   return (
