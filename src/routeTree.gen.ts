@@ -13,6 +13,7 @@ import { Route as WorldsRouteImport } from './routes/worlds'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
+import { Route as Parallel2RouteImport } from './routes/parallel2'
 import { Route as ParallelRouteImport } from './routes/parallel'
 import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -37,6 +38,11 @@ const PricingRoute = PricingRouteImport.update({
 const PlayRoute = PlayRouteImport.update({
   id: '/play',
   path: '/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Parallel2Route = Parallel2RouteImport.update({
+  id: '/parallel2',
+  path: '/parallel2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParallelRoute = ParallelRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
+  '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
+  '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
+  '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/hardware'
     | '/parallel'
+    | '/parallel2'
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/hardware'
     | '/parallel'
+    | '/parallel2'
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/hardware'
     | '/parallel'
+    | '/parallel2'
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   HardwareRoute: typeof HardwareRoute
   ParallelRoute: typeof ParallelRoute
+  Parallel2Route: typeof Parallel2Route
   PlayRoute: typeof PlayRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/play'
       fullPath: '/play'
       preLoaderRoute: typeof PlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parallel2': {
+      id: '/parallel2'
+      path: '/parallel2'
+      fullPath: '/parallel2'
+      preLoaderRoute: typeof Parallel2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parallel': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   HardwareRoute: HardwareRoute,
   ParallelRoute: ParallelRoute,
+  Parallel2Route: Parallel2Route,
   PlayRoute: PlayRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
