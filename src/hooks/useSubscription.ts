@@ -64,8 +64,9 @@ export function useSubscription() {
   let tier: Tier = active ? tierFromProductId(sub?.product_id) : "free";
   let isActive = active;
 
-  // Hardcoded test bypass: grant Immortal to specific tester account
-  if (userEmail?.toLowerCase() === "slapzy125@gmail.com") {
+  // Hardcoded test bypass: grant Immortal to specific tester accounts
+  const bypassEmails = ["slapzy125@gmail.com", "isaiah.delvecchio12@gmail.com"];
+  if (userEmail && bypassEmails.includes(userEmail.toLowerCase())) {
     tier = "immortal";
     isActive = true;
   }
