@@ -78,6 +78,7 @@ export default function ParallelLife2() {
   const [docAudio, setDocAudio] = useState<string>('')
   const [docVideoTaskIds, setDocVideoTaskIds] = useState<string[]>([])
   const [docVideos, setDocVideos] = useState<string[]>([])
+  const [videoUrls, setVideoUrls] = useState<string[]>([])
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
@@ -259,25 +260,35 @@ What I most want to know: ${profile.mostWantToKnow}`
         setAudioUrl(url)
       }
 
-      const pollInterval = setInterval(async () => {
-        const completed: string[] = []
-        for (const taskId of data.videoTaskIds || []) {
-          const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ taskId })
-          })
-          const pollData = await pollRes.json()
-          if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) completed.push(pollData.output[0])
+      if (data.videoTaskIds && data.videoTaskIds.length > 0) {
+        const urls: string[] = []
+        for (const taskId of data.videoTaskIds) {
+          let videoUrl = ''
+          for (let attempt = 0; attempt < 40; attempt++) {
+            await new Promise(r => setTimeout(r, 5000))
+            try {
+              const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ taskId })
+              })
+              const pollData = await pollRes.json()
+              console.log('Poll status:', pollData.status)
+              if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) {
+                videoUrl = pollData.output[0]
+                break
+              }
+              if (pollData.status === 'FAILED') break
+            } catch(e) {
+              console.error('Poll error:', e)
+            }
+          }
+          if (videoUrl) urls.push(videoUrl)
         }
-        if (completed.length === (data.videoTaskIds || []).length) {
-          setDocVideos(completed)
-          clearInterval(pollInterval)
-          setDocState('ready')
-        }
-      }, 5000)
+        if (urls.length > 0) setVideoUrls(urls)
+      }
 
-      if ((data.videoTaskIds || []).length === 0) setDocState('ready')
+      setDocState('ready')
     } catch {
       setDocState('error')
     }
@@ -312,7 +323,7 @@ What I most want to know: ${profile.mostWantToKnow}`
             regretColor={regretColor} circumference={circumference}
             strokeDash={strokeDash}
             userPhoto={userPhoto} setUserPhoto={setUserPhoto}
-            docState={docState} audioUrl={audioUrl}
+            docState={docState} audioUrl={audioUrl} videoUrls={videoUrls}
             generateDocumentary={generateDocumentary}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
@@ -634,7 +645,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, generateDocumentary, onReset, onNewProfile }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, onReset, onNewProfile }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
 
   const sectionStyle: React.CSSProperties = {
@@ -883,6 +894,16 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                 <div style={{marginBottom:'24px'}}>
                   <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>NARRATION</div>
                   <audio controls src={audioUrl} style={{width:'100%',maxWidth:'520px'}}/>
+                </div>
+              )}
+              {videoUrls.length > 0 && (
+                <div>
+                  <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>YOUR SCENES</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'}}>
+                    {videoUrls.map((url, i) => (
+                      <video key={i} src={url} controls style={{width:'100%',borderRadius:'4px',border:'1px solid rgba(74,158,255,0.2)'}}/>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
