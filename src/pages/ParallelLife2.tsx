@@ -81,6 +81,8 @@ export default function ParallelLife2() {
   const [docVideoTaskIds, setDocVideoTaskIds] = useState<string[]>([])
   const [docVideos, setDocVideos] = useState<string[]>([])
   const [videoUrls, setVideoUrls] = useState<string[]>([])
+  const [copied, setCopied] = useState(false)
+  const [email, setEmail] = useState('')
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
@@ -124,6 +126,7 @@ export default function ParallelLife2() {
 
   const runSimulation = async () => {
     localStorage.setItem('revenio_parallel2_profile', JSON.stringify(profile))
+    if (email) localStorage.setItem('revenio_user_email', email)
     setStep('loading')
     const lines = [
       'Analysing your life...',
@@ -290,6 +293,22 @@ What I most want to know: ${profile.mostWantToKnow}`
     }
   }
 
+  const generateShareText = () => {
+    if (!sim || !profile) return ''
+    return `I just discovered what my life would look like if I had ${profile.alternativePath}. The result surprised me. Try your own parallel life at revenio.net/parallel2`
+  }
+
+  const shareToTwitter = () => {
+    const text = encodeURIComponent(generateShareText())
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank')
+  }
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(`${generateShareText()} — revenio.net/parallel2`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const regretColor = regretAnimated < 40 ? '#4A9EFF' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
   const circumference = 2 * Math.PI * 54
   const strokeDash = circumference - (regretAnimated / 100) * circumference
@@ -319,6 +338,7 @@ What I most want to know: ${profile.mostWantToKnow}`
           <FormSection
             profile={profile} up={up} formStep={formStep}
             setFormStep={setFormStep} onSubmit={runSimulation}
+            email={email} setEmail={setEmail}
           />
         )}
         {step === 'loading' && <LoadingSection lines={loadingLines} />}
@@ -334,6 +354,7 @@ What I most want to know: ${profile.mostWantToKnow}`
             userPhoto={userPhoto} setUserPhoto={setUserPhoto}
             docState={docState} audioUrl={audioUrl} videoUrls={videoUrls}
             generateDocumentary={generateDocumentary}
+            shareToTwitter={shareToTwitter} copyShareLink={copyShareLink} copied={copied}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
           />
@@ -349,7 +370,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'40px 20px'}}>
       <div style={{marginBottom:'24px'}}>
         {title.map((l,i) => (
-          <span key={i} style={{display:'inline-block',fontSize:'clamp(28px,6vw,64px)',fontWeight:900,letterSpacing:'4px',color:'#F0F0F0',animation:`letterIn 0.5s ease ${i*0.05}s both`}}>{l === ' ' ? '\u00A0' : l}</span>
+          <span key={i} style={{display:'inline-block',fontSize:'clamp(22px,6vw,56px)',fontWeight:900,letterSpacing:'4px',color:'#F0F0F0',animation:`letterIn 0.5s ease ${i*0.05}s both`}}>{l === ' ' ? '\u00A0' : l}</span>
         ))}
       </div>
       <div style={{fontFamily:'Georgia,serif',fontSize:'clamp(16px,2vw,22px)',color:'rgba(240,240,240,0.7)',marginBottom:'48px',maxWidth:'600px',lineHeight:1.7,animation:'fadeUp 1s ease 1s both'}}>
@@ -357,7 +378,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
       </div>
       <button
         onClick={onStart}
-        style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',transition:'transform 0.3s'}}
+        style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
         onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'}
         onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
       >
@@ -372,7 +393,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
 
 function LoadingSection({ lines }: { lines: string[] }) {
   return (
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'20px',position:'relative',overflow:'hidden'}}>
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'20px',position:'relative',overflow:'hidden',padding:'20px'}}>
       <div style={{position:'absolute',top:0,left:'50%',width:'1px',height:'100%',background:'linear-gradient(180deg,transparent,#4A9EFF,transparent)',animation:'scanLine 3s linear infinite',opacity:0.3}}/>
       <div style={{width:'48px',height:'48px',border:'2px solid rgba(74,158,255,0.3)',borderTopColor:'#4A9EFF',borderRadius:'50%',animation:'spin 1s linear infinite',marginBottom:'16px'}}/>
       {lines.map((line,i) => (
@@ -382,7 +403,7 @@ function LoadingSection({ lines }: { lines: string[] }) {
   )
 }
 
-function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
+function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setEmail }: any) {
   const totalSteps = 6
   const pct = ((formStep-1)/totalSteps)*100
 
@@ -403,7 +424,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
   const prev = () => setFormStep((s:number) => Math.max(s-1, 1))
 
   return (
-    <div style={{minHeight:'100vh',padding:'40px 20px',maxWidth:'720px',margin:'0 auto'}}>
+    <div style={{minHeight:'100vh',padding:'clamp(16px, 4vw, 40px) clamp(12px, 3vw, 20px)',maxWidth:'720px',margin:'0 auto'}}>
       <div style={{marginBottom:'32px'}}>
         <div style={{display:'flex',justifyContent:'space-between',marginBottom:'8px'}}>
           <span style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px'}}>STEP {formStep} OF {totalSteps}</span>
@@ -422,11 +443,11 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
             <div style={{display:'grid',gap:'20px'}}>
               <div><label style={labelStyle}>Your first name *</label><input style={inputStyle} value={profile.firstName} onChange={e=>up('firstName',e.target.value)} placeholder="Your first name"/></div>
               <div><label style={labelStyle}>Your current age *</label><input style={inputStyle} type="number" value={profile.age} onChange={e=>up('age',e.target.value)} placeholder="Your age"/></div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
                 <div><label style={labelStyle}>City you grew up in *</label><input style={inputStyle} value={profile.grewUpCity} onChange={e=>up('grewUpCity',e.target.value)} placeholder="City"/></div>
                 <div><label style={labelStyle}>Country *</label><input style={inputStyle} value={profile.grewUpCountry} onChange={e=>up('grewUpCountry',e.target.value)} placeholder="Country"/></div>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
                 <div><label style={labelStyle}>City you live in now</label><input style={inputStyle} value={profile.liveCity} onChange={e=>up('liveCity',e.target.value)} placeholder="City"/></div>
                 <div><label style={labelStyle}>Country</label><input style={inputStyle} value={profile.liveCountry} onChange={e=>up('liveCountry',e.target.value)} placeholder="Country"/></div>
               </div>
@@ -621,7 +642,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
             <h2 style={{fontFamily:'Georgia,serif',fontSize:'28px',color:'#F0F0F0',marginBottom:'12px'}}>Your Simulation Is Ready</h2>
             <p style={{color:'rgba(240,240,240,0.5)',marginBottom:'40px',lineHeight:1.7,fontFamily:'Georgia,serif',fontStyle:'italic',maxWidth:'500px',margin:'0 auto 40px'}}>What you are about to see is an AI generated speculation based on everything you told us. It will be specific. It will be surprising. Some of it will feel true. Some will feel wrong. That is the nature of roads not taken.</p>
             <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(74,158,255,0.15)',borderRadius:'8px',padding:'24px',marginBottom:'40px',textAlign:'left' as const}}>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
                 {[['Name',profile.firstName],['Age',profile.age],['From',`${profile.grewUpCity}, ${profile.grewUpCountry}`],['Now',`${profile.liveCity}, ${profile.liveCountry}`],['Decision age',profile.decisionAge],['Alternate path',profile.alternativePath]].map(([l,v])=> v ? (
                   <div key={String(l)}>
                     <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px',marginBottom:'4px'}}>{l}</div>
@@ -629,6 +650,24 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
                   </div>
                 ) : null)}
               </div>
+            </div>
+            <div style={{marginBottom:'24px'}}>
+              <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px',textTransform:'uppercase' as const}}>
+                SAVE YOUR RESULTS
+              </label>
+              <p style={{color:'rgba(240,240,240,0.4)',fontSize:'13px',marginBottom:'12px',lineHeight:1.6}}>
+                Enter your email and we will save your simulation so you can come back to it anytime.
+              </p>
+              <input
+                type="email"
+                value={email}
+                onChange={e=>setEmail(e.target.value)}
+                placeholder="your@email.com"
+                style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(74,158,255,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'15px',borderRadius:'4px',outline:'none',fontFamily:'system-ui,sans-serif',boxSizing:'border-box' as const}}
+              />
+              <p style={{color:'rgba(240,240,240,0.3)',fontSize:'11px',marginTop:'8px'}}>
+                Optional. No spam. Unsubscribe anytime.
+              </p>
             </div>
             <button
               onClick={onSubmit}
@@ -654,7 +693,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, onReset, onNewProfile }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, onReset, onNewProfile }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
 
   const sectionStyle: React.CSSProperties = {
@@ -740,7 +779,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
         <>
           <div style={{...sectionStyle,animationDelay:'0.5s'}}>
             <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>SIDE BY SIDE — YOUR TWO LIVES</div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0'}}>
+            <div style={{display:'grid',gridTemplateColumns:window.innerWidth < 600 ? '1fr' : '1fr 1fr',gap:'0'}}>
               <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(74,158,255,0.2)'}}>YOUR REAL LIFE</div>
               <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(74,158,255,0.2)',borderLeft:'1px solid rgba(74,158,255,0.2)'}}>YOUR OTHER LIFE</div>
               {sim.sideBySide?.map((row: any, i: number) => (
@@ -880,7 +919,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                     <div style={{color:'rgba(240,240,240,0.5)',fontSize:'12px',letterSpacing:'2px'}}>PHOTO READY</div>
                     <button onClick={()=>setUserPhoto('')} style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'12px',textDecoration:'underline'}}>Use a different photo</button>
                   </div>
-                  <button onClick={generateDocumentary} style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'17px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px'}}>
+                  <button onClick={generateDocumentary} style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'17px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',width:'100%',maxWidth:'400px'}}>
                     GENERATE MY DOCUMENTARY
                   </button>
                 </div>
@@ -927,6 +966,31 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
         </div>
       )}
 
+      {sim && (
+        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(74,158,255,0.15)',borderRadius:'8px',padding:'28px',marginBottom:'24px',textAlign:'center' as const}}>
+          <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'4px',marginBottom:'12px'}}>SHARE YOUR PARALLEL LIFE</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'16px',color:'rgba(240,240,240,0.7)',marginBottom:'8px',fontStyle:'italic',maxWidth:'500px',margin:'0 auto 20px',lineHeight:1.6}}>
+            "{sim.overallJudgment}"
+          </div>
+          <div style={{display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap' as const}}>
+            <button
+              onClick={shareToTwitter}
+              style={{background:'#1DA1F2',color:'white',border:'none',padding:'12px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',fontWeight:600,display:'flex',alignItems:'center',gap:'8px',transition:'opacity 0.2s'}}
+              onMouseEnter={e=>e.currentTarget.style.opacity='0.8'}
+              onMouseLeave={e=>e.currentTarget.style.opacity='1'}
+            >
+              𝕏 Share on Twitter
+            </button>
+            <button
+              onClick={copyShareLink}
+              style={{background:copied?'rgba(39,174,96,0.2)':'rgba(74,158,255,0.1)',color:copied?'#27AE60':'#4A9EFF',border:`1px solid ${copied?'#27AE60':'rgba(74,158,255,0.3)'}`,padding:'12px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',fontWeight:600,transition:'all 0.2s'}}
+            >
+              {copied ? '✓ Copied' : '🔗 Copy Link'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{display:'flex',gap:'12px',justifyContent:'center',marginTop:'48px',flexWrap:'wrap' as const}}>
         <button onClick={onReset} style={{background:'transparent',border:'1px solid rgba(74,158,255,0.3)',color:'#4A9EFF',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(74,158,255,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>EXPLORE ANOTHER DECISION</button>
         <button onClick={onNewProfile} style={{background:'transparent',border:'1px solid rgba(255,255,255,0.15)',color:'rgba(240,240,240,0.6)',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'} onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.15)'}>BUILD A NEW PROFILE</button>
@@ -940,7 +1004,7 @@ function TurningPoint({ tp, choice, setChoice, number }: any) {
     <div style={{background:'rgba(74,158,255,0.03)',border:'1px solid rgba(74,158,255,0.25)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
       <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>TURNING POINT {number}</div>
       <p style={{fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.7,color:'rgba(240,240,240,0.85)',marginBottom:'20px'}}>{tp?.situation}</p>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
         {['A','B'].map(opt => (
           <button key={opt} onClick={() => setChoice(opt)} style={{background:choice===opt?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.03)',border:`1px solid ${choice===opt?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:choice===opt?'#4A9EFF':'rgba(240,240,240,0.7)',padding:'16px',cursor:'pointer',borderRadius:'4px',textAlign:'left' as const,fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.5,transition:'all 0.2s'}}>
             {opt === 'A' ? tp?.choiceA : tp?.choiceB}

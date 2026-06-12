@@ -506,13 +506,37 @@ const G: Record<string,React.CSSProperties> = {
 
 export default function Play() {
   return (
-    <div style={{minHeight:'100vh',background:'#0A0A0C',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'40px',fontFamily:"'Rajdhani',sans-serif"}}>
+    <div style={{minHeight:'100vh',background:'#0A0A0C',fontFamily:"'Rajdhani',sans-serif",overflow:'hidden'}}>
       <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(28px,6vw,56px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'16px'}}>REVENIO</div>
-      <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px',marginBottom:'24px'}}>PLAY MODE</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,4vw,36px)',fontWeight:700,color:'#F0C060',letterSpacing:'4px',marginBottom:'16px'}}>COMING SOON</div>
-      <div style={{color:'#7A7A8A',fontSize:'15px',maxWidth:'400px',lineHeight:1.7,marginBottom:'40px'}}>We are putting the finishing touches on something extraordinary.</div>
-      <a href="/" style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',textDecoration:'none',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',display:'inline-block'}}>BACK TO HOME</a>
+      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}`}</style>
+
+      <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',justifyContent:'center',minHeight:'100vh',textAlign:'center' as const,padding:'40px 20px'}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'8px',animation:'fadeUp 0.8s ease both'}}>REVENIO</div>
+        <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px',marginBottom:'16px',animation:'fadeUp 0.8s ease 0.2s both'}}>PLAY MODE</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(20px,4vw,32px)',fontWeight:700,color:'#F0C060',letterSpacing:'4px',marginBottom:'12px',animation:'fadeUp 0.8s ease 0.3s both'}}>COMING SOON</div>
+        <div style={{color:'#7A7A8A',fontSize:'15px',maxWidth:'500px',lineHeight:1.7,marginBottom:'48px',animation:'fadeUp 0.8s ease 0.4s both'}}>Eight worlds. Eight alternate lives. We are putting the finishing touches on something extraordinary.</div>
+
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'16px',maxWidth:'800px',width:'100%',marginBottom:'48px',animation:'fadeUp 0.8s ease 0.5s both'}}>
+          {[
+            {icon:'⚽',name:'Champions Legacy',desc:'Football career sim'},
+            {icon:'🔮',name:'Arcane Academy',desc:'Magic school RPG'},
+            {icon:'💹',name:'Greed: The Floor',desc:'Wall Street empire'},
+            {icon:'🐉',name:'Dragonfall Kingdoms',desc:'Medieval war game'},
+            {icon:'🚀',name:'Galactic Frontier',desc:'Space adventure'},
+            {icon:'⚡',name:'Hero Nexus',desc:'Superhero career'},
+            {icon:'🕶️',name:'Shadow Guild',desc:'Assassin brotherhood'},
+            {icon:'🌆',name:'Neon Domination',desc:'Cyberpunk hacker'},
+          ].map((world, i) => (
+            <div key={world.name} style={{background:'#1A1A24',border:'1px solid #2A2A3A',borderRadius:'4px',padding:'20px 16px',animation:`fadeUp 0.6s ease ${0.6 + i * 0.08}s both, float ${3 + i * 0.3}s ease ${i * 0.2}s infinite`}}>
+              <div style={{fontSize:'28px',marginBottom:'8px'}}>{world.icon}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:'12px',fontWeight:700,color:'#D4A843',marginBottom:'4px',letterSpacing:'0.5px'}}>{world.name}</div>
+              <div style={{color:'#7A7A8A',fontSize:'11px'}}>{world.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        <a href="/" style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',textDecoration:'none',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',display:'inline-block',animation:'fadeUp 0.8s ease 1.2s both'}}>BACK TO HOME</a>
+      </div>
     </div>
   )
   const [screen, setScreen] = useState('splash')

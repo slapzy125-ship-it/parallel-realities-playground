@@ -105,6 +105,31 @@ function Home() {
         </div>
       </section>
 
+      {/* HOW IT WORKS */}
+      <section style={{padding:'80px 20px',background:'#0D0D14',textAlign:'center' as const}}>
+        <div style={{maxWidth:'900px',margin:'0 auto'}}>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'12px'}}>HOW IT WORKS</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(24px,4vw,36px)',fontWeight:700,color:'#F0C060',marginBottom:'48px',letterSpacing:'2px'}}>Three Steps to Your Other Life</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:'32px'}}>
+            {[
+              {step:'01',title:'Tell Your Story',desc:'Answer questions about your real life. Your relationships, your career, your decisions. The more honest you are the more surprising the result.',icon:'📝'},
+              {step:'02',title:'Choose Your Decision',desc:'Pick the one moment that changed everything. The university you did not attend. The job you turned down. The person you did not call back.',icon:'🔀'},
+              {step:'03',title:'See the Other Life',desc:'Watch your alternate timeline unfold. Who you would have met. Where you would have lived. What you would have become.',icon:'🌐'},
+            ].map(item => (
+              <div key={item.step} style={{background:'#1A1A24',border:'1px solid #2A2A3A',borderRadius:'4px',padding:'32px 24px',textAlign:'left' as const}}>
+                <div style={{color:'#8B6914',fontFamily:"'Orbitron',monospace",fontSize:'28px',fontWeight:700,marginBottom:'12px',opacity:0.6}}>{item.step}</div>
+                <div style={{fontSize:'32px',marginBottom:'16px'}}>{item.icon}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:'17px',fontWeight:700,color:'#F0C060',marginBottom:'12px'}}>{item.title}</div>
+                <div style={{color:'#7A7A8A',fontSize:'14px',lineHeight:1.7}}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:'48px'}}>
+            <a href="/parallel2" style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'16px 48px',textDecoration:'none',letterSpacing:'2px',fontSize:'15px',borderRadius:'4px',display:'inline-block'}}>BEGIN YOUR SIMULATION</a>
+          </div>
+        </div>
+      </section>
+
       {/* CTA bridge */}
       <section className="relative py-32 px-6 bg-[var(--onyx)] border-y border-border text-center">
         <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-6">Three Steps</p>
