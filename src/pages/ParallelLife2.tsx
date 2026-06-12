@@ -248,8 +248,16 @@ What I most want to know: ${profile.mostWantToKnow}`
       if (!docRes.ok) throw new Error(data.error || 'Documentary generation failed')
       setDocAudio(data.audioBase64)
       setDocVideoTaskIds(data.videoTaskIds || [])
-      const blob = new Blob([Uint8Array.from(atob(data.audioBase64), c => c.charCodeAt(0))], { type: 'audio/mpeg' })
-      setAudioUrl(URL.createObjectURL(blob))
+      if (data.audioBase64) {
+        const binaryString = atob(data.audioBase64)
+        const bytes = new Uint8Array(binaryString.length)
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i)
+        }
+        const blob = new Blob([bytes], { type: 'audio/mpeg' })
+        const url = URL.createObjectURL(blob)
+        setAudioUrl(url)
+      }
 
       const pollInterval = setInterval(async () => {
         const completed: string[] = []
