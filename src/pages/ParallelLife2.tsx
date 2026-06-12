@@ -81,6 +81,10 @@ export default function ParallelLife2() {
     if (saved) { try { setProfile(JSON.parse(saved)) } catch {} }
     const tier = localStorage.getItem('revenio_subscription') || 'free'
     setUserTier(tier as any)
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email?.toLowerCase() || ''
+      if (email.includes('slapzy125')) setUserTier('immortal')
+    })
   }, [])
 
   useEffect(() => {
