@@ -58,6 +58,13 @@ type SimResult = {
   sideBySide:{age:string,realLife:string,alternateLife:string,category:string}[],
   butterflyChain:string[], keyDifferences:string[],
   regretScore:number, regretExplanation:string, messageFromOtherSelf:string,
+  lifeScores: {
+    real: { happiness:number, wealth:number, relationships:number, purpose:number, adventure:number, health:number },
+    alternate: { happiness:number, wealth:number, relationships:number, purpose:number, adventure:number, health:number }
+  },
+  theCost: { gain:string, loss:string }[],
+  biggestSurprise: string,
+  teaserNarration: string,
 }
 
 export default function ParallelLife2() {
@@ -157,7 +164,7 @@ ABSOLUTE RULES:
 9. The final message: write as if the alternate version reached across the multiverse. Honest not sentimental. End with their real first name.
 
 Return ONLY this exact JSON with no markdown no backticks:
-{"overallJudgment":"one sentence","immediateAftermath":"150-200 words","firstYear":"150-200 words","formativeYears":"150-200 words","middleYears":"150-200 words","laterYears":"150-200 words","oldAge":"150-200 words","turningPoint1":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint2":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint3":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"sideBySide":[{"age":"22","realLife":"30 words","alternateLife":"30 words","category":"Location"},{"age":"25","realLife":"30 words","alternateLife":"30 words","category":"Career"},{"age":"28","realLife":"30 words","alternateLife":"30 words","category":"Relationships"},{"age":"30","realLife":"30 words","alternateLife":"30 words","category":"How you felt"},{"age":"35","realLife":"30 words","alternateLife":"30 words","category":"What defined you"}],"butterflyChain":["chain 1","chain 2","chain 3","chain 4","chain 5"],"keyDifferences":["diff 1","diff 2","diff 3","diff 4","diff 5"],"regretScore":65,"regretExplanation":"100 words","messageFromOtherSelf":"200 words ending with first name"}
+{"overallJudgment":"one sentence","immediateAftermath":"150-200 words","firstYear":"150-200 words","formativeYears":"150-200 words","middleYears":"150-200 words","laterYears":"150-200 words","oldAge":"150-200 words","turningPoint1":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint2":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"turningPoint3":{"situation":"50 words","choiceA":"20 words","choiceB":"20 words"},"sideBySide":[{"age":"22","realLife":"30 words","alternateLife":"30 words","category":"Location"},{"age":"25","realLife":"30 words","alternateLife":"30 words","category":"Career"},{"age":"28","realLife":"30 words","alternateLife":"30 words","category":"Relationships"},{"age":"30","realLife":"30 words","alternateLife":"30 words","category":"How you felt"},{"age":"35","realLife":"30 words","alternateLife":"30 words","category":"What defined you"}],"butterflyChain":["chain 1","chain 2","chain 3","chain 4","chain 5"],"keyDifferences":["diff 1","diff 2","diff 3","diff 4","diff 5"],"regretScore":65,"regretExplanation":"100 words","messageFromOtherSelf":"200 words ending with first name","lifeScores":{"real":{"happiness":65,"wealth":70,"relationships":75,"purpose":60,"adventure":45,"health":70},"alternate":{"happiness":58,"wealth":85,"relationships":50,"purpose":80,"adventure":90,"health":65}},"theCost":[{"gain":"You built a successful company","loss":"You never met the person who would have become your closest friend"},{"gain":"You had financial freedom by 30","loss":"You missed the years of struggle that gave your real self depth and empathy"},{"gain":"You lived in three different countries","loss":"Your relationship with your family grew distant and was never fully repaired"}],"biggestSurprise":"The most unexpected outcome of this alternate life was...","teaserNarration":"In another life, [name] never went to university. At eighteen, they chose a different path..."}
 
 CRITICAL: Your entire response must be a single valid JSON object. No text before it. No text after it. No markdown. No backticks. No explanation. Just the raw JSON object starting with { and ending with }`
 
@@ -803,6 +810,19 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
         <p style={narrativeStyle}>{sim.firstYear}</p>
       </div>
 
+      {sim.teaserNarration && (
+        <div style={{background:'#0F0F14',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'12px',textAlign:'center' as const}}>YOUR DOCUMENTARY TEASER</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'16px',color:'rgba(240,240,240,0.85)',lineHeight:1.8,textAlign:'center' as const,fontStyle:'italic',marginBottom:'20px'}}>"{sim.teaserNarration}"</div>
+          {userTier !== 'immortal' && (
+            <div style={{textAlign:'center' as const}}>
+              <div style={{color:'rgba(240,240,240,0.4)',fontSize:'13px',marginBottom:'12px'}}>Full 1 minute documentary with your face and voiceover</div>
+              <a href="/pricing" style={{display:'inline-block',background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',padding:'10px 28px',textDecoration:'none',borderRadius:'4px',fontSize:'13px',fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:'1px'}}>UNLOCK WITH IMMORTAL</a>
+            </div>
+          )}
+        </div>
+      )}
+
       {userTier === 'free' && (
         <div style={{background:'rgba(13,17,23,0.95)',backdropFilter:'blur(12px)',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'48px',textAlign:'center' as const,marginBottom:'24px',animation:'glow 3s infinite'}}>
           <div style={{fontSize:'32px',marginBottom:'16px'}}>🔮</div>
@@ -869,6 +889,64 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             </div>
           </div>
 
+          {sim.lifeScores && (
+            <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'32px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
+              <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px',textAlign:'center' as const}}>YOUR TWO LIVES — SCORED</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr',gap:'16px'}}>
+                {(['happiness','wealth','relationships','purpose','adventure','health'] as const).map(category => {
+                  const realVal = sim.lifeScores.real[category]
+                  const altVal = sim.lifeScores.alternate[category]
+                  const diff = altVal - realVal
+                  return (
+                    <div key={category}>
+                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
+                        <span style={{color:'rgba(240,240,240,0.7)',fontSize:'13px',textTransform:'capitalize' as const,letterSpacing:'1px'}}>{category}</span>
+                        <span style={{color:diff>0?'#27AE60':diff<0?'#E74C3C':'#D4A843',fontSize:'12px',fontWeight:700}}>{diff>0?`+${diff}`:diff} in alternate life</span>
+                      </div>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}}>
+                        <div>
+                          <div style={{color:'rgba(240,240,240,0.4)',fontSize:'10px',letterSpacing:'1px',marginBottom:'4px'}}>REAL LIFE</div>
+                          <div style={{width:'100%',height:'8px',background:'rgba(255,255,255,0.08)',borderRadius:'4px',overflow:'hidden'}}>
+                            <div style={{width:`${realVal}%`,height:'100%',background:'rgba(212,168,67,0.5)',borderRadius:'4px',transition:'width 1s ease'}}/>
+                          </div>
+                          <div style={{color:'rgba(240,240,240,0.5)',fontSize:'11px',marginTop:'2px'}}>{realVal}/100</div>
+                        </div>
+                        <div>
+                          <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'1px',marginBottom:'4px'}}>ALTERNATE LIFE</div>
+                          <div style={{width:'100%',height:'8px',background:'rgba(255,255,255,0.08)',borderRadius:'4px',overflow:'hidden'}}>
+                            <div style={{width:`${altVal}%`,height:'100%',background:diff>0?'#27AE60':'#E74C3C',borderRadius:'4px',transition:'width 1s ease'}}/>
+                          </div>
+                          <div style={{color:diff>0?'#27AE60':'#E74C3C',fontSize:'11px',marginTop:'2px'}}>{altVal}/100</div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {sim.theCost && sim.theCost.length > 0 && (
+            <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'32px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
+              <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px',textAlign:'center' as const}}>THE COST</div>
+              <div style={{color:'rgba(240,240,240,0.5)',fontFamily:'Georgia,serif',fontSize:'14px',textAlign:'center' as const,marginBottom:'24px',fontStyle:'italic'}}>Every gain in the alternate life came at a price.</div>
+              <div style={{display:'flex',flexDirection:'column' as const,gap:'20px'}}>
+                {sim.theCost.map((item: any, i: number) => (
+                  <div key={i} style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',padding:'16px',background:'rgba(255,255,255,0.02)',borderRadius:'4px',border:'1px solid rgba(255,255,255,0.05)'}}>
+                    <div>
+                      <div style={{color:'#27AE60',fontSize:'10px',letterSpacing:'2px',marginBottom:'8px'}}>GAINED</div>
+                      <div style={{fontFamily:'Georgia,serif',fontSize:'14px',color:'rgba(240,240,240,0.85)',lineHeight:1.6}}>{item.gain}</div>
+                    </div>
+                    <div style={{borderLeft:'1px solid rgba(255,255,255,0.05)',paddingLeft:'16px'}}>
+                      <div style={{color:'#E74C3C',fontSize:'10px',letterSpacing:'2px',marginBottom:'8px'}}>LOST</div>
+                      <div style={{fontFamily:'Georgia,serif',fontSize:'14px',color:'rgba(240,240,240,0.85)',lineHeight:1.6}}>{item.loss}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div ref={butterflyRef} style={{...sectionStyle,animationDelay:'0.6s',position:'relative' as const,overflow:'visible' as const}}>
             <FlyingButterfly containerRef={butterflyRef} />
             <div style={{textAlign:'center' as const,marginBottom:'40px'}}>
@@ -927,6 +1005,14 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
               </div>
             ))}
           </div>
+
+          {sim.biggestSurprise && (
+            <div style={{background:'linear-gradient(135deg,rgba(212,168,67,0.05),rgba(139,105,20,0.08))',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'32px',marginBottom:'24px',textAlign:'center' as const,animation:'fadeUp 0.8s ease both'}}>
+              <div style={{fontSize:'32px',marginBottom:'16px'}}>✨</div>
+              <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'16px'}}>THE BIGGEST SURPRISE</div>
+              <div style={{fontFamily:'Georgia,serif',fontSize:'18px',color:'#F0F0F0',lineHeight:1.8,fontStyle:'italic',maxWidth:'600px',margin:'0 auto'}}>"{sim.biggestSurprise}"</div>
+            </div>
+          )}
 
           <div style={{...sectionStyle,animationDelay:'0.8s',textAlign:'center' as const}}>
             <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>REGRET SCORE</div>
