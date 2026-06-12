@@ -6,11 +6,11 @@ const STYLES = `
   @keyframes slideRight { from { opacity:0; transform:translateX(-32px); } to { opacity:1; transform:translateX(0); } }
   @keyframes slideLeft { from { opacity:0; transform:translateX(32px); } to { opacity:1; transform:translateX(0); } }
   @keyframes shimmer { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
-  @keyframes bgPulse { 0%,100% { background-color:#0D1117; } 50% { background-color:#0a0f1a; } }
+  @keyframes bgPulse { 0%,100% { background-color:#0A0A0C; } 50% { background-color:#0A0A0C; } }
   @keyframes drawLine { from { stroke-dashoffset:1000; } to { stroke-dashoffset:0; } }
   @keyframes wordFade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
-  @keyframes glow { 0%,100% { box-shadow:0 0 20px rgba(74,158,255,0.2); } 50% { box-shadow:0 0 40px rgba(74,158,255,0.5); } }
+  @keyframes glow { 0%,100% { box-shadow:0 0 20px rgba(212,168,67,0.2); } 50% { box-shadow:0 0 40px rgba(212,168,67,0.5); } }
   @keyframes letterIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   @keyframes particleFloat { from { transform:translateY(100vh); opacity:0; } 20% { opacity:0.6; } 80% { opacity:0.6; } to { transform:translateY(-20px); opacity:0; } }
   @keyframes progressShimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
@@ -309,28 +309,28 @@ What I most want to know: ${profile.mostWantToKnow}`
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const regretColor = regretAnimated < 40 ? '#4A9EFF' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
+  const regretColor = regretAnimated < 40 ? '#D4A843' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
   const circumference = 2 * Math.PI * 54
   const strokeDash = circumference - (regretAnimated / 100) * circumference
 
   if (authChecked && !authedUserId) {
     return (
-      <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
+      <div style={{minHeight:'100vh',background:'#0A0A0C',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
         <div style={{maxWidth:'420px',textAlign:'center'}}>
-          <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'4px',marginBottom:'16px'}}>SIGN IN REQUIRED</div>
+          <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'4px',marginBottom:'16px'}}>SIGN IN REQUIRED</div>
           <h1 style={{fontFamily:"'Cinzel',serif",fontSize:'28px',marginBottom:'14px'}}>Parallel 2.0</h1>
           <p style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.6,marginBottom:'24px'}}>Sign in to explore the life you never lived. Every account gets full access.</p>
-          <a href="/auth" style={{display:'inline-block',background:'#4A9EFF',color:'#0D1117',padding:'12px 28px',fontSize:'12px',letterSpacing:'3px',fontWeight:700,textDecoration:'none',borderRadius:'2px'}}>SIGN IN / SIGN UP</a>
+          <a href="/auth" style={{display:'inline-block',background:'#D4A843',color:'#0A0A0C',padding:'12px 28px',fontSize:'12px',letterSpacing:'3px',fontWeight:700,textDecoration:'none',borderRadius:'2px'}}>SIGN IN / SIGN UP</a>
         </div>
       </div>
     )
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',animation:'bgPulse 8s infinite',position:'relative',overflow:'hidden'}}>
+    <div style={{minHeight:'100vh',background:'#0A0A0C',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',animation:'bgPulse 8s infinite',position:'relative',overflow:'hidden'}}>
       <style>{STYLES}</style>
       {PARTICLES.map(p => (
-        <div key={p.id} style={{position:'fixed',left:p.left,bottom:'-20px',width:p.size,height:p.size,borderRadius:'50%',background:'#4A9EFF',opacity:0.3,animation:`particleFloat ${p.duration} ${p.delay} infinite linear`,pointerEvents:'none',zIndex:0}}/>
+        <div key={p.id} style={{position:'fixed',left:p.left,bottom:'-20px',width:p.size,height:p.size,borderRadius:'50%',background:'#D4A843',opacity:0.3,animation:`particleFloat ${p.duration} ${p.delay} infinite linear`,pointerEvents:'none',zIndex:0}}/>
       ))}
       <div style={{position:'relative',zIndex:1}}>
         {step === 'hero' && <HeroSection onStart={() => setStep('form')} />}
@@ -378,7 +378,7 @@ function HeroSection({ onStart }: { onStart: () => void }) {
       </div>
       <button
         onClick={onStart}
-        style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
+        style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'18px 56px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
         onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'}
         onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
       >
@@ -394,10 +394,10 @@ function HeroSection({ onStart }: { onStart: () => void }) {
 function LoadingSection({ lines }: { lines: string[] }) {
   return (
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'20px',position:'relative',overflow:'hidden',padding:'20px'}}>
-      <div style={{position:'absolute',top:0,left:'50%',width:'1px',height:'100%',background:'linear-gradient(180deg,transparent,#4A9EFF,transparent)',animation:'scanLine 3s linear infinite',opacity:0.3}}/>
-      <div style={{width:'48px',height:'48px',border:'2px solid rgba(74,158,255,0.3)',borderTopColor:'#4A9EFF',borderRadius:'50%',animation:'spin 1s linear infinite',marginBottom:'16px'}}/>
+      <div style={{position:'absolute',top:0,left:'50%',width:'1px',height:'100%',background:'linear-gradient(180deg,transparent,#D4A843,transparent)',animation:'scanLine 3s linear infinite',opacity:0.3}}/>
+      <div style={{width:'48px',height:'48px',border:'2px solid rgba(212,168,67,0.3)',borderTopColor:'#D4A843',borderRadius:'50%',animation:'spin 1s linear infinite',marginBottom:'16px'}}/>
       {lines.map((line,i) => (
-        <div key={i} style={{color:i===lines.length-1?'#4A9EFF':'rgba(240,240,240,0.6)',fontSize:'15px',letterSpacing:'2px',animation:'fadeUp 0.5s ease both',fontFamily:'Georgia,serif'}}>{line}</div>
+        <div key={i} style={{color:i===lines.length-1?'#D4A843':'rgba(240,240,240,0.6)',fontSize:'15px',letterSpacing:'2px',animation:'fadeUp 0.5s ease both',fontFamily:'Georgia,serif'}}>{line}</div>
       ))}
     </div>
   )
@@ -408,7 +408,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
   const pct = ((formStep-1)/totalSteps)*100
 
   const inputStyle: React.CSSProperties = {
-    width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(74,158,255,0.2)',
+    width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(212,168,67,0.2)',
     color:'#F0F0F0', padding:'12px 16px', fontSize:'15px', borderRadius:'4px',
     outline:'none', fontFamily:'system-ui,sans-serif', boxSizing:'border-box',
     transition:'border-color 0.2s',
@@ -427,11 +427,11 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
     <div style={{minHeight:'100vh',padding:'clamp(16px, 4vw, 40px) clamp(12px, 3vw, 20px)',maxWidth:'720px',margin:'0 auto'}}>
       <div style={{marginBottom:'32px'}}>
         <div style={{display:'flex',justifyContent:'space-between',marginBottom:'8px'}}>
-          <span style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px'}}>STEP {formStep} OF {totalSteps}</span>
+          <span style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px'}}>STEP {formStep} OF {totalSteps}</span>
           <span style={{color:'rgba(240,240,240,0.4)',fontSize:'12px'}}>{Math.round(pct)}% complete</span>
         </div>
         <div style={{width:'100%',height:'3px',background:'rgba(255,255,255,0.1)',borderRadius:'2px',overflow:'hidden'}}>
-          <div style={{width:`${pct}%`,height:'100%',background:'linear-gradient(90deg,#1a3a6b,#4A9EFF)',backgroundSize:'200% 100%',animation:'progressShimmer 2s linear infinite',transition:'width 0.5s ease',borderRadius:'2px'}}/>
+          <div style={{width:`${pct}%`,height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)',backgroundSize:'200% 100%',animation:'progressShimmer 2s linear infinite',transition:'width 0.5s ease',borderRadius:'2px'}}/>
         </div>
       </div>
 
@@ -527,7 +527,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
             <div style={{display:'grid',gap:'20px'}}>
               <div><label style={labelStyle}>Are you currently in school or university?</label>
                 <div style={{display:'flex',gap:'12px'}}>
-                  {['yes','no'].map(v => <button key={v} onClick={()=>up('inSchool',v)} style={{flex:1,padding:'12px',background:profile.inSchool===v?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.inSchool===v?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}}>{v.toUpperCase()}</button>)}
+                  {['yes','no'].map(v => <button key={v} onClick={()=>up('inSchool',v)} style={{flex:1,padding:'12px',background:profile.inSchool===v?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.inSchool===v?'#D4A843':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}}>{v.toUpperCase()}</button>)}
                 </div>
               </div>
               {profile.inSchool === 'yes' && (
@@ -538,7 +538,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
               )}
               <div><label style={labelStyle}>Have you finished school or university?</label>
                 <div style={{display:'flex',gap:'12px'}}>
-                  {['yes','no'].map(v => <button key={v} onClick={()=>up('wentToCollege',v)} style={{flex:1,padding:'12px',background:profile.wentToCollege===v?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.wentToCollege===v?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}}>{v.toUpperCase()}</button>)}
+                  {['yes','no'].map(v => <button key={v} onClick={()=>up('wentToCollege',v)} style={{flex:1,padding:'12px',background:profile.wentToCollege===v?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.wentToCollege===v?'#D4A843':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}}>{v.toUpperCase()}</button>)}
                 </div>
               </div>
               {profile.wentToCollege === 'yes' && (
@@ -560,7 +560,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
               </div>
               <div><label style={labelStyle}>Are you doing what you thought you would be doing at this point</label>
                 <div style={{display:'flex',gap:'12px'}}>
-                  {['yes','no','I had no idea what I wanted'].map(v => <button key={v} onClick={()=>up('doingWhatExpected',v)} style={{flex:1,padding:'10px 6px',background:profile.doingWhatExpected===v?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.doingWhatExpected===v?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'12px',transition:'all 0.2s'}}>{v}</button>)}
+                  {['yes','no','I had no idea what I wanted'].map(v => <button key={v} onClick={()=>up('doingWhatExpected',v)} style={{flex:1,padding:'10px 6px',background:profile.doingWhatExpected===v?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.doingWhatExpected===v?'#D4A843':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'12px',transition:'all 0.2s'}}>{v}</button>)}
                 </div>
               </div>
             </div>
@@ -582,7 +582,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
               <div><label style={labelStyle}>Describe your living situation briefly</label><input style={inputStyle} value={profile.livingSituation} onChange={e=>up('livingSituation',e.target.value)} placeholder="City apartment, house in suburbs, rural, travelling etc"/></div>
               <div><label style={labelStyle}>Do you have children</label>
                 <div style={{display:'flex',gap:'12px'}}>
-                  {['yes','no','not yet'].map(v => <button key={v} onClick={()=>up('hasChildren',v)} style={{flex:1,padding:'12px',background:profile.hasChildren===v?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.hasChildren===v?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'13px',transition:'all 0.2s'}}>{v}</button>)}
+                  {['yes','no','not yet'].map(v => <button key={v} onClick={()=>up('hasChildren',v)} style={{flex:1,padding:'12px',background:profile.hasChildren===v?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.05)',border:`1px solid ${profile.hasChildren===v?'#D4A843':'rgba(255,255,255,0.1)'}`,color:'#F0F0F0',cursor:'pointer',borderRadius:'4px',fontSize:'13px',transition:'all 0.2s'}}>{v}</button>)}
                 </div>
               </div>
               {profile.hasChildren === 'yes' && <div><label style={labelStyle}>How many and rough ages</label><input style={inputStyle} value={profile.childrenDetails} onChange={e=>up('childrenDetails',e.target.value)} placeholder="e.g. Two kids, ages 4 and 7"/></div>}
@@ -616,12 +616,12 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
 
         {formStep === 5 && (
           <div>
-            <div style={{background:'rgba(74,158,255,0.05)',border:'1px solid rgba(74,158,255,0.3)',borderRadius:'8px',padding:'32px',animation:'glow 3s infinite'}}>
-              <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'4px',marginBottom:'16px'}}>THE MOMENT EVERYTHING CHANGED</div>
+            <div style={{background:'rgba(212,168,67,0.05)',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'32px',animation:'glow 3s infinite'}}>
+              <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'16px'}}>THE MOMENT EVERYTHING CHANGED</div>
               <h2 style={{fontFamily:'Georgia,serif',fontSize:'clamp(22px,4vw,32px)',color:'#F0F0F0',marginBottom:'12px',lineHeight:1.3}}>Every life hinges on moments. This is yours.</h2>
               <p style={{color:'rgba(240,240,240,0.5)',marginBottom:'32px',lineHeight:1.7,fontStyle:'italic',fontFamily:'Georgia,serif'}}>Describe the decision you actually made in as much detail as you can. The more specific you are the more the simulation will surprise you.</p>
               <div style={{display:'grid',gap:'20px'}}>
-                <div><label style={labelStyle}>The decision you actually made *</label><textarea style={{...textareaStyle,minHeight:'140px',borderColor:'rgba(74,158,255,0.3)'}} value={profile.theDecision} onChange={e=>up('theDecision',e.target.value)} placeholder="For example: I chose to stay in London instead of moving to New York when I had the opportunity at 22. I stayed because of my relationship at the time and because I was scared. I have always wondered what would have happened if I had gone."/></div>
+                <div><label style={labelStyle}>The decision you actually made *</label><textarea style={{...textareaStyle,minHeight:'140px',borderColor:'rgba(212,168,67,0.3)'}} value={profile.theDecision} onChange={e=>up('theDecision',e.target.value)} placeholder="For example: I chose to stay in London instead of moving to New York when I had the opportunity at 22. I stayed because of my relationship at the time and because I was scared. I have always wondered what would have happened if I had gone."/></div>
                 <div><label style={labelStyle}>How old were you *</label><input style={inputStyle} value={profile.decisionAge} onChange={e=>up('decisionAge',e.target.value)} placeholder="Your age when you made this decision"/></div>
                 <div><label style={labelStyle}>Why did you make the choice you made</label><textarea style={textareaStyle} value={profile.whyMadeIt} onChange={e=>up('whyMadeIt',e.target.value)} placeholder="What were you thinking and feeling at the time"/></div>
                 <div><label style={labelStyle}>The alternative you did not take *</label><input style={inputStyle} value={profile.alternativePath} onChange={e=>up('alternativePath',e.target.value)} placeholder="What was the other path"/></div>
@@ -641,7 +641,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
           <div style={{textAlign:'center' as const}}>
             <h2 style={{fontFamily:'Georgia,serif',fontSize:'28px',color:'#F0F0F0',marginBottom:'12px'}}>Your Simulation Is Ready</h2>
             <p style={{color:'rgba(240,240,240,0.5)',marginBottom:'40px',lineHeight:1.7,fontFamily:'Georgia,serif',fontStyle:'italic',maxWidth:'500px',margin:'0 auto 40px'}}>What you are about to see is an AI generated speculation based on everything you told us. It will be specific. It will be surprising. Some of it will feel true. Some will feel wrong. That is the nature of roads not taken.</p>
-            <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(74,158,255,0.15)',borderRadius:'8px',padding:'24px',marginBottom:'40px',textAlign:'left' as const}}>
+            <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(212,168,67,0.15)',borderRadius:'8px',padding:'24px',marginBottom:'40px',textAlign:'left' as const}}>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
                 {[['Name',profile.firstName],['Age',profile.age],['From',`${profile.grewUpCity}, ${profile.grewUpCountry}`],['Now',`${profile.liveCity}, ${profile.liveCountry}`],['Decision age',profile.decisionAge],['Alternate path',profile.alternativePath]].map(([l,v])=> v ? (
                   <div key={String(l)}>
@@ -663,7 +663,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
                 value={email}
                 onChange={e=>setEmail(e.target.value)}
                 placeholder="your@email.com"
-                style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(74,158,255,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'15px',borderRadius:'4px',outline:'none',fontFamily:'system-ui,sans-serif',boxSizing:'border-box' as const}}
+                style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'15px',borderRadius:'4px',outline:'none',fontFamily:'system-ui,sans-serif',boxSizing:'border-box' as const}}
               />
               <p style={{color:'rgba(240,240,240,0.3)',fontSize:'11px',marginTop:'8px'}}>
                 Optional. No spam. Unsubscribe anytime.
@@ -671,7 +671,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
             </div>
             <button
               onClick={onSubmit}
-              style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'20px 64px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
+              style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'20px 64px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
               onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'}
               onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
             >
@@ -686,7 +686,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
           <button onClick={prev} style={{background:'transparent',border:'1px solid rgba(255,255,255,0.15)',color:'rgba(240,240,240,0.6)',padding:'12px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}}>← Back</button>
         )}
         {formStep < totalSteps && (
-          <button onClick={next} style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'12px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',marginLeft:'auto',transition:'transform 0.3s'}} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>Continue →</button>
+          <button onClick={next} style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'12px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',marginLeft:'auto',transition:'transform 0.3s'}} onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'} onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>Continue →</button>
         )}
       </div>
     </div>
@@ -744,21 +744,21 @@ function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLD
       transform: `rotate(${pos.angle}deg)`,
       pointerEvents: 'none',
       zIndex: 20,
-      filter: 'drop-shadow(0 0 8px rgba(74,158,255,0.8))',
+      filter: 'drop-shadow(0 0 8px rgba(212,168,67,0.8)) drop-shadow(0 0 16px rgba(212,168,67,0.4))',
     }}>
       <svg width="48" height="48" viewBox="0 0 48 48">
-        <ellipse cx="16" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(74,158,255,0.85)" transform="rotate(-25 16 18)"/>
-        <ellipse cx="32" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(74,158,255,0.85)" transform="rotate(25 32 18)"/>
-        <ellipse cx="15" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(52,120,220,0.75)" transform="rotate(25 15 28)"/>
-        <ellipse cx="33" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(52,120,220,0.75)" transform="rotate(-25 33 28)"/>
+        <ellipse cx="16" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(212,168,67,0.85)" transform="rotate(-25 16 18)"/>
+        <ellipse cx="32" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(212,168,67,0.85)" transform="rotate(25 32 18)"/>
+        <ellipse cx="15" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(180,130,20,0.75)" transform="rotate(25 15 28)"/>
+        <ellipse cx="33" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(180,130,20,0.75)" transform="rotate(-25 33 28)"/>
         <ellipse cx="24" cy="22" rx="2.5" ry="9" fill="rgba(212,168,67,1)"/>
         <ellipse cx="24" cy="13" rx="2" ry="2" fill="rgba(212,168,67,1)"/>
         <path d="M24 11 Q20 5 17 3" stroke="rgba(212,168,67,0.9)" strokeWidth="1.2" fill="none"/>
         <path d="M24 11 Q28 5 31 3" stroke="rgba(212,168,67,0.9)" strokeWidth="1.2" fill="none"/>
         <circle cx="17" cy="3" r="1.5" fill="rgba(212,168,67,0.9)"/>
         <circle cx="31" cy="3" r="1.5" fill="rgba(212,168,67,0.9)"/>
-        <ellipse cx="16" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(120,200,255,0.4)" transform="rotate(-25 16 17)"/>
-        <ellipse cx="32" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(120,200,255,0.4)" transform="rotate(25 32 17)"/>
+        <ellipse cx="16" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(240,200,80,0.4)" transform="rotate(-25 16 17)"/>
+        <ellipse cx="32" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(240,200,80,0.4)" transform="rotate(25 32 17)"/>
       </svg>
     </div>
   )
@@ -769,11 +769,11 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
   const butterflyRef = useRef<HTMLDivElement>(null)
 
   const sectionStyle: React.CSSProperties = {
-    background:'rgba(255,255,255,0.02)', border:'1px solid rgba(74,158,255,0.1)',
+    background:'rgba(255,255,255,0.02)', border:'1px solid rgba(212,168,67,0.1)',
     borderRadius:'8px', padding:'32px', marginBottom:'24px', animation:'fadeUp 0.8s ease both',
   }
   const yearStyle: React.CSSProperties = {
-    color:'#4A9EFF', fontSize:'12px', letterSpacing:'3px',
+    color:'#D4A843', fontSize:'12px', letterSpacing:'3px',
     marginBottom:'8px', fontFamily:'system-ui,sans-serif',
   }
   const narrativeStyle: React.CSSProperties = {
@@ -783,13 +783,13 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
   return (
     <div style={{maxWidth:'800px',margin:'0 auto',padding:'40px 20px'}}>
-      <div style={{...sectionStyle,borderColor:'rgba(74,158,255,0.3)',animation:'glow 3s infinite',textAlign:'center' as const,marginBottom:'48px'}}>
+      <div style={{...sectionStyle,borderColor:'rgba(212,168,67,0.3)',animation:'glow 3s infinite',textAlign:'center' as const,marginBottom:'48px'}}>
         <div style={{fontFamily:'Georgia,serif',fontSize:'clamp(28px,5vw,48px)',fontWeight:700,color:'#F0F0F0',marginBottom:'8px'}}>{profile.firstName}</div>
         <div style={{color:'rgba(240,240,240,0.5)',fontSize:'14px',marginBottom:'12px'}}>{sim.overallJudgment && <em style={{fontFamily:'Georgia,serif',fontSize:'18px',color:'#D4A843'}}>"{sim.overallJudgment}"</em>}</div>
         <div style={{display:'flex',gap:'24px',justifyContent:'center',flexWrap:'wrap' as const,marginTop:'16px'}}>
           <div style={{textAlign:'center' as const}}><div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px'}}>REAL DECISION</div><div style={{color:'rgba(240,240,240,0.7)',fontSize:'13px',marginTop:'4px',maxWidth:'200px'}}>{profile.theDecision?.slice(0,60)}...</div></div>
           <div style={{width:'1px',background:'rgba(255,255,255,0.1)'}}/>
-          <div style={{textAlign:'center' as const}}><div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px'}}>ALTERNATE PATH</div><div style={{color:'#4A9EFF',fontSize:'13px',marginTop:'4px',maxWidth:'200px'}}>{profile.alternativePath}</div></div>
+          <div style={{textAlign:'center' as const}}><div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px'}}>ALTERNATE PATH</div><div style={{color:'#D4A843',fontSize:'13px',marginTop:'4px',maxWidth:'200px'}}>{profile.alternativePath}</div></div>
         </div>
       </div>
 
@@ -804,11 +804,11 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
       </div>
 
       {userTier === 'free' && (
-        <div style={{background:'rgba(13,17,23,0.95)',backdropFilter:'blur(12px)',border:'1px solid rgba(74,158,255,0.3)',borderRadius:'8px',padding:'48px',textAlign:'center' as const,marginBottom:'24px',animation:'glow 3s infinite'}}>
+        <div style={{background:'rgba(13,17,23,0.95)',backdropFilter:'blur(12px)',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'48px',textAlign:'center' as const,marginBottom:'24px',animation:'glow 3s infinite'}}>
           <div style={{fontSize:'32px',marginBottom:'16px'}}>🔮</div>
           <div style={{fontFamily:'Georgia,serif',fontSize:'24px',color:'#F0F0F0',marginBottom:'12px'}}>Your other life continues</div>
           <div style={{color:'rgba(240,240,240,0.6)',fontSize:'15px',lineHeight:1.7,marginBottom:'32px',maxWidth:'400px',margin:'0 auto 32px'}}>See how the next decade unfolded — your career, your relationships, where you ended up living, who you became.</div>
-          <a href="/pricing" style={{display:'inline-block',background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',textDecoration:'none',padding:'16px 40px',borderRadius:'4px',fontSize:'16px',fontFamily:'Georgia,serif',letterSpacing:'1px'}}>Unlock with Legend — $10/mo</a>
+          <a href="/pricing" style={{display:'inline-block',background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'white',textDecoration:'none',padding:'16px 40px',borderRadius:'4px',fontSize:'16px',fontFamily:'Georgia,serif',letterSpacing:'1px'}}>Unlock with Legend — $10/mo</a>
           <div style={{marginTop:'16px',color:'rgba(240,240,240,0.4)',fontSize:'13px'}}>Full life simulation to old age with <a href="/pricing" style={{color:'#D4A843'}}>Immortal — $20/mo</a></div>
         </div>
       )}
@@ -850,18 +850,18 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
       {(userTier === 'legend' || userTier === 'immortal') && (
         <>
           <div style={{...sectionStyle,animationDelay:'0.5s'}}>
-            <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>SIDE BY SIDE — YOUR TWO LIVES</div>
+            <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>SIDE BY SIDE — YOUR TWO LIVES</div>
             <div style={{display:'grid',gridTemplateColumns:window.innerWidth < 600 ? '1fr' : '1fr 1fr',gap:'0'}}>
-              <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(74,158,255,0.2)'}}>YOUR REAL LIFE</div>
-              <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(74,158,255,0.2)',borderLeft:'1px solid rgba(74,158,255,0.2)'}}>YOUR OTHER LIFE</div>
+              <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(212,168,67,0.2)'}}>YOUR REAL LIFE</div>
+              <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'2px',padding:'8px 16px',borderBottom:'1px solid rgba(212,168,67,0.2)',borderLeft:'1px solid rgba(212,168,67,0.2)'}}>YOUR OTHER LIFE</div>
               {sim.sideBySide?.map((row: any, i: number) => (
                 <>
                   <div key={`r${i}`} style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.05)',animation:`slideRight 0.5s ease ${i*0.15}s both`}}>
                     <div style={{color:'rgba(240,240,240,0.4)',fontSize:'10px',letterSpacing:'2px',marginBottom:'4px'}}>AGE {row.age} · {row.category}</div>
                     <div style={{fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.6,color:'rgba(240,240,240,0.7)'}}>{row.realLife}</div>
                   </div>
-                  <div key={`a${i}`} style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.05)',borderLeft:'1px solid rgba(74,158,255,0.2)',animation:`slideLeft 0.5s ease ${i*0.15}s both`}}>
-                    <div style={{color:'#4A9EFF',fontSize:'10px',letterSpacing:'2px',marginBottom:'4px'}}>AGE {row.age} · {row.category}</div>
+                  <div key={`a${i}`} style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.05)',borderLeft:'1px solid rgba(212,168,67,0.2)',animation:`slideLeft 0.5s ease ${i*0.15}s both`}}>
+                    <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'2px',marginBottom:'4px'}}>AGE {row.age} · {row.category}</div>
                     <div style={{fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.6,color:'rgba(240,240,240,0.88)'}}>{row.alternateLife}</div>
                   </div>
                 </>
@@ -873,7 +873,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             <FlyingButterfly containerRef={butterflyRef} />
             <div style={{textAlign:'center' as const,marginBottom:'40px'}}>
               {'THE BUTTERFLY EFFECT'.split('').map((l,i) => (
-                <span key={i} style={{display:'inline-block',color:'#4A9EFF',fontSize:'13px',letterSpacing:'6px',fontWeight:700,animation:`letterIn 0.5s ease ${i*0.04}s both`}}>{l===' '?'\u00A0':l}</span>
+                <span key={i} style={{display:'inline-block',color:'#D4A843',fontSize:'13px',letterSpacing:'6px',fontWeight:700,animation:`letterIn 0.5s ease ${i*0.04}s both`}}>{l===' '?'\u00A0':l}</span>
               ))}
             </div>
             <div style={{position:'relative',maxWidth:'720px',margin:'0 auto'}}>
@@ -885,28 +885,28 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                     <div style={{
                       width:'45%',
                       background:'rgba(15,22,35,0.85)',
-                      borderLeft:'3px solid #4A9EFF',
+                      borderLeft:'3px solid #D4A843',
                       borderRadius:'4px',
                       padding:'18px 20px',
                       boxShadow:'0 4px 24px rgba(0,0,0,0.4)',
                       animation:`${isLeft?'slideRight':'slideLeft'} 0.6s ease ${i*0.3}s both`,
                     }}>
-                      <div style={{color:'#4A9EFF',fontSize:'10px',letterSpacing:'3px',marginBottom:'8px',fontWeight:700}}>RIPPLE {String(i+1).padStart(2,'0')}</div>
+                      <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'3px',marginBottom:'8px',fontWeight:700}}>RIPPLE {String(i+1).padStart(2,'0')}</div>
                       <div style={{fontFamily:'Georgia,serif',fontSize:'15px',lineHeight:1.6,color:'rgba(240,240,240,0.9)'}}>{item}</div>
                     </div>
-                    <div style={{position:'absolute',left:'50%',top:'50%',width:'14px',height:'14px',marginLeft:'-7px',marginTop:'-7px',borderRadius:'50%',background:'#4A9EFF',boxShadow:'0 0 16px rgba(74,158,255,0.8)',animation:`glow 2s infinite, fadeUp 0.5s ease ${i*0.3+0.2}s both`,zIndex:2}}/>
+                    <div style={{position:'absolute',left:'50%',top:'50%',width:'14px',height:'14px',marginLeft:'-7px',marginTop:'-7px',borderRadius:'50%',background:'#D4A843',boxShadow:'0 0 16px rgba(212,168,67,0.8)',animation:`glow 2s infinite, fadeUp 0.5s ease ${i*0.3+0.2}s both`,zIndex:2}}/>
                     {!isLast && (
                       <svg style={{position:'absolute',left:'50%',top:'100%',width:'120px',height:'60px',marginLeft:'-60px',overflow:'visible',pointerEvents:'none'}} viewBox="0 0 120 60">
                         <path
                           d={isLeft?`M60 0 Q 90 30 60 60`:`M60 0 Q 30 30 60 60`}
                           fill="none"
-                          stroke="rgba(74,158,255,0.4)"
+                          stroke="rgba(212,168,67,0.4)"
                           strokeWidth="2"
                           strokeDasharray="200"
                           strokeDashoffset="200"
                           style={{animation:`drawLine 1s ease ${i*0.3+0.4}s forwards`}}
                         />
-                        <circle r="4" fill="#4A9EFF" style={{filter:'drop-shadow(0 0 6px #4A9EFF)',animation:`glow 1.5s infinite, fadeUp 0.3s ease ${i*0.3+1.2}s both`}}>
+                        <circle r="4" fill="#D4A843" style={{filter:'drop-shadow(0 0 6px #D4A843)',animation:`glow 1.5s infinite, fadeUp 0.3s ease ${i*0.3+1.2}s both`}}>
                           <animateMotion dur="2s" repeatCount="indefinite" begin={`${i*0.3+1.2}s`} path={isLeft?`M60 0 Q 90 30 60 60`:`M60 0 Q 30 30 60 60`}/>
                         </circle>
                       </svg>
@@ -919,17 +919,17 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
 
           <div style={{...sectionStyle,animationDelay:'0.7s'}}>
-            <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>5 BIGGEST DIFFERENCES</div>
+            <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>5 BIGGEST DIFFERENCES</div>
             {sim.keyDifferences?.map((diff: string, i: number) => (
               <div key={i} style={{display:'flex',gap:'16px',marginBottom:'16px',animation:`slideRight 0.5s ease ${i*0.15}s both`}}>
-                <div style={{color:'#4A9EFF',fontFamily:'Georgia,serif',fontSize:'20px',minWidth:'24px'}}>{i+1}.</div>
+                <div style={{color:'#D4A843',fontFamily:'Georgia,serif',fontSize:'20px',minWidth:'24px'}}>{i+1}.</div>
                 <div style={{fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.6,color:'rgba(240,240,240,0.85)'}}>{diff}</div>
               </div>
             ))}
           </div>
 
           <div style={{...sectionStyle,animationDelay:'0.8s',textAlign:'center' as const}}>
-            <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>REGRET SCORE</div>
+            <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>REGRET SCORE</div>
             <svg width="130" height="130" style={{margin:'0 auto 16px',display:'block'}}>
               <circle cx="65" cy="65" r="54" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8"/>
               <circle cx="65" cy="65" r="54" fill="none" stroke={regretColor} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDash} transform="rotate(-90 65 65)" style={{transition:'stroke-dashoffset 0.1s'}}/>
@@ -944,15 +944,15 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
       {userTier === 'immortal' && (
         <>
           {(userTier === 'legend' || userTier === 'immortal') && (
-            <div style={{...sectionStyle,border:'1px solid rgba(74,158,255,0.4)',animation:'glow 3s infinite',animationDelay:'0.9s'}}>
-              <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'8px',textAlign:'center' as const}}>A MESSAGE FROM THE OTHER YOU</div>
+            <div style={{...sectionStyle,border:'1px solid rgba(212,168,67,0.4)',animation:'glow 3s infinite',animationDelay:'0.9s'}}>
+              <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'8px',textAlign:'center' as const}}>A MESSAGE FROM THE OTHER YOU</div>
               <div style={{fontFamily:'Georgia,serif',fontSize:'18px',lineHeight:1.9,color:'rgba(240,240,240,0.92)',fontStyle:'italic',textAlign:'center' as const,padding:'16px 0'}}>
                 {words.slice(0, visibleWords).map((word: string, i: number) => (
                   <span key={i} style={{display:'inline-block',marginRight:'4px',animation:'wordFade 0.3s ease both'}}>{word}</span>
                 ))}
               </div>
               <div style={{textAlign:'center' as const,marginTop:'24px'}}>
-                <button onClick={() => navigator.clipboard?.writeText(sim.messageFromOtherSelf)} style={{background:'transparent',border:'1px solid rgba(74,158,255,0.3)',color:'#4A9EFF',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px',letterSpacing:'1px'}}>COPY THIS MESSAGE</button>
+                <button onClick={() => navigator.clipboard?.writeText(sim.messageFromOtherSelf)} style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'#D4A843',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px',letterSpacing:'1px'}}>COPY THIS MESSAGE</button>
               </div>
             </div>
           )}
@@ -961,15 +961,15 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             <div style={{...sectionStyle,textAlign:'center' as const,borderColor:'rgba(212,168,67,0.3)'}}>
               <div style={{fontFamily:'Georgia,serif',fontSize:'22px',color:'#F0F0F0',marginBottom:'12px'}}>The most profound years are ahead</div>
               <div style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.7,marginBottom:'24px',maxWidth:'400px',margin:'0 auto 24px'}}>Your later life, your legacy, and a message from the other version of yourself.</div>
-              <a href="/pricing" style={{display:'inline-block',background:'linear-gradient(135deg,#6b4a1a,#D4A843)',color:'#0D1117',textDecoration:'none',padding:'14px 32px',borderRadius:'4px',fontSize:'15px',fontFamily:'Georgia,serif'}}>Upgrade to Immortal — $20/mo</a>
+              <a href="/pricing" style={{display:'inline-block',background:'linear-gradient(135deg,#6b4a1a,#D4A843)',color:'#0A0A0C',textDecoration:'none',padding:'14px 32px',borderRadius:'4px',fontSize:'15px',fontFamily:'Georgia,serif'}}>Upgrade to Immortal — $20/mo</a>
             </div>
           )}
         </>
       )}
 
       {userTier === 'immortal' && (
-        <div style={{background:'linear-gradient(135deg,rgba(13,17,23,0.98),rgba(10,15,26,0.98))',border:'1px solid rgba(74,158,255,0.3)',borderRadius:'8px',padding:'40px',textAlign:'center' as const,marginBottom:'24px'}}>
-          <div style={{fontSize:'11px',letterSpacing:'4px',color:'#4A9EFF',marginBottom:'12px'}}>IMMORTAL EXCLUSIVE</div>
+        <div style={{background:'linear-gradient(135deg,rgba(13,17,23,0.98),rgba(10,15,26,0.98))',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'40px',textAlign:'center' as const,marginBottom:'24px'}}>
+          <div style={{fontSize:'11px',letterSpacing:'4px',color:'#D4A843',marginBottom:'12px'}}>IMMORTAL EXCLUSIVE</div>
           <div style={{fontFamily:'Georgia,serif',fontSize:'26px',color:'#F0F0F0',marginBottom:'8px'}}>Your Documentary</div>
           <div style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.7,marginBottom:'32px',maxWidth:'500px',margin:'0 auto 32px',fontFamily:'Georgia,serif',fontStyle:'italic'}}>
             A 1 minute AI generated documentary about your alternate life. Your face. Your story. Your other world.
@@ -980,7 +980,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
               {!userPhoto ? (
                 <div>
                   <div style={{color:'rgba(240,240,240,0.5)',fontSize:'13px',marginBottom:'20px'}}>Upload a photo of yourself so the documentary features you</div>
-                  <label style={{display:'inline-block',background:'rgba(74,158,255,0.1)',border:'1px solid rgba(74,158,255,0.3)',color:'#4A9EFF',padding:'14px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px'}}>
+                  <label style={{display:'inline-block',background:'rgba(212,168,67,0.1)',border:'1px solid rgba(212,168,67,0.3)',color:'#D4A843',padding:'14px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px'}}>
                     UPLOAD YOUR PHOTO
                     <input type="file" accept="image/*" onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setUserPhoto(r.result as string);r.readAsDataURL(f)}} style={{display:'none'}}/>
                   </label>
@@ -988,11 +988,11 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
               ) : (
                 <div>
                   <div style={{marginBottom:'20px',display:'flex',flexDirection:'column' as const,alignItems:'center',gap:'12px'}}>
-                    <img src={userPhoto} style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover' as const,border:'2px solid #4A9EFF'}}/>
+                    <img src={userPhoto} style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover' as const,border:'2px solid #D4A843'}}/>
                     <div style={{color:'rgba(240,240,240,0.5)',fontSize:'12px',letterSpacing:'2px'}}>PHOTO READY</div>
                     <button onClick={()=>setUserPhoto('')} style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'12px',textDecoration:'underline'}}>Use a different photo</button>
                   </div>
-                  <button onClick={generateDocumentary} style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'17px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',width:'100%',maxWidth:'400px'}}>
+                  <button onClick={generateDocumentary} style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'18px 56px',fontSize:'17px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',width:'100%',maxWidth:'400px'}}>
                     GENERATE MY DOCUMENTARY
                   </button>
                 </div>
@@ -1002,8 +1002,8 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
           {docState === 'generating' && (
             <div>
-              <div style={{width:'52px',height:'52px',border:'2px solid rgba(74,158,255,0.3)',borderTopColor:'#4A9EFF',borderRadius:'50%',animation:'spin 1s linear infinite',margin:'0 auto 20px'}}/>
-              <div style={{color:'#4A9EFF',fontSize:'13px',letterSpacing:'3px',marginBottom:'8px'}}>CRAFTING YOUR STORY...</div>
+              <div style={{width:'52px',height:'52px',border:'2px solid rgba(212,168,67,0.3)',borderTopColor:'#D4A843',borderRadius:'50%',animation:'spin 1s linear infinite',margin:'0 auto 20px'}}/>
+              <div style={{color:'#D4A843',fontSize:'13px',letterSpacing:'3px',marginBottom:'8px'}}>CRAFTING YOUR STORY...</div>
               <div style={{color:'rgba(240,240,240,0.4)',fontSize:'12px'}}>This takes 2 to 3 minutes. Do not close this page.</div>
             </div>
           )}
@@ -1022,7 +1022,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                   <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>YOUR SCENES</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'}}>
                     {videoUrls.map((url: string, i: number) => (
-                      <video key={i} src={url} controls style={{width:'100%',borderRadius:'4px',border:'1px solid rgba(74,158,255,0.2)'}}/>
+                      <video key={i} src={url} controls style={{width:'100%',borderRadius:'4px',border:'1px solid rgba(212,168,67,0.2)'}}/>
                     ))}
                   </div>
                 </div>
@@ -1033,15 +1033,15 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
           {docState === 'error' && (
             <div>
               <div style={{color:'#ff6b6b',fontSize:'13px',marginBottom:'16px'}}>Generation failed. Please try again.</div>
-              <button onClick={generateDocumentary} style={{background:'transparent',border:'1px solid #4A9EFF',color:'#4A9EFF',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>RETRY</button>
+              <button onClick={generateDocumentary} style={{background:'transparent',border:'1px solid #D4A843',color:'#D4A843',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>RETRY</button>
             </div>
           )}
         </div>
       )}
 
       {sim && (
-        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(74,158,255,0.15)',borderRadius:'8px',padding:'28px',marginBottom:'24px',textAlign:'center' as const}}>
-          <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'4px',marginBottom:'12px'}}>SHARE YOUR PARALLEL LIFE</div>
+        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(212,168,67,0.15)',borderRadius:'8px',padding:'28px',marginBottom:'24px',textAlign:'center' as const}}>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'12px'}}>SHARE YOUR PARALLEL LIFE</div>
           <div style={{fontFamily:'Georgia,serif',fontSize:'16px',color:'rgba(240,240,240,0.7)',marginBottom:'8px',fontStyle:'italic',maxWidth:'500px',margin:'0 auto 20px',lineHeight:1.6}}>
             "{sim.overallJudgment}"
           </div>
@@ -1056,7 +1056,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             </button>
             <button
               onClick={copyShareLink}
-              style={{background:copied?'rgba(39,174,96,0.2)':'rgba(74,158,255,0.1)',color:copied?'#27AE60':'#4A9EFF',border:`1px solid ${copied?'#27AE60':'rgba(74,158,255,0.3)'}`,padding:'12px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',fontWeight:600,transition:'all 0.2s'}}
+              style={{background:copied?'rgba(39,174,96,0.2)':'rgba(212,168,67,0.1)',color:copied?'#27AE60':'#D4A843',border:`1px solid ${copied?'#27AE60':'rgba(212,168,67,0.3)'}`,padding:'12px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',fontWeight:600,transition:'all 0.2s'}}
             >
               {copied ? '✓ Copied' : '🔗 Copy Link'}
             </button>
@@ -1065,7 +1065,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
       )}
 
       <div style={{display:'flex',gap:'12px',justifyContent:'center',marginTop:'48px',flexWrap:'wrap' as const}}>
-        <button onClick={onReset} style={{background:'transparent',border:'1px solid rgba(74,158,255,0.3)',color:'#4A9EFF',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(74,158,255,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>EXPLORE ANOTHER DECISION</button>
+        <button onClick={onReset} style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'#D4A843',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(212,168,67,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>EXPLORE ANOTHER DECISION</button>
         <button onClick={onNewProfile} style={{background:'transparent',border:'1px solid rgba(255,255,255,0.15)',color:'rgba(240,240,240,0.6)',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'} onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.15)'}>BUILD A NEW PROFILE</button>
       </div>
     </div>
@@ -1074,12 +1074,12 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
 function TurningPoint({ tp, choice, setChoice, number }: any) {
   return (
-    <div style={{background:'rgba(74,158,255,0.03)',border:'1px solid rgba(74,158,255,0.25)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
-      <div style={{color:'#4A9EFF',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>TURNING POINT {number}</div>
+    <div style={{background:'rgba(212,168,67,0.03)',border:'1px solid rgba(212,168,67,0.25)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
+      <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>TURNING POINT {number}</div>
       <p style={{fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.7,color:'rgba(240,240,240,0.85)',marginBottom:'20px'}}>{tp?.situation}</p>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
         {['A','B'].map(opt => (
-          <button key={opt} onClick={() => setChoice(opt)} style={{background:choice===opt?'rgba(74,158,255,0.2)':'rgba(255,255,255,0.03)',border:`1px solid ${choice===opt?'#4A9EFF':'rgba(255,255,255,0.1)'}`,color:choice===opt?'#4A9EFF':'rgba(240,240,240,0.7)',padding:'16px',cursor:'pointer',borderRadius:'4px',textAlign:'left' as const,fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.5,transition:'all 0.2s'}}>
+          <button key={opt} onClick={() => setChoice(opt)} style={{background:choice===opt?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.03)',border:`1px solid ${choice===opt?'#D4A843':'rgba(255,255,255,0.1)'}`,color:choice===opt?'#D4A843':'rgba(240,240,240,0.7)',padding:'16px',cursor:'pointer',borderRadius:'4px',textAlign:'left' as const,fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.5,transition:'all 0.2s'}}>
             {opt === 'A' ? tp?.choiceA : tp?.choiceB}
           </button>
         ))}

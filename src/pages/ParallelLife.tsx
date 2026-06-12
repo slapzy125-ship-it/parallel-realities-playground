@@ -8,12 +8,12 @@ import { useSubscription } from "@/hooks/useSubscription";
 // Self-contained on purpose. No game UI. No stats. No choices.
 // ─────────────────────────────────────────────────────────────────────
 
-const BG = "#0D1117";
+const BG = "#0A0A0C";
 const TEXT = "#F0F0F0";
-const MUTED = "#8B95A7";
-const ACCENT = "#4A9EFF";
-const CARD = "#161B22";
-const BORDER = "#222936";
+const MUTED = "#8A7A5A";
+const ACCENT = "#D4A843";
+const CARD = "#16141A";
+const BORDER = "#2A281E";
 const SERIF = `'Cormorant Garamond', 'Source Serif Pro', Georgia, 'Times New Roman', serif`;
 const SANS = `-apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif`;
 
@@ -767,7 +767,7 @@ function Narrative({ text }: { text: string }) {
     <div>
       {quote && (
         <div style={{
-          background: "#13202F", borderLeft: `2px solid ${ACCENT}`,
+          background: "#141208", borderLeft: `2px solid ${ACCENT}`,
           padding: "14px 20px", marginBottom: 20, borderRadius: 2,
           fontFamily: SERIF, fontSize: 22, fontStyle: "italic", color: TEXT, lineHeight: 1.4,
         }}>
@@ -823,7 +823,7 @@ function MessageFromOtherSelf({ firstName, text }: { firstName: string; text: st
         </div>
       </div>
       <div style={{
-        background: "linear-gradient(180deg, #131D2E, #0F1620)",
+        background: "linear-gradient(180deg, #1A1810, #0A0A0C)",
         border: `1px solid ${ACCENT}33`,
         padding: 40, borderRadius: 4, marginTop: 8,
       }}>
@@ -872,7 +872,7 @@ function LegendPaywall() {
 }
 
 const paywallStyle: React.CSSProperties = {
-  background: "linear-gradient(180deg, #131D2E, #0F1620)",
+  background: "linear-gradient(180deg, #1A1810, #0A0A0C)",
   border: `1px solid ${ACCENT}55`,
   borderRadius: 4,
   padding: 40,
@@ -922,7 +922,7 @@ async function generateShareCard(name: string, decision: string, alternative: st
   if (!ctx) return null;
 
   // bg
-  ctx.fillStyle = "#0D1117";
+  ctx.fillStyle = "#0A0A0C";
   ctx.fillRect(0, 0, 1200, 630);
 
   // accent bar
