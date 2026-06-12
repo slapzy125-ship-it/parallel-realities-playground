@@ -30,6 +30,7 @@ function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   // If already signed in, send home
   useEffect(() => {
@@ -37,6 +38,29 @@ function Auth() {
       if (data.session) router.navigate({ to: "/" });
     });
   }, [router]);
+
+  // When Remember Me is off, move the supabase auth token to sessionStorage so
+  // it disappears when the browser/tab closes. A listener in __root.tsx
+  // restores it across in-tab reloads.
+  const applyRememberMePreference = () => {
+    if (typeof window === "undefined") return;
+    if (rememberMe) {
+      sessionStorage.removeItem("revenio_session_only");
+    } else {
+      sessionStorage.setItem("revenio_session_only", "1");
+      // Move any current sb-*-auth-token entries out of localStorage.
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("sb-") && k.endsWith("-auth-token")) keys.push(k);
+      }
+      keys.forEach((k) => {
+        const v = localStorage.getItem(k);
+        if (v) sessionStorage.setItem(k, v);
+        localStorage.removeItem(k);
+      });
+    }
+  };
 
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +75,12 @@ function Auth() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        applyRememberMePreference();
         setMessage("Check your email to confirm your account, then sign in.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        applyRememberMePreference();
         router.navigate({ to: "/" });
       }
     } catch (err) {
