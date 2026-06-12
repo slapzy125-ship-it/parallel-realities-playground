@@ -230,11 +230,35 @@ What I most want to know: ${profile.mostWantToKnow}`
     }
   }
 
+  const pollVideoTask = async (taskId: string) => {
+    for (let attempt = 0; attempt < 40; attempt++) {
+      await new Promise(r => setTimeout(r, 5000))
+      try {
+        const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskId })
+        })
+        const pollData = await pollRes.json()
+        console.log('Poll attempt', attempt, 'status:', pollData.status)
+        if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) {
+          setVideoUrls(prev => [...prev, pollData.output[0]])
+          return
+        }
+        if (pollData.status === 'FAILED') {
+          console.log('Task failed:', taskId)
+          return
+        }
+      } catch(e) {
+        console.error('Poll error:', e)
+      }
+    }
+  }
+
   const generateDocumentary = async () => {
     if (!sim) return
     setDocState('generating')
     try {
-      const narration = `${sim.immediateAftermath} ${sim.firstYear} ${sim.formativeYears}`
       const scenes = [
         { visualPrompt: sim.immediateAftermath },
         { visualPrompt: sim.firstYear },
@@ -243,52 +267,22 @@ What I most want to know: ${profile.mostWantToKnow}`
       const docRes = await fetch('https://parallel-realities-playground.vercel.app/api/generate-documentary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ narrationText: narration, personName: profile.firstName, scenes, userPhotoBase64: userPhoto.split(',')[1], userPhotoMediaType: userPhoto.split(';')[0].split(':')[1] })
+        body: JSON.stringify({
+          scenes,
+          userPhotoBase64: userPhoto ? userPhoto.split(',')[1] : undefined,
+          userPhotoMediaType: userPhoto ? userPhoto.split(';')[0].split(':')[1] : undefined
+        })
       })
       const data = await docRes.json()
-      if (!docRes.ok) throw new Error(data.error || 'Documentary generation failed')
-      setDocAudio(data.audioBase64)
-      setDocVideoTaskIds(data.videoTaskIds || [])
-      if (data.audioBase64) {
-        const binaryString = atob(data.audioBase64)
-        const bytes = new Uint8Array(binaryString.length)
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i)
-        }
-        const blob = new Blob([bytes], { type: 'audio/mpeg' })
-        const url = URL.createObjectURL(blob)
-        setAudioUrl(url)
-      }
-
-      if (data.videoTaskIds && data.videoTaskIds.length > 0) {
-        const urls: string[] = []
-        for (const taskId of data.videoTaskIds) {
-          let videoUrl = ''
-          for (let attempt = 0; attempt < 40; attempt++) {
-            await new Promise(r => setTimeout(r, 5000))
-            try {
-              const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ taskId })
-              })
-              const pollData = await pollRes.json()
-              console.log('Poll status:', pollData.status)
-              if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) {
-                videoUrl = pollData.output[0]
-                break
-              }
-              if (pollData.status === 'FAILED') break
-            } catch(e) {
-              console.error('Poll error:', e)
-            }
-          }
-          if (videoUrl) urls.push(videoUrl)
-        }
-        if (urls.length > 0) setVideoUrls(urls)
-      }
+      if (!docRes.ok) throw new Error(data.error || 'Failed')
 
       setDocState('ready')
+
+      if (data.videoTaskIds && data.videoTaskIds.length > 0) {
+        for (const taskId of data.videoTaskIds) {
+          pollVideoTask(taskId)
+        }
+      }
     } catch {
       setDocState('error')
     }
