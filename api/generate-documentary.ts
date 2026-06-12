@@ -14,7 +14,7 @@ export default async function handler(req: any, res: any) {
   try {
     const videoTaskIds: string[] = []
     for (const scene of scenes.slice(0, 3)) {
-      const runwayRes = await fetch('https://api.runwayml.com/v1/image_to_video', {
+      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
