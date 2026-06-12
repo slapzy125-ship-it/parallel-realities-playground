@@ -156,6 +156,16 @@ function Auth() {
             {error && <p className="text-xs text-red-400 border border-red-500/30 bg-red-500/10 p-3">{error}</p>}
             {message && <p className="text-xs text-[var(--gold)] border border-[var(--gold)]/30 bg-[var(--gold)]/5 p-3">{message}</p>}
 
+            <label className="flex items-center gap-3 text-[0.65rem] tracking-[0.2em] uppercase text-muted-foreground cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 accent-[var(--gold)] cursor-pointer"
+              />
+              Remember me
+            </label>
+
             <button
               type="submit"
               disabled={loading}
