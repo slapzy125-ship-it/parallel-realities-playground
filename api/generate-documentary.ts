@@ -11,8 +11,15 @@ export default async function handler(req: any, res: any) {
     headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVEN_KEY! },
     body: JSON.stringify({ text: narrationText, model_id: 'eleven_monolingual_v1', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
   })
+
+  if (!elevenRes.ok) {
+    const errorText = await elevenRes.text()
+    console.log('ElevenLabs error:', elevenRes.status, errorText)
+    return res.status(500).json({ error: 'ElevenLabs failed', status: elevenRes.status, details: errorText.slice(0, 300) })
+  }
+
   const audioBuffer = await elevenRes.arrayBuffer()
-  const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+  const audioBase64 = Buffer.from(audioBuffer).toString('base64')
   const videoTaskIds: string[] = []
   for (const scene of scenes) {
     const body: any = { model: 'gen4_turbo', promptText: scene.visualPrompt, duration: 10, ratio: '1280:720' }
