@@ -72,6 +72,10 @@ export default function ParallelLife2() {
   const [loadingLines, setLoadingLines] = useState<string[]>([])
   const [visibleWords, setVisibleWords] = useState(0)
   const [regretAnimated, setRegretAnimated] = useState(0)
+  const [userPhoto, setUserPhoto] = useState<string>('')
+  const [docAudio, setDocAudio] = useState<string>('')
+  const [docVideoTaskIds, setDocVideoTaskIds] = useState<string[]>([])
+  const [docVideos, setDocVideos] = useState<string[]>([])
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
@@ -221,6 +225,42 @@ What I most want to know: ${profile.mostWantToKnow}`
       setStep('form')
       alert('Simulation failed. Please try again.')
     }
+  }
+
+  const generateDocumentary = async () => {
+    if (!sim) return
+    const narration = `${sim.immediateAftermath} ${sim.firstYear} ${sim.formativeYears}`
+    const scenes = [
+      { visualPrompt: sim.immediateAftermath },
+      { visualPrompt: sim.firstYear },
+      { visualPrompt: sim.formativeYears },
+    ]
+    const docRes = await fetch('https://parallel-realities-playground.vercel.app/api/generate-documentary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ narrationText: narration, personName: profile.firstName, scenes, userPhotoBase64: userPhoto.split(',')[1], userPhotoMediaType: userPhoto.split(';')[0].split(':')[1] })
+    })
+    const data = await docRes.json()
+    if (!docRes.ok) throw new Error(data.error || 'Documentary generation failed')
+    setDocAudio(data.audioBase64)
+    setDocVideoTaskIds(data.videoTaskIds || [])
+
+    const pollInterval = setInterval(async () => {
+      const completed: string[] = []
+      for (const taskId of data.videoTaskIds || []) {
+        const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskId })
+        })
+        const pollData = await pollRes.json()
+        if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) completed.push(pollData.output[0])
+      }
+      if (completed.length === (data.videoTaskIds || []).length) {
+        setDocVideos(completed)
+        clearInterval(pollInterval)
+      }
+    }, 5000)
   }
 
   const regretColor = regretAnimated < 40 ? '#4A9EFF' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
