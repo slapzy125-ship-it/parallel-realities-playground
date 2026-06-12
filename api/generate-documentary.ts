@@ -14,23 +14,19 @@ export default async function handler(req: any, res: any) {
   try {
     const videoTaskIds: string[] = []
     for (const scene of scenes.slice(0, 3)) {
-      const body: any = {
-        model: 'gen4_turbo',
-        promptText: scene.visualPrompt,
-        duration: 10,
-        ratio: '1280:720',
-      }
-      if (userPhotoBase64 && userPhotoMediaType) {
-        body.promptImage = `data:${userPhotoMediaType};base64,${userPhotoBase64}`
-      }
-      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+      const runwayRes = await fetch('https://api.runwayml.com/v1/image_to_video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${RUNWAY_KEY}`,
           'X-Runway-Version': '2024-11-06',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          model: 'gen4_turbo',
+          ratio: '1280:720',
+          duration: 5,
+          promptText: scene.visualPrompt,
+        })
       })
       const runwayText = await runwayRes.text()
       console.log('Runway status:', runwayRes.status)
