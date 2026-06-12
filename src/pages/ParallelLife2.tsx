@@ -676,19 +676,52 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
           </div>
 
           <div style={{...sectionStyle,animationDelay:'0.6s'}}>
-            <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>THE CHAIN REACTION</div>
-            <div style={{position:'relative',paddingLeft:'24px'}}>
-              <svg style={{position:'absolute',left:0,top:0,height:'100%',width:'20px'}} viewBox="0 0 20 400" preserveAspectRatio="none">
-                <line x1="10" y1="0" x2="10" y2="400" stroke="rgba(74,158,255,0.3)" strokeWidth="1" strokeDasharray="1000" strokeDashoffset="1000" style={{animation:'drawLine 2s ease 0.5s forwards'}}/>
-              </svg>
-              {sim.butterflyChain?.map((item: string, i: number) => (
-                <div key={i} style={{display:'flex',gap:'12px',marginBottom:'20px',animation:`slideRight 0.5s ease ${i*0.2}s both`}}>
-                  <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#4A9EFF',flexShrink:0,marginTop:'6px'}}/>
-                  <div style={{fontFamily:'Georgia,serif',fontSize:'15px',lineHeight:1.6,color:'rgba(240,240,240,0.8)'}}>{item}</div>
-                </div>
+            <div style={{textAlign:'center' as const,marginBottom:'40px'}}>
+              {'THE BUTTERFLY EFFECT'.split('').map((l,i) => (
+                <span key={i} style={{display:'inline-block',color:'#4A9EFF',fontSize:'13px',letterSpacing:'6px',fontWeight:700,animation:`letterIn 0.5s ease ${i*0.04}s both`}}>{l===' '?'\u00A0':l}</span>
               ))}
             </div>
+            <div style={{position:'relative',maxWidth:'720px',margin:'0 auto'}}>
+              {sim.butterflyChain?.map((item: string, i: number) => {
+                const isLeft = i % 2 === 0
+                const isLast = i === (sim.butterflyChain.length - 1)
+                return (
+                  <div key={i} style={{position:'relative',display:'flex',justifyContent:isLeft?'flex-start':'flex-end',marginBottom:'56px'}}>
+                    <div style={{
+                      width:'45%',
+                      background:'rgba(15,22,35,0.85)',
+                      borderLeft:'3px solid #4A9EFF',
+                      borderRadius:'4px',
+                      padding:'18px 20px',
+                      boxShadow:'0 4px 24px rgba(0,0,0,0.4)',
+                      animation:`${isLeft?'slideRight':'slideLeft'} 0.6s ease ${i*0.3}s both`,
+                    }}>
+                      <div style={{color:'#4A9EFF',fontSize:'10px',letterSpacing:'3px',marginBottom:'8px',fontWeight:700}}>RIPPLE {String(i+1).padStart(2,'0')}</div>
+                      <div style={{fontFamily:'Georgia,serif',fontSize:'15px',lineHeight:1.6,color:'rgba(240,240,240,0.9)'}}>{item}</div>
+                    </div>
+                    <div style={{position:'absolute',left:'50%',top:'50%',width:'14px',height:'14px',marginLeft:'-7px',marginTop:'-7px',borderRadius:'50%',background:'#4A9EFF',boxShadow:'0 0 16px rgba(74,158,255,0.8)',animation:`glow 2s infinite, fadeUp 0.5s ease ${i*0.3+0.2}s both`,zIndex:2}}/>
+                    {!isLast && (
+                      <svg style={{position:'absolute',left:'50%',top:'100%',width:'120px',height:'60px',marginLeft:'-60px',overflow:'visible',pointerEvents:'none'}} viewBox="0 0 120 60">
+                        <path
+                          d={isLeft?`M60 0 Q 90 30 60 60`:`M60 0 Q 30 30 60 60`}
+                          fill="none"
+                          stroke="rgba(74,158,255,0.4)"
+                          strokeWidth="2"
+                          strokeDasharray="200"
+                          strokeDashoffset="200"
+                          style={{animation:`drawLine 1s ease ${i*0.3+0.4}s forwards`}}
+                        />
+                        <circle r="4" fill="#4A9EFF" style={{filter:'drop-shadow(0 0 6px #4A9EFF)',animation:`glow 1.5s infinite, fadeUp 0.3s ease ${i*0.3+1.2}s both`}}>
+                          <animateMotion dur="2s" repeatCount="indefinite" begin={`${i*0.3+1.2}s`} path={isLeft?`M60 0 Q 90 30 60 60`:`M60 0 Q 30 30 60 60`}/>
+                        </circle>
+                      </svg>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
+
 
           <div style={{...sectionStyle,animationDelay:'0.7s'}}>
             <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'3px',marginBottom:'24px'}}>5 BIGGEST DIFFERENCES</div>
