@@ -695,51 +695,70 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
 
 function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
   const [pos, setPos] = useState({ x: 0, y: 0, angle: 0 })
+  const [flap, setFlap] = useState(1)
   const frameRef = useRef<number>()
   const progressRef = useRef(0)
+  const startTimeRef = useRef(Date.now())
 
   useEffect(() => {
     const animate = () => {
-      progressRef.current += 0.003
-      const t = progressRef.current
+      const elapsed = (Date.now() - startTimeRef.current) / 1000
+      progressRef.current = elapsed * 0.08
+      const t = progressRef.current % 1
+      const flapVal = Math.abs(Math.sin(elapsed * 8))
+      setFlap(flapVal)
+
       const container = containerRef.current
       if (!container) { frameRef.current = requestAnimationFrame(animate); return }
-      const rect = container.getBoundingClientRect()
-      const w = rect.width
-      const h = rect.height
+      const w = container.offsetWidth
+      const h = container.offsetHeight
       const perimeter = 2 * (w + h)
-      const dist = (t % 1) * perimeter
+      const dist = t * perimeter
       let x = 0, y = 0, angle = 0
+
       if (dist < w) {
-        x = dist; y = 0; angle = 90
+        x = dist; y = -20; angle = 5
       } else if (dist < w + h) {
-        x = w; y = dist - w; angle = 180
+        x = w + 20; y = dist - w; angle = 95
       } else if (dist < 2 * w + h) {
-        x = w - (dist - w - h); y = h; angle = 270
+        x = w - (dist - w - h); y = h + 20; angle = 185
       } else {
-        x = 0; y = h - (dist - 2 * w - h); angle = 0
+        x = -20; y = h - (dist - 2 * w - h); angle = 275
       }
-      x += Math.sin(t * 8) * 12
-      y += Math.cos(t * 6) * 8
-      setPos({ x, y, angle: angle + Math.sin(t * 10) * 15 })
+
+      x += Math.sin(elapsed * 3) * 15
+      y += Math.cos(elapsed * 2.5) * 10
+
+      setPos({ x, y, angle })
       frameRef.current = requestAnimationFrame(animate)
     }
     frameRef.current = requestAnimationFrame(animate)
     return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current) }
   }, [])
 
-  const wingFlap = Math.sin(Date.now() * 0.01) * 0.3 + 0.7
-
   return (
-    <div style={{position:'absolute',left:pos.x - 12,top:pos.y - 12,transform:`rotate(${pos.angle}deg)`,pointerEvents:'none',zIndex:10,transition:'left 0.05s, top 0.05s'}}>
-      <svg width="24" height="24" viewBox="0 0 24 24">
-        <ellipse cx="8" cy="10" rx={7 * wingFlap} ry="5" fill="rgba(74,158,255,0.7)" transform={`rotate(-20 8 10)`}/>
-        <ellipse cx="16" cy="10" rx={7 * wingFlap} ry="5" fill="rgba(74,158,255,0.7)" transform={`rotate(20 16 10)`}/>
-        <ellipse cx="7" cy="14" rx={5 * wingFlap} ry="3" fill="rgba(74,158,255,0.5)" transform={`rotate(20 7 14)`}/>
-        <ellipse cx="17" cy="14" rx={5 * wingFlap} ry="3" fill="rgba(74,158,255,0.5)" transform={`rotate(-20 17 14)`}/>
-        <ellipse cx="12" cy="12" rx="1.5" ry="5" fill="rgba(212,168,67,0.9)"/>
-        <line x1="12" y1="8" x2="9" y2="4" stroke="rgba(212,168,67,0.7)" strokeWidth="0.8"/>
-        <line x1="12" y1="8" x2="15" y2="4" stroke="rgba(212,168,67,0.7)" strokeWidth="0.8"/>
+    <div style={{
+      position: 'absolute',
+      left: pos.x - 24,
+      top: pos.y - 24,
+      transform: `rotate(${pos.angle}deg)`,
+      pointerEvents: 'none',
+      zIndex: 20,
+      filter: 'drop-shadow(0 0 8px rgba(74,158,255,0.8))',
+    }}>
+      <svg width="48" height="48" viewBox="0 0 48 48">
+        <ellipse cx="16" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(74,158,255,0.85)" transform="rotate(-25 16 18)"/>
+        <ellipse cx="32" cy="18" rx={13 * (0.4 + flap * 0.6)} ry="9" fill="rgba(74,158,255,0.85)" transform="rotate(25 32 18)"/>
+        <ellipse cx="15" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(52,120,220,0.75)" transform="rotate(25 15 28)"/>
+        <ellipse cx="33" cy="28" rx={9 * (0.4 + flap * 0.6)} ry="6" fill="rgba(52,120,220,0.75)" transform="rotate(-25 33 28)"/>
+        <ellipse cx="24" cy="22" rx="2.5" ry="9" fill="rgba(212,168,67,1)"/>
+        <ellipse cx="24" cy="13" rx="2" ry="2" fill="rgba(212,168,67,1)"/>
+        <path d="M24 11 Q20 5 17 3" stroke="rgba(212,168,67,0.9)" strokeWidth="1.2" fill="none"/>
+        <path d="M24 11 Q28 5 31 3" stroke="rgba(212,168,67,0.9)" strokeWidth="1.2" fill="none"/>
+        <circle cx="17" cy="3" r="1.5" fill="rgba(212,168,67,0.9)"/>
+        <circle cx="31" cy="3" r="1.5" fill="rgba(212,168,67,0.9)"/>
+        <ellipse cx="16" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(120,200,255,0.4)" transform="rotate(-25 16 17)"/>
+        <ellipse cx="32" cy="17" rx={4 * (0.4 + flap * 0.6)} ry="3" fill="rgba(120,200,255,0.4)" transform="rotate(25 32 17)"/>
       </svg>
     </div>
   )
