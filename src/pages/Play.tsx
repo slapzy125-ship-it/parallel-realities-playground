@@ -505,6 +505,16 @@ const G: Record<string,React.CSSProperties> = {
 }
 
 export default function Play() {
+  return (
+    <div style={{minHeight:'100vh',background:'#0A0A0C',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'40px',fontFamily:"'Rajdhani',sans-serif"}}>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(28px,6vw,56px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'16px'}}>REVENIO</div>
+      <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px',marginBottom:'24px'}}>PLAY MODE</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,4vw,36px)',fontWeight:700,color:'#F0C060',letterSpacing:'4px',marginBottom:'16px'}}>COMING SOON</div>
+      <div style={{color:'#7A7A8A',fontSize:'15px',maxWidth:'400px',lineHeight:1.7,marginBottom:'40px'}}>We are putting the finishing touches on something extraordinary.</div>
+      <a href="/" style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',textDecoration:'none',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',display:'inline-block'}}>BACK TO HOME</a>
+    </div>
+  )
   const [screen, setScreen] = useState('splash')
   const [player, setPlayer] = useState(defaultPlayer())
   const [currentWorld, setCurrentWorld] = useState<any>(null)
