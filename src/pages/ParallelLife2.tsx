@@ -88,11 +88,11 @@ export default function ParallelLife2() {
   useEffect(() => {
     const saved = localStorage.getItem('revenio_parallel2_profile')
     if (saved) { try { setProfile(JSON.parse(saved)) } catch {} }
-    const tier = localStorage.getItem('revenio_subscription') || 'free'
-    setUserTier(tier as any)
+    // Subscription gating removed: every authenticated user gets full Immortal access.
     supabase.auth.getUser().then(({ data }) => {
-      const email = data.user?.email?.toLowerCase() || ''
-      if (email.includes('slapzy125')) setUserTier('immortal')
+      setAuthedUserId(data.user?.id ?? null)
+      setAuthChecked(true)
+      setUserTier('immortal')
     })
   }, [])
 
