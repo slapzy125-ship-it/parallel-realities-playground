@@ -61,7 +61,7 @@ export function useSubscription() {
   const sub = data?.subscription as any;
   // Subscription gating removed: every authenticated user gets full Immortal access.
   // Unauthenticated users remain "free" so pages can show a sign-in prompt.
-  const tier: Tier = userId ? "immortal" : "free";
+  const tier: Tier = (userId ? "immortal" : "free") as Tier;
   const isActive = !!userId;
   void userEmail;
 
