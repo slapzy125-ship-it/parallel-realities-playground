@@ -32,8 +32,11 @@ export default async function handler(req: any, res: any) {
         },
         body: JSON.stringify(body)
       })
-      const runwayData = await runwayRes.json()
-      console.log('Runway response:', JSON.stringify(runwayData).slice(0, 200))
+      const runwayText = await runwayRes.text()
+      console.log('Runway status:', runwayRes.status)
+      console.log('Runway response:', runwayText.slice(0, 500))
+      let runwayData: any = {}
+      try { runwayData = JSON.parse(runwayText) } catch(e) {}
       if (runwayData.id) videoTaskIds.push(runwayData.id)
     }
     return res.status(200).json({ audioBase64: null, videoTaskIds, success: true })
