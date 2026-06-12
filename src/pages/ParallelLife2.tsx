@@ -894,7 +894,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                 <div>
                   <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>YOUR SCENES</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'}}>
-                    {videoUrls.map((url, i) => (
+                    {videoUrls.map((url: string, i: number) => (
                       <video key={i} src={url} controls style={{width:'100%',borderRadius:'4px',border:'1px solid rgba(74,158,255,0.2)'}}/>
                     ))}
                   </div>
