@@ -73,6 +73,8 @@ export default function ParallelLife2() {
   const [visibleWords, setVisibleWords] = useState(0)
   const [regretAnimated, setRegretAnimated] = useState(0)
   const [userPhoto, setUserPhoto] = useState<string>('')
+  const [docState, setDocState] = useState<'idle'|'generating'|'ready'|'error'>('idle')
+  const [audioUrl, setAudioUrl] = useState('')
   const [docAudio, setDocAudio] = useState<string>('')
   const [docVideoTaskIds, setDocVideoTaskIds] = useState<string[]>([])
   const [docVideos, setDocVideos] = useState<string[]>([])
@@ -229,38 +231,48 @@ What I most want to know: ${profile.mostWantToKnow}`
 
   const generateDocumentary = async () => {
     if (!sim) return
-    const narration = `${sim.immediateAftermath} ${sim.firstYear} ${sim.formativeYears}`
-    const scenes = [
-      { visualPrompt: sim.immediateAftermath },
-      { visualPrompt: sim.firstYear },
-      { visualPrompt: sim.formativeYears },
-    ]
-    const docRes = await fetch('https://parallel-realities-playground.vercel.app/api/generate-documentary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ narrationText: narration, personName: profile.firstName, scenes, userPhotoBase64: userPhoto.split(',')[1], userPhotoMediaType: userPhoto.split(';')[0].split(':')[1] })
-    })
-    const data = await docRes.json()
-    if (!docRes.ok) throw new Error(data.error || 'Documentary generation failed')
-    setDocAudio(data.audioBase64)
-    setDocVideoTaskIds(data.videoTaskIds || [])
+    setDocState('generating')
+    try {
+      const narration = `${sim.immediateAftermath} ${sim.firstYear} ${sim.formativeYears}`
+      const scenes = [
+        { visualPrompt: sim.immediateAftermath },
+        { visualPrompt: sim.firstYear },
+        { visualPrompt: sim.formativeYears },
+      ]
+      const docRes = await fetch('https://parallel-realities-playground.vercel.app/api/generate-documentary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ narrationText: narration, personName: profile.firstName, scenes, userPhotoBase64: userPhoto.split(',')[1], userPhotoMediaType: userPhoto.split(';')[0].split(':')[1] })
+      })
+      const data = await docRes.json()
+      if (!docRes.ok) throw new Error(data.error || 'Documentary generation failed')
+      setDocAudio(data.audioBase64)
+      setDocVideoTaskIds(data.videoTaskIds || [])
+      const blob = new Blob([Uint8Array.from(atob(data.audioBase64), c => c.charCodeAt(0))], { type: 'audio/mpeg' })
+      setAudioUrl(URL.createObjectURL(blob))
 
-    const pollInterval = setInterval(async () => {
-      const completed: string[] = []
-      for (const taskId of data.videoTaskIds || []) {
-        const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskId })
-        })
-        const pollData = await pollRes.json()
-        if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) completed.push(pollData.output[0])
-      }
-      if (completed.length === (data.videoTaskIds || []).length) {
-        setDocVideos(completed)
-        clearInterval(pollInterval)
-      }
-    }, 5000)
+      const pollInterval = setInterval(async () => {
+        const completed: string[] = []
+        for (const taskId of data.videoTaskIds || []) {
+          const pollRes = await fetch('https://parallel-realities-playground.vercel.app/api/poll-runway', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taskId })
+          })
+          const pollData = await pollRes.json()
+          if (pollData.status === 'SUCCEEDED' && pollData.output?.[0]) completed.push(pollData.output[0])
+        }
+        if (completed.length === (data.videoTaskIds || []).length) {
+          setDocVideos(completed)
+          clearInterval(pollInterval)
+          setDocState('ready')
+        }
+      }, 5000)
+
+      if ((data.videoTaskIds || []).length === 0) setDocState('ready')
+    } catch {
+      setDocState('error')
+    }
   }
 
   const regretColor = regretAnimated < 40 ? '#4A9EFF' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
@@ -291,6 +303,9 @@ What I most want to know: ${profile.mostWantToKnow}`
             visibleWords={visibleWords} regretAnimated={regretAnimated}
             regretColor={regretColor} circumference={circumference}
             strokeDash={strokeDash}
+            userPhoto={userPhoto} setUserPhoto={setUserPhoto}
+            docState={docState} audioUrl={audioUrl}
+            generateDocumentary={generateDocumentary}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
           />
@@ -810,6 +825,68 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             </div>
           )}
         </>
+      )}
+
+      {userTier === 'immortal' && (
+        <div style={{background:'linear-gradient(135deg,rgba(13,17,23,0.98),rgba(10,15,26,0.98))',border:'1px solid rgba(74,158,255,0.3)',borderRadius:'8px',padding:'40px',textAlign:'center' as const,marginBottom:'24px'}}>
+          <div style={{fontSize:'11px',letterSpacing:'4px',color:'#4A9EFF',marginBottom:'12px'}}>IMMORTAL EXCLUSIVE</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'26px',color:'#F0F0F0',marginBottom:'8px'}}>Your Documentary</div>
+          <div style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.7,marginBottom:'32px',maxWidth:'500px',margin:'0 auto 32px',fontFamily:'Georgia,serif',fontStyle:'italic'}}>
+            A 1 minute AI generated documentary about your alternate life. Your face. Your story. Your other world.
+          </div>
+
+          {docState === 'idle' && (
+            <div>
+              {!userPhoto ? (
+                <div>
+                  <div style={{color:'rgba(240,240,240,0.5)',fontSize:'13px',marginBottom:'20px'}}>Upload a photo of yourself so the documentary features you</div>
+                  <label style={{display:'inline-block',background:'rgba(74,158,255,0.1)',border:'1px solid rgba(74,158,255,0.3)',color:'#4A9EFF',padding:'14px 32px',cursor:'pointer',borderRadius:'4px',fontSize:'14px'}}>
+                    UPLOAD YOUR PHOTO
+                    <input type="file" accept="image/*" onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setUserPhoto(r.result as string);r.readAsDataURL(f)}} style={{display:'none'}}/>
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  <div style={{marginBottom:'20px',display:'flex',flexDirection:'column' as const,alignItems:'center',gap:'12px'}}>
+                    <img src={userPhoto} style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover' as const,border:'2px solid #4A9EFF'}}/>
+                    <div style={{color:'rgba(240,240,240,0.5)',fontSize:'12px',letterSpacing:'2px'}}>PHOTO READY</div>
+                    <button onClick={()=>setUserPhoto('')} style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'12px',textDecoration:'underline'}}>Use a different photo</button>
+                  </div>
+                  <button onClick={generateDocumentary} style={{background:'linear-gradient(135deg,#1a3a6b,#4A9EFF)',color:'white',border:'none',padding:'18px 56px',fontSize:'17px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px'}}>
+                    GENERATE MY DOCUMENTARY
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {docState === 'generating' && (
+            <div>
+              <div style={{width:'52px',height:'52px',border:'2px solid rgba(74,158,255,0.3)',borderTopColor:'#4A9EFF',borderRadius:'50%',animation:'spin 1s linear infinite',margin:'0 auto 20px'}}/>
+              <div style={{color:'#4A9EFF',fontSize:'13px',letterSpacing:'3px',marginBottom:'8px'}}>CRAFTING YOUR STORY...</div>
+              <div style={{color:'rgba(240,240,240,0.4)',fontSize:'12px'}}>This takes 2 to 3 minutes. Do not close this page.</div>
+            </div>
+          )}
+
+          {docState === 'ready' && (
+            <div>
+              <div style={{color:'#27AE60',fontSize:'13px',letterSpacing:'3px',marginBottom:'24px'}}>YOUR DOCUMENTARY IS READY</div>
+              {audioUrl && (
+                <div style={{marginBottom:'24px'}}>
+                  <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>NARRATION</div>
+                  <audio controls src={audioUrl} style={{width:'100%',maxWidth:'520px'}}/>
+                </div>
+              )}
+            </div>
+          )}
+
+          {docState === 'error' && (
+            <div>
+              <div style={{color:'#ff6b6b',fontSize:'13px',marginBottom:'16px'}}>Generation failed. Please try again.</div>
+              <button onClick={generateDocumentary} style={{background:'transparent',border:'1px solid #4A9EFF',color:'#4A9EFF',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>RETRY</button>
+            </div>
+          )}
+        </div>
       )}
 
       <div style={{display:'flex',gap:'12px',justifyContent:'center',marginTop:'48px',flexWrap:'wrap' as const}}>
