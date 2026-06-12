@@ -6,11 +6,21 @@ export default async function handler(req: any, res: any) {
   const { narrationText, scenes, userPhotoBase64, userPhotoMediaType } = req.body
   const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY
   const RUNWAY_KEY = process.env.RUNWAY_API_KEY
-  const elevenRes = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
+  let elevenRes = await fetch('https://api.elevenlabs.io/v1/text-to-speech/pNInz4e1e7jOzMWy0gNn', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVEN_KEY! },
     body: JSON.stringify({ text: narrationText, model_id: 'eleven_monolingual_v1', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
   })
+
+  if (!elevenRes.ok && (elevenRes.status === 401 || elevenRes.status === 422)) {
+    const retryText = await elevenRes.text()
+    console.log('ElevenLabs first attempt failed, retrying without voice settings:', elevenRes.status, retryText)
+    elevenRes = await fetch('https://api.elevenlabs.io/v1/text-to-speech/pNInz4e1e7jOzMWy0gNn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVEN_KEY! },
+      body: JSON.stringify({ text: narrationText, model_id: 'eleven_monolingual_v1' })
+    })
+  }
 
   if (!elevenRes.ok) {
     const errorText = await elevenRes.text()
