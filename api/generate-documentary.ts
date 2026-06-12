@@ -14,7 +14,7 @@ export default async function handler(req: any, res: any) {
   try {
     const videoTaskIds: string[] = []
     for (const scene of scenes.slice(0, 3)) {
-      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/text_to_video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,10 +22,11 @@ export default async function handler(req: any, res: any) {
           'X-Runway-Version': '2024-11-06',
         },
         body: JSON.stringify({
-          model: 'gen4_turbo',
-          ratio: '1280:720',
+          model: 'gen3a_turbo',
+          prompt_text: scene.visualPrompt,
           duration: 5,
-          promptText: scene.visualPrompt,
+          ratio: '1280:720',
+          watermark: false,
         })
       })
       const runwayText = await runwayRes.text()
