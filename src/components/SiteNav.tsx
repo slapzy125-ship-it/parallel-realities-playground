@@ -35,7 +35,6 @@ export function SiteNav() {
   const navLinks = [
     { to: "/", label: "Home", exact: true },
     { to: "/worlds", label: "Worlds" },
-    { to: "/pricing", label: "Pricing" },
     { to: "/hardware", label: "Hardware" },
     { to: "/play", label: "Play" },
     { to: "/parallel", label: "Parallel Life", accent: true as const },
