@@ -294,6 +294,19 @@ What I most want to know: ${profile.mostWantToKnow}`
   const circumference = 2 * Math.PI * 54
   const strokeDash = circumference - (regretAnimated / 100) * circumference
 
+  if (authChecked && !authedUserId) {
+    return (
+      <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
+        <div style={{maxWidth:'420px',textAlign:'center'}}>
+          <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'4px',marginBottom:'16px'}}>SIGN IN REQUIRED</div>
+          <h1 style={{fontFamily:"'Cinzel',serif",fontSize:'28px',marginBottom:'14px'}}>Parallel 2.0</h1>
+          <p style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.6,marginBottom:'24px'}}>Sign in to explore the life you never lived. Every account gets full access.</p>
+          <a href="/auth" style={{display:'inline-block',background:'#4A9EFF',color:'#0D1117',padding:'12px 28px',fontSize:'12px',letterSpacing:'3px',fontWeight:700,textDecoration:'none',borderRadius:'2px'}}>SIGN IN / SIGN UP</a>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',animation:'bgPulse 8s infinite',position:'relative',overflow:'hidden'}}>
       <style>{STYLES}</style>
