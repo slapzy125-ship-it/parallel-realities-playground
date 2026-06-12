@@ -91,7 +91,6 @@ function Auth() {
   };
 
   const handleGoogle = async () => {
-  const handleGoogle = async () => {
     setError(null);
     setLoading(true);
     applyRememberMePreference();
