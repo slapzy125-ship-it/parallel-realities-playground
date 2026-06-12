@@ -1075,7 +1075,6 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         <>
           <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'3px',marginBottom:'14px',textAlign:'center',maxWidth:'420px'}}>SIGN IN TO BEGIN — YOUR STORY IS TIED TO YOUR ACCOUNT</div>
           <Link to="/auth" style={{...G.btnGold,textDecoration:'none',display:'inline-block'}}>SIGN IN / SIGN UP</Link>
-          <Link to="/pricing" style={{...G.btnGhost,marginTop:'8px',textDecoration:'none',display:'inline-block'}}>VIEW PLANS</Link>
         </>
       ) : (
         <>
