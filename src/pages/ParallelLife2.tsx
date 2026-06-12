@@ -626,7 +626,7 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit }: any) {
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, onReset, onNewProfile }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, generateDocumentary, onReset, onNewProfile }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
 
   const sectionStyle: React.CSSProperties = {
