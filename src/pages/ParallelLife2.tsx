@@ -693,8 +693,61 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
   )
 }
 
+function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
+  const [pos, setPos] = useState({ x: 0, y: 0, angle: 0 })
+  const frameRef = useRef<number>()
+  const progressRef = useRef(0)
+
+  useEffect(() => {
+    const animate = () => {
+      progressRef.current += 0.003
+      const t = progressRef.current
+      const container = containerRef.current
+      if (!container) { frameRef.current = requestAnimationFrame(animate); return }
+      const rect = container.getBoundingClientRect()
+      const w = rect.width
+      const h = rect.height
+      const perimeter = 2 * (w + h)
+      const dist = (t % 1) * perimeter
+      let x = 0, y = 0, angle = 0
+      if (dist < w) {
+        x = dist; y = 0; angle = 90
+      } else if (dist < w + h) {
+        x = w; y = dist - w; angle = 180
+      } else if (dist < 2 * w + h) {
+        x = w - (dist - w - h); y = h; angle = 270
+      } else {
+        x = 0; y = h - (dist - 2 * w - h); angle = 0
+      }
+      x += Math.sin(t * 8) * 12
+      y += Math.cos(t * 6) * 8
+      setPos({ x, y, angle: angle + Math.sin(t * 10) * 15 })
+      frameRef.current = requestAnimationFrame(animate)
+    }
+    frameRef.current = requestAnimationFrame(animate)
+    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current) }
+  }, [])
+
+  const wingFlap = Math.sin(Date.now() * 0.01) * 0.3 + 0.7
+
+  return (
+    <div style={{position:'absolute',left:pos.x - 12,top:pos.y - 12,transform:`rotate(${pos.angle}deg)`,pointerEvents:'none',zIndex:10,transition:'left 0.05s, top 0.05s'}}>
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <ellipse cx="8" cy="10" rx={7 * wingFlap} ry="5" fill="rgba(74,158,255,0.7)" transform={`rotate(-20 8 10)`}/>
+        <ellipse cx="16" cy="10" rx={7 * wingFlap} ry="5" fill="rgba(74,158,255,0.7)" transform={`rotate(20 16 10)`}/>
+        <ellipse cx="7" cy="14" rx={5 * wingFlap} ry="3" fill="rgba(74,158,255,0.5)" transform={`rotate(20 7 14)`}/>
+        <ellipse cx="17" cy="14" rx={5 * wingFlap} ry="3" fill="rgba(74,158,255,0.5)" transform={`rotate(-20 17 14)`}/>
+        <ellipse cx="12" cy="12" rx="1.5" ry="5" fill="rgba(212,168,67,0.9)"/>
+        <line x1="12" y1="8" x2="9" y2="4" stroke="rgba(212,168,67,0.7)" strokeWidth="0.8"/>
+        <line x1="12" y1="8" x2="15" y2="4" stroke="rgba(212,168,67,0.7)" strokeWidth="0.8"/>
+      </svg>
+    </div>
+  )
+}
+
 function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, onReset, onNewProfile }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
+  const butterflyRef = useRef<HTMLDivElement>(null)
 
   const sectionStyle: React.CSSProperties = {
     background:'rgba(255,255,255,0.02)', border:'1px solid rgba(74,158,255,0.1)',
@@ -797,7 +850,8 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             </div>
           </div>
 
-          <div style={{...sectionStyle,animationDelay:'0.6s'}}>
+          <div ref={butterflyRef} style={{...sectionStyle,animationDelay:'0.6s',position:'relative' as const,overflow:'visible' as const}}>
+            <FlyingButterfly containerRef={butterflyRef} />
             <div style={{textAlign:'center' as const,marginBottom:'40px'}}>
               {'THE BUTTERFLY EFFECT'.split('').map((l,i) => (
                 <span key={i} style={{display:'inline-block',color:'#4A9EFF',fontSize:'13px',letterSpacing:'6px',fontWeight:700,animation:`letterIn 0.5s ease ${i*0.04}s both`}}>{l===' '?'\u00A0':l}</span>
