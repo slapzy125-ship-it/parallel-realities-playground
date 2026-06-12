@@ -65,7 +65,9 @@ export default function ParallelLife2() {
   const [formStep, setFormStep] = useState(1)
   const [profile, setProfile] = useState<Profile>(defaultProfile())
   const [sim, setSim] = useState<SimResult|null>(null)
-  const [userTier, setUserTier] = useState<'free'|'legend'|'immortal'>('free')
+  const [userTier, setUserTier] = useState<'free'|'legend'|'immortal'>('immortal')
+  const [authedUserId, setAuthedUserId] = useState<string|null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
   const [tp1Choice, setTp1Choice] = useState<'A'|'B'|null>(null)
   const [tp2Choice, setTp2Choice] = useState<'A'|'B'|null>(null)
   const [tp3Choice, setTp3Choice] = useState<'A'|'B'|null>(null)
@@ -86,11 +88,11 @@ export default function ParallelLife2() {
   useEffect(() => {
     const saved = localStorage.getItem('revenio_parallel2_profile')
     if (saved) { try { setProfile(JSON.parse(saved)) } catch {} }
-    const tier = localStorage.getItem('revenio_subscription') || 'free'
-    setUserTier(tier as any)
+    // Subscription gating removed: every authenticated user gets full Immortal access.
     supabase.auth.getUser().then(({ data }) => {
-      const email = data.user?.email?.toLowerCase() || ''
-      if (email.includes('slapzy125')) setUserTier('immortal')
+      setAuthedUserId(data.user?.id ?? null)
+      setAuthChecked(true)
+      setUserTier('immortal')
     })
   }, [])
 
@@ -291,6 +293,19 @@ What I most want to know: ${profile.mostWantToKnow}`
   const regretColor = regretAnimated < 40 ? '#4A9EFF' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
   const circumference = 2 * Math.PI * 54
   const strokeDash = circumference - (regretAnimated / 100) * circumference
+
+  if (authChecked && !authedUserId) {
+    return (
+      <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
+        <div style={{maxWidth:'420px',textAlign:'center'}}>
+          <div style={{color:'#4A9EFF',fontSize:'12px',letterSpacing:'4px',marginBottom:'16px'}}>SIGN IN REQUIRED</div>
+          <h1 style={{fontFamily:"'Cinzel',serif",fontSize:'28px',marginBottom:'14px'}}>Parallel 2.0</h1>
+          <p style={{color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.6,marginBottom:'24px'}}>Sign in to explore the life you never lived. Every account gets full access.</p>
+          <a href="/auth" style={{display:'inline-block',background:'#4A9EFF',color:'#0D1117',padding:'12px 28px',fontSize:'12px',letterSpacing:'3px',fontWeight:700,textDecoration:'none',borderRadius:'2px'}}>SIGN IN / SIGN UP</a>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{minHeight:'100vh',background:'#0D1117',color:'#F0F0F0',fontFamily:'system-ui,sans-serif',animation:'bgPulse 8s infinite',position:'relative',overflow:'hidden'}}>
@@ -894,7 +909,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                 <div>
                   <div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>YOUR SCENES</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'12px'}}>
-                    {videoUrls.map((url, i) => (
+                    {videoUrls.map((url: string, i: number) => (
                       <video key={i} src={url} controls style={{width:'100%',borderRadius:'4px',border:'1px solid rgba(74,158,255,0.2)'}}/>
                     ))}
                   </div>

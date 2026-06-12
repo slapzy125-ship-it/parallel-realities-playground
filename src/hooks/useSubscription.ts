@@ -59,17 +59,11 @@ export function useSubscription() {
   }, [userId, refetch]);
 
   const sub = data?.subscription as any;
-  const active = !!sub && ["active", "trialing"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
-  let tier: Tier = active ? tierFromProductId(sub?.product_id) : "free";
-  let isActive = active;
-
-  // Hardcoded test bypass: grant Immortal to specific tester accounts
-  const bypassEmails = ["slapzy125@gmail.com", "isaiah.delvecchio12@gmail.com"];
-  if (userEmail && bypassEmails.includes(userEmail.toLowerCase())) {
-    tier = "immortal";
-    isActive = true;
-  }
+  // Subscription gating removed: every authenticated user gets full Immortal access.
+  // Unauthenticated users remain "free" so pages can show a sign-in prompt.
+  const tier: Tier = (userId ? "immortal" : "free") as Tier;
+  const isActive = !!userId;
+  void userEmail;
 
   return { subscription: sub, tier, isActive, isLoading, userId, refetch };
 }

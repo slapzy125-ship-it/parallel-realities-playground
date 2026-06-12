@@ -146,6 +146,40 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Remember-Me: when the auth page sets `revenio_session_only=1`, mirror the
+  // Supabase auth token between localStorage (so the client picks it up) and
+  // sessionStorage (so it vanishes when the browser/tab closes).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("revenio_session_only") !== "1") return;
+
+    const matches = (k: string) => k.startsWith("sb-") && k.endsWith("-auth-token");
+
+    // Restore from sessionStorage → localStorage on load (handles in-tab reloads).
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && matches(k)) {
+        const v = sessionStorage.getItem(k);
+        if (v) localStorage.setItem(k, v);
+      }
+    }
+
+    const offload = () => {
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && matches(k)) keys.push(k);
+      }
+      keys.forEach((k) => {
+        const v = localStorage.getItem(k);
+        if (v) sessionStorage.setItem(k, v);
+        localStorage.removeItem(k);
+      });
+    };
+    window.addEventListener("pagehide", offload);
+    return () => window.removeEventListener("pagehide", offload);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
