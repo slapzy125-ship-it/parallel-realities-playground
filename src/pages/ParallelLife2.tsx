@@ -328,9 +328,18 @@ What I most want to know: ${profile.mostWantToKnow}`
     try {
       const compressedPhoto = userPhoto ? await compressImage(userPhoto) : undefined
       const scenes = [
-        { visualPrompt: sim.immediateAftermath },
-        { visualPrompt: sim.firstYear },
-        { visualPrompt: sim.formativeYears },
+        {
+          title: 'The moment of decision',
+          visualPrompt: `Cinematic documentary portrait of a person in ${profile.grewUpCity} ${profile.grewUpCountry} at a crossroads moment in their life, golden hour lighting, 35mm film style, emotional realism`
+        },
+        {
+          title: 'The alternate path begins',
+          visualPrompt: `A person starting fresh somewhere new, ${profile.alternativePath?.slice(0,50)}, documentary style, natural light, hopeful and uncertain at the same time`
+        },
+        {
+          title: 'Reflection',
+          visualPrompt: `An older person sitting quietly reflecting on the life they built, warm evening light, intimate documentary portrait, contemplative`
+        },
       ]
       const docRes = await fetch('https://parallel-realities-playground.vercel.app/api/generate-documentary', {
         method: 'POST',
