@@ -1207,7 +1207,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                 Record 45 seconds of your voice and the narration will sound like you — getting older as the timeline progresses.
               </div>
               <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'4px',padding:'16px',marginBottom:'16px',fontFamily:'Georgia,serif',fontSize:'15px',color:'rgba(240,240,240,0.85)',lineHeight:1.8,textAlign:'left' as const}}>
-                "My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story — in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. This is my voice. And this is my other life."
+                "Read this out loud naturally, like you're telling a story to a friend: My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. I've thought about it more than I'd like to admit — what would have happened if I'd just said yes, or no, or stayed, or left. Would I be happier? Would I be lost? Would I even recognize myself? This is my voice. And this is my other life."
               </div>
               <button onClick={startVoiceClone} style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'12px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'13px',fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:'2px'}}>
                 🎤 RECORD YOUR VOICE
@@ -1225,7 +1225,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
                 <div style={{width:`${(recordingSeconds/45)*100}%`,height:'100%',background:'#E74C3C',borderRadius:'2px',transition:'width 1s linear'}}/>
               </div>
               <div style={{fontFamily:'Georgia,serif',color:'rgba(240,240,240,0.5)',fontSize:'13px',marginBottom:'16px',fontStyle:'italic'}}>
-                "My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story — in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. This is my voice. And this is my other life."
+                "Read this out loud naturally, like you're telling a story to a friend: My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. I've thought about it more than I'd like to admit — what would have happened if I'd just said yes, or no, or stayed, or left. Would I be happier? Would I be lost? Would I even recognize myself? This is my voice. And this is my other life."
               </div>
               <button onClick={stopRecording} style={{background:'transparent',border:'1px solid rgba(231,76,60,0.4)',color:'#E74C3C',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>
                 Stop Early
