@@ -106,6 +106,7 @@ export default function ParallelLife2() {
   const stopNarrationRef = useRef(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
+  const voiceIdRef = useRef<string | null>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
 
@@ -124,6 +125,8 @@ export default function ParallelLife2() {
     const saved = localStorage.getItem('revenio_voice_id')
     if (saved) setVoiceId(saved)
   }, [])
+
+  useEffect(() => { voiceIdRef.current = voiceId }, [voiceId])
 
   useEffect(() => {
     if (step === 'result' && sim) {
@@ -401,12 +404,14 @@ What I most want to know: ${profile.mostWantToKnow}`
       mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
+        console.log('Recording stopped, chunks:', audioChunksRef.current.length)
         setCloningVoice(true)
         setRecording(false)
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
         const reader = new FileReader()
         reader.onload = async () => {
           const base64 = (reader.result as string).split(',')[1]
+          console.log('Sending to clone-voice API...')
           try {
             const res = await fetch('https://parallel-realities-playground.vercel.app/api/clone-voice', {
               method: 'POST',
@@ -414,9 +419,13 @@ What I most want to know: ${profile.mostWantToKnow}`
               body: JSON.stringify({ audioBase64: base64, audioMimeType: 'audio/webm' })
             })
             const data = await res.json()
+            console.log('Clone response:', data)
             if (data.voiceId) {
+              console.log('Voice cloned successfully:', data.voiceId)
               setVoiceId(data.voiceId)
               localStorage.setItem('revenio_voice_id', data.voiceId)
+            } else {
+              console.error('No voiceId in response:', data)
             }
           } catch(e) { console.error('Clone error:', e) }
           setCloningVoice(false)
@@ -462,7 +471,7 @@ What I most want to know: ${profile.mostWantToKnow}`
         const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: section.text, sectionIndex: section.index, voiceId: voiceId || undefined })
+          body: JSON.stringify({ text: section.text, sectionIndex: section.index, voiceId: voiceIdRef.current || undefined })
         })
         const data = await res.json()
         if (data.audioBase64) {
