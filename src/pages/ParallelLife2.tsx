@@ -885,10 +885,10 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
   )
 }
 
-function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
+function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const [pos, setPos] = useState({ x: 0, y: 0, angle: 0 })
   const [flap, setFlap] = useState(1)
-  const frameRef = useRef<number>()
+  const frameRef = useRef<number | undefined>(undefined)
   const progressRef = useRef(0)
   const startTimeRef = useRef(Date.now())
 
