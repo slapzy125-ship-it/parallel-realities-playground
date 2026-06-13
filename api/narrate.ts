@@ -4,9 +4,10 @@ export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
   try {
-    const { text, sectionIndex = 0 } = req.body
+    const { text, sectionIndex = 0, voiceId } = req.body
     const ELEVEN_KEY = process.env.ELEVENLABS_API_KEY
     if (!ELEVEN_KEY) return res.status(500).json({ error: 'No ElevenLabs key' })
+    const VOICE_ID = voiceId || '21m00Tcm4TlvDq8ikWAM'
     const ageSettings = [
       { stability: 0.3, similarity_boost: 0.6, style: 0.8 },
       { stability: 0.4, similarity_boost: 0.65, style: 0.7 },
@@ -17,7 +18,7 @@ export default async function handler(req: any, res: any) {
       { stability: 0.95, similarity_boost: 0.95, style: 0.05 },
     ]
     const settings = ageSettings[Math.min(sectionIndex, ageSettings.length - 1)]
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVEN_KEY },
       body: JSON.stringify({

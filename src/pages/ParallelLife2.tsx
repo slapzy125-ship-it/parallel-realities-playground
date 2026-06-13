@@ -98,8 +98,14 @@ export default function ParallelLife2() {
   const [quickProfile, setQuickProfile] = useState({ firstName:'', age:'', grewUpCity:'', theDecision:'', alternativePath:'' })
   const [narrating, setNarrating] = useState(false)
   const [narratingSection, setNarratingSection] = useState('')
+  const [voiceId, setVoiceId] = useState<string | null>(null)
+  const [recording, setRecording] = useState(false)
+  const [recordingSeconds, setRecordingSeconds] = useState(0)
+  const [cloningVoice, setCloningVoice] = useState(false)
   const timelineRef = useRef<HTMLDivElement>(null)
   const stopNarrationRef = useRef(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
 
@@ -112,6 +118,11 @@ export default function ParallelLife2() {
       setAuthChecked(true)
       setUserTier('immortal')
     })
+  }, [])
+
+  useEffect(() => {
+    const saved = localStorage.getItem('revenio_voice_id')
+    if (saved) setVoiceId(saved)
   }, [])
 
   useEffect(() => {
@@ -381,6 +392,56 @@ What I most want to know: ${profile.mostWantToKnow}`
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const startVoiceClone = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop())
+        setCloningVoice(true)
+        setRecording(false)
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        const reader = new FileReader()
+        reader.onload = async () => {
+          const base64 = (reader.result as string).split(',')[1]
+          try {
+            const res = await fetch('https://parallel-realities-playground.vercel.app/api/clone-voice', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ audioBase64: base64, audioMimeType: 'audio/webm' })
+            })
+            const data = await res.json()
+            if (data.voiceId) {
+              setVoiceId(data.voiceId)
+              localStorage.setItem('revenio_voice_id', data.voiceId)
+            }
+          } catch(e) { console.error('Clone error:', e) }
+          setCloningVoice(false)
+        }
+        reader.readAsDataURL(audioBlob)
+      }
+      setRecording(true)
+      setRecordingSeconds(0)
+      mediaRecorder.start()
+      const interval = setInterval(() => {
+        setRecordingSeconds(s => {
+          if (s >= 15) { clearInterval(interval); mediaRecorder.stop(); return s }
+          return s + 1
+        })
+      }, 1000)
+      setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop() }, 16000)
+    } catch(e) {
+      alert('Please allow microphone access to clone your voice')
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop()
+  }
+
   const narrateSimulation = async () => {
     if (!sim) return
     stopNarrationRef.current = false
@@ -401,7 +462,7 @@ What I most want to know: ${profile.mostWantToKnow}`
         const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: section.text, sectionIndex: section.index })
+          body: JSON.stringify({ text: section.text, sectionIndex: section.index, voiceId: voiceId || undefined })
         })
         const data = await res.json()
         if (data.audioBase64) {
@@ -1123,8 +1184,57 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
       </div>
 
       {sim && (
-        <div style={{textAlign:'center' as const,marginBottom:'32px'}}>
-          <style>{`@keyframes soundBar{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}`}</style>
+        <div style={{textAlign:'center' as const,marginBottom:'20px'}}>
+          <style>{`@keyframes soundBar{from{transform:scaleY(0.3)}to{transform:scaleY(1)}} @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
+
+          {!voiceId && !recording && !cloningVoice && (
+            <div style={{background:'rgba(212,168,67,0.05)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'24px',marginBottom:'16px',maxWidth:'500px',margin:'0 auto 16px'}}>
+              <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>USE YOUR OWN VOICE</div>
+              <div style={{fontFamily:'Georgia,serif',color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.7,marginBottom:'16px',fontStyle:'italic'}}>
+                Record 15 seconds of your voice and the narration will sound like you — getting older as the timeline progresses.
+              </div>
+              <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'4px',padding:'16px',marginBottom:'16px',fontFamily:'Georgia,serif',fontSize:'15px',color:'rgba(240,240,240,0.85)',lineHeight:1.8,textAlign:'left' as const}}>
+                "My name is {profile?.firstName || 'Noah'} and I want to hear the life I never lived — in my own voice, getting older as the years pass."
+              </div>
+              <button onClick={startVoiceClone} style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'12px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'13px',fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:'2px'}}>
+                🎤 RECORD YOUR VOICE
+              </button>
+            </div>
+          )}
+
+          {recording && (
+            <div style={{background:'rgba(231,76,60,0.08)',border:'1px solid rgba(231,76,60,0.3)',borderRadius:'8px',padding:'24px',marginBottom:'16px',maxWidth:'500px',margin:'0 auto 16px',textAlign:'center' as const}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',marginBottom:'12px'}}>
+                <div style={{width:'10px',height:'10px',borderRadius:'50%',background:'#E74C3C',animation:'pulse 1s infinite'}}/>
+                <span style={{color:'#E74C3C',fontSize:'13px',letterSpacing:'2px'}}>RECORDING — {recordingSeconds}s / 15s</span>
+              </div>
+              <div style={{width:'100%',height:'4px',background:'rgba(255,255,255,0.08)',borderRadius:'2px',marginBottom:'16px'}}>
+                <div style={{width:`${(recordingSeconds/15)*100}%`,height:'100%',background:'#E74C3C',borderRadius:'2px',transition:'width 1s linear'}}/>
+              </div>
+              <div style={{fontFamily:'Georgia,serif',color:'rgba(240,240,240,0.5)',fontSize:'13px',marginBottom:'16px',fontStyle:'italic'}}>
+                "My name is {profile?.firstName || 'Noah'} and I want to hear the life I never lived — in my own voice, getting older as the years pass."
+              </div>
+              <button onClick={stopRecording} style={{background:'transparent',border:'1px solid rgba(231,76,60,0.4)',color:'#E74C3C',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>
+                Stop Early
+              </button>
+            </div>
+          )}
+
+          {cloningVoice && (
+            <div style={{textAlign:'center' as const,marginBottom:'16px',padding:'20px'}}>
+              <div style={{color:'#D4A843',fontSize:'13px',letterSpacing:'2px',marginBottom:'8px'}}>LEARNING YOUR VOICE...</div>
+              <div style={{color:'rgba(240,240,240,0.4)',fontSize:'12px'}}>This takes about 30 seconds</div>
+            </div>
+          )}
+
+          {voiceId && !recording && !cloningVoice && (
+            <div style={{marginBottom:'12px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+              <span style={{color:'#27AE60',fontSize:'12px'}}>✓</span>
+              <span style={{color:'rgba(240,240,240,0.5)',fontSize:'12px'}}>Your voice is ready</span>
+              <button onClick={()=>{setVoiceId(null);localStorage.removeItem('revenio_voice_id')}} style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.2)',cursor:'pointer',fontSize:'11px',textDecoration:'underline'}}>Reset</button>
+            </div>
+          )}
+
           {!narrating ? (
             <button
               onClick={narrateSimulation}
