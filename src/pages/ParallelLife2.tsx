@@ -558,6 +558,9 @@ What I most want to know: ${profile.mostWantToKnow}`
             shareToTwitter={shareToTwitter} copyShareLink={copyShareLink} copied={copied}
             switchChoice={switchChoice} setSwitchChoice={setSwitchChoice}
             narrating={narrating} narratingSection={narratingSection} narrateSimulation={narrateSimulation} stopNarration={()=>{ stopNarrationRef.current = true; setNarrating(false); setNarratingSection('') }}
+            voiceId={voiceId} recording={recording} recordingSeconds={recordingSeconds} cloningVoice={cloningVoice}
+            startVoiceClone={startVoiceClone} stopRecording={stopRecording}
+            setVoiceId={setVoiceId}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
             onExploreDecision={(decision: string, alternativePath: string) => {
@@ -1154,7 +1157,7 @@ function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLD
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, narrating, narratingSection, narrateSimulation, stopNarration, onReset, onNewProfile, onExploreDecision }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, narrating, narratingSection, narrateSimulation, stopNarration, voiceId, setVoiceId, recording, recordingSeconds, cloningVoice, startVoiceClone, stopRecording, onReset, onNewProfile, onExploreDecision }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
   const butterflyRef = useRef<HTMLDivElement>(null)
 
