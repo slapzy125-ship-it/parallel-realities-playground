@@ -437,11 +437,11 @@ What I most want to know: ${profile.mostWantToKnow}`
       mediaRecorder.start()
       const interval = setInterval(() => {
         setRecordingSeconds(s => {
-          if (s >= 15) { clearInterval(interval); mediaRecorder.stop(); return s }
+          if (s >= 45) { clearInterval(interval); mediaRecorder.stop(); return s }
           return s + 1
         })
       }, 1000)
-      setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop() }, 16000)
+      setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop() }, 46000)
     } catch(e) {
       alert('Please allow microphone access to clone your voice')
     }
@@ -1204,7 +1204,7 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             <div style={{background:'rgba(212,168,67,0.05)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'24px',marginBottom:'16px',maxWidth:'500px',margin:'0 auto 16px'}}>
               <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>USE YOUR OWN VOICE</div>
               <div style={{fontFamily:'Georgia,serif',color:'rgba(240,240,240,0.6)',fontSize:'14px',lineHeight:1.7,marginBottom:'16px',fontStyle:'italic'}}>
-                Record 15 seconds of your voice and the narration will sound like you — getting older as the timeline progresses.
+                Record 45 seconds of your voice and the narration will sound like you — getting older as the timeline progresses.
               </div>
               <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'4px',padding:'16px',marginBottom:'16px',fontFamily:'Georgia,serif',fontSize:'15px',color:'rgba(240,240,240,0.85)',lineHeight:1.8,textAlign:'left' as const}}>
                 "My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story — in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. This is my voice. And this is my other life."
@@ -1219,10 +1219,10 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             <div style={{background:'rgba(231,76,60,0.08)',border:'1px solid rgba(231,76,60,0.3)',borderRadius:'8px',padding:'24px',marginBottom:'16px',maxWidth:'500px',margin:'0 auto 16px',textAlign:'center' as const}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',marginBottom:'12px'}}>
                 <div style={{width:'10px',height:'10px',borderRadius:'50%',background:'#E74C3C',animation:'pulse 1s infinite'}}/>
-                <span style={{color:'#E74C3C',fontSize:'13px',letterSpacing:'2px'}}>RECORDING — {recordingSeconds}s / 15s</span>
+                <span style={{color:'#E74C3C',fontSize:'13px',letterSpacing:'2px'}}>RECORDING — {recordingSeconds}s / 45s</span>
               </div>
               <div style={{width:'100%',height:'4px',background:'rgba(255,255,255,0.08)',borderRadius:'2px',marginBottom:'16px'}}>
-                <div style={{width:`${(recordingSeconds/15)*100}%`,height:'100%',background:'#E74C3C',borderRadius:'2px',transition:'width 1s linear'}}/>
+                <div style={{width:`${(recordingSeconds/45)*100}%`,height:'100%',background:'#E74C3C',borderRadius:'2px',transition:'width 1s linear'}}/>
               </div>
               <div style={{fontFamily:'Georgia,serif',color:'rgba(240,240,240,0.5)',fontSize:'13px',marginBottom:'16px',fontStyle:'italic'}}>
                 "My name is [say your name], and somewhere out there is a version of me who made a different choice. I want to hear that story — in my own voice. The roads I didn't take. The moments I can never get back. The life I almost lived. This is my voice. And this is my other life."
