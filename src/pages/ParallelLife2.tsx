@@ -372,7 +372,17 @@ What I most want to know: ${profile.mostWantToKnow}`
         <div key={p.id} style={{position:'fixed',left:p.left,bottom:'-20px',width:p.size,height:p.size,borderRadius:'50%',background:'#D4A843',opacity:0.3,animation:`particleFloat ${p.duration} ${p.delay} infinite linear`,pointerEvents:'none',zIndex:0}}/>
       ))}
       <div style={{position:'relative',zIndex:1}}>
-        {step === 'hero' && <HeroSection onStart={() => setStep('form')} onQuickStart={() => { setQuickMode(true); setStep('form') }} />}
+        {step === 'hero' && <HeroSection
+          onStart={() => setStep('form')}
+          onQuickStart={() => { setQuickMode(true); setStep('form') }}
+          onStartFresh={() => {
+            localStorage.removeItem('revenio_parallel2_profile')
+            setProfile(defaultProfile())
+            setFormStep(1)
+            setQuickMode(false)
+            setStep('form')
+          }}
+        />}
         {step === 'form' && (
           <FormSection
             profile={profile} up={up} formStep={formStep}
@@ -400,6 +410,13 @@ What I most want to know: ${profile.mostWantToKnow}`
             switchChoice={switchChoice} setSwitchChoice={setSwitchChoice}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
+            onExploreDecision={(decision: string, alternativePath: string) => {
+              setSim(null)
+              setProfile((p: typeof profile) => ({ ...p, theDecision: decision, alternativePath }))
+              setFormStep(5)
+              setStep('form')
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
           />
         )}
       </div>
@@ -407,7 +424,7 @@ What I most want to know: ${profile.mostWantToKnow}`
   )
 }
 
-function HeroSection({ onStart, onQuickStart }: { onStart: () => void, onQuickStart: () => void }) {
+function HeroSection({ onStart, onQuickStart, onStartFresh }: { onStart: () => void, onQuickStart: () => void, onStartFresh: () => void }) {
   const title = 'PARALLEL LIFE 2.0'.split('')
   return (
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'40px 20px'}}>
@@ -431,6 +448,14 @@ function HeroSection({ onStart, onQuickStart }: { onStart: () => void, onQuickSt
         </GlowButton>
         <div style={{color:'rgba(240,240,240,0.3)',fontSize:'12px',marginTop:'8px'}}>5 questions only. Full simulation in the deep version.</div>
       </div>
+      <button
+        onClick={onStartFresh}
+        style={{marginTop:'28px',background:'transparent',border:'none',color:'rgba(212,168,67,0.45)',fontSize:'13px',fontFamily:'Georgia,serif',cursor:'pointer',letterSpacing:'1px',textDecoration:'underline',textUnderlineOffset:'3px',transition:'color 0.2s',animation:'fadeUp 1s ease 1.7s both'}}
+        onMouseEnter={e=>e.currentTarget.style.color='rgba(212,168,67,0.8)'}
+        onMouseLeave={e=>e.currentTarget.style.color='rgba(212,168,67,0.45)'}
+      >
+        Start Fresh
+      </button>
     </div>
   )
 }
@@ -559,6 +584,14 @@ function LoadingSection({ lines, profile }: { lines: string[], profile: any }) {
 function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setEmail, quickMode, setQuickMode, quickProfile, setQuickProfile, setProfile, runSimulation }: any) {
   const totalSteps = 6
   const pct = ((formStep-1)/totalSteps)*100
+  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const hasSavedProfile = !bannerDismissed && formStep === 1 && !!profile.firstName
+
+  const handleBannerStartFresh = () => {
+    localStorage.removeItem('revenio_parallel2_profile')
+    setProfile({ firstName:'', age:'', grewUpCity:'', grewUpCountry:'', liveCity:'', liveCountry:'', familyStructure:'', birthOrder:'', financialBackground:'', threeWords:'', greatestStrength:'', greatestWeakness:'', mostProudOf:'', wonderAbout:'', relationshipStatus:'', partnerName:'', togetherLength:'', howMet:'', closestFriendName:'', closestFriendDesc:'', shapedByName:'', shapedByHow:'', parentRelationship:'', endedRelationship:'', inSchool:'', schoolName:'', studying:'', wentToCollege:'', collegeName:'', collegeSubject:'', collegeWhy:'', otherSchools:'', timeMostly:'', currentJob:'', incomeRange:'', doingWhatExpected:'', ownOrRent:'', livingSituation:'', hasChildren:'', childrenDetails:'', socialConnection:'', physicalHealth:'', mentalHealth:'', typicalWeek:'', proudOf:'', regretOrWonder:'', theDecision:'', decisionAge:'', whyMadeIt:'', alternativePath:'', whyNotTaken:'', peopleNotMet:'', initialHypothesis:'', mostWantToKnow:'' })
+    setBannerDismissed(true)
+  }
 
   const inputStyle: React.CSSProperties = {
     width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(212,168,67,0.2)',
@@ -633,6 +666,19 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
           <div style={{width:`${pct}%`,height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)',backgroundSize:'200% 100%',animation:'progressShimmer 2s linear infinite',transition:'width 0.5s ease',borderRadius:'2px'}}/>
         </div>
       </div>
+
+      {hasSavedProfile && (
+        <div style={{background:'rgba(212,168,67,0.06)',border:'1px solid rgba(212,168,67,0.25)',borderRadius:'6px',padding:'16px 20px',marginBottom:'24px',display:'flex',flexWrap:'wrap' as const,alignItems:'center',justifyContent:'space-between',gap:'12px',animation:'fadeUp 0.5s ease both'}}>
+          <div>
+            <div style={{color:'#D4A843',fontSize:'12px',letterSpacing:'2px',marginBottom:'2px'}}>WELCOME BACK</div>
+            <div style={{color:'rgba(240,240,240,0.65)',fontSize:'14px',fontFamily:'Georgia,serif'}}>Your previous answers are saved.</div>
+          </div>
+          <div style={{display:'flex',gap:'10px',flexShrink:0}}>
+            <button onClick={()=>setBannerDismissed(true)} style={{background:'rgba(212,168,67,0.15)',border:'1px solid rgba(212,168,67,0.4)',color:'#D4A843',padding:'8px 18px',cursor:'pointer',borderRadius:'3px',fontSize:'13px',fontFamily:'Georgia,serif',letterSpacing:'0.5px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(212,168,67,0.25)'} onMouseLeave={e=>e.currentTarget.style.background='rgba(212,168,67,0.15)'}>Continue</button>
+            <button onClick={handleBannerStartFresh} style={{background:'transparent',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(240,240,240,0.4)',padding:'8px 18px',cursor:'pointer',borderRadius:'3px',fontSize:'13px',fontFamily:'Georgia,serif',letterSpacing:'0.5px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.color='rgba(240,240,240,0.7)'} onMouseLeave={e=>e.currentTarget.style.color='rgba(240,240,240,0.4)'}>Start fresh</button>
+          </div>
+        </div>
+      )}
 
       <div style={{animation:'slideLeft 0.4s ease both'}}>
         {formStep === 1 && (
@@ -958,7 +1004,7 @@ function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLD
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, onReset, onNewProfile }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, onReset, onNewProfile, onExploreDecision }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
   const butterflyRef = useRef<HTMLDivElement>(null)
 
@@ -1222,6 +1268,13 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             </svg>
             <div style={{color:'rgba(240,240,240,0.5)',fontSize:'13px',maxWidth:'400px',margin:'0 auto',fontFamily:'Georgia,serif',fontStyle:'italic',lineHeight:1.7}}>How much your alternate self would miss the life they never lived</div>
             <div style={{fontFamily:'Georgia,serif',fontSize:'15px',lineHeight:1.7,color:'rgba(240,240,240,0.7)',maxWidth:'500px',margin:'16px auto 0'}}>{sim.regretExplanation}</div>
+            <div style={{fontFamily:'Georgia,serif',fontSize:'14px',fontStyle:'italic',color:'rgba(240,240,240,0.45)',maxWidth:'480px',margin:'12px auto 0',lineHeight:1.6}}>
+              {regretAnimated <= 20 && 'Your real life wins clearly. The alternate path held little for you.'}
+              {regretAnimated > 20 && regretAnimated <= 40 && 'Mild curiosity. The other path had some appeal but not enough to matter.'}
+              {regretAnimated > 40 && regretAnimated <= 60 && 'A genuine fork. Both lives had real value in different ways.'}
+              {regretAnimated > 60 && regretAnimated <= 80 && 'The alternate path had something important your real life missed.'}
+              {regretAnimated > 80 && 'The road not taken haunts this alternate self deeply.'}
+            </div>
           </div>
         </>
       )}
@@ -1402,11 +1455,69 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
         </div>
       )}
 
-      <div style={{display:'flex',gap:'12px',justifyContent:'center',marginTop:'48px',flexWrap:'wrap' as const}}>
-        <button onClick={onReset} style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'#D4A843',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(212,168,67,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>EXPLORE ANOTHER DECISION</button>
+      <AnimatedSection delay={0} direction="up" style={{marginTop:'48px'}}>
+        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(212,168,67,0.15)',borderRadius:'8px',padding:'32px',marginBottom:'24px'}}>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'8px',textAlign:'center' as const}}>EXPLORE ANOTHER DECISION</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'15px',color:'rgba(240,240,240,0.5)',textAlign:'center' as const,marginBottom:'24px',fontStyle:'italic'}}>What else could have been different?</div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:'12px'}}>
+            {[
+              ...(profile.otherSchools ? [{
+                label: `What if you had gone to ${profile.otherSchools}`,
+                theDecision: `I chose not to go to ${profile.otherSchools}`,
+                alternativePath: `Going to ${profile.otherSchools} instead`,
+              }] : []),
+              ...(profile.endedRelationship ? [{
+                label: 'What if that relationship had worked out',
+                theDecision: `I let that relationship end`,
+                alternativePath: `That relationship working out and continuing`,
+              }] : []),
+              ...(profile.closestFriendName ? [{
+                label: `What if you had never met ${profile.closestFriendName}`,
+                theDecision: `I met and became close with ${profile.closestFriendName}`,
+                alternativePath: `Never meeting ${profile.closestFriendName} and having a completely different social life`,
+              }] : []),
+              {
+                label: `What if you had stayed in ${profile.grewUpCity || 'your hometown'}`,
+                theDecision: `I left ${profile.grewUpCity || 'my hometown'} and built my life elsewhere`,
+                alternativePath: `Staying in ${profile.grewUpCity || 'my hometown'} and building my life there`,
+              },
+            ].map((s, i) => (
+              <SuggestionCard
+                key={i}
+                label={s.label}
+                onClick={() => onExploreDecision(s.theDecision, s.alternativePath)}
+              />
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      <div style={{display:'flex',gap:'12px',justifyContent:'center',marginTop:'16px',flexWrap:'wrap' as const}}>
+        <button onClick={onReset} style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'#D4A843',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(212,168,67,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>ENTER MY OWN DECISION</button>
         <button onClick={onNewProfile} style={{background:'transparent',border:'1px solid rgba(255,255,255,0.15)',color:'rgba(240,240,240,0.6)',padding:'14px 28px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',transition:'all 0.2s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'} onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.15)'}>BUILD A NEW PROFILE</button>
       </div>
     </div>
+  )
+}
+
+function SuggestionCard({ label, onClick }: { label: string, onClick: () => void }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: hovered ? 'rgba(212,168,67,0.06)' : 'rgba(255,255,255,0.02)',
+        border: `1px solid ${hovered ? 'rgba(212,168,67,0.45)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius:'6px', padding:'18px 16px', cursor:'pointer', textAlign:'left' as const,
+        fontFamily:'Georgia,serif', fontSize:'14px', color: hovered ? 'rgba(240,240,240,0.9)' : 'rgba(240,240,240,0.65)',
+        lineHeight:1.5, transition:'all 0.25s', width:'100%',
+      }}
+    >
+      <div style={{color: hovered ? '#D4A843' : 'rgba(212,168,67,0.5)',fontSize:'18px',marginBottom:'8px'}}>→</div>
+      {label}
+    </button>
   )
 }
 
