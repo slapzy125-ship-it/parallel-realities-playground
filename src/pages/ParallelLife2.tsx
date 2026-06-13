@@ -468,6 +468,7 @@ What I most want to know: ${profile.mostWantToKnow}`
       if (stopNarrationRef.current) break
       setNarratingSection(section.label)
       try {
+        console.log('Narrating with voiceId:', voiceIdRef.current, '| localStorage:', localStorage.getItem('revenio_voice_id'))
         const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
