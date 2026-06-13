@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/useSubscription";
+import AnimatedSection from "@/components/AnimatedSection";
+import GlowButton from "@/components/GlowButton";
+import MagneticCard from "@/components/MagneticCard";
 
 // ─────────────────────────────────────────────────────────────────────
 // PARALLEL LIFE — a documentary-style alternate-timeline simulator.
@@ -578,9 +581,9 @@ function Review({
         ))}
       </div>
       <div style={{ textAlign: "center" }}>
-        <button onClick={onRun} style={{ ...primaryBtn, fontSize: 14, padding: "18px 42px" }}>
+        <GlowButton onClick={onRun} gold={true} style={{ fontSize: 14, padding: "18px 42px" }}>
           Run the Simulation
-        </button>
+        </GlowButton>
         <div style={{ fontFamily: SERIF, fontSize: 14, color: MUTED, fontStyle: "italic", marginTop: 16, lineHeight: 1.6, maxWidth: 480, margin: "16px auto 0" }}>
           The simulation will take your real life as its starting point and show you in detail how that one different decision would have rippled through every part of your existence.
         </div>
@@ -667,6 +670,7 @@ function Output({
               body={s.body}
               showPaywallAfter={showPaywallAfter}
               paywallTier={isFree ? "free" : "legend"}
+              delay={idx * 120}
             />
           );
         })}
@@ -726,13 +730,14 @@ function HeaderCard({ profile, judgment }: { profile: Profile; judgment: string 
 }
 
 function TimelineRow({
-  yearLabel, title, body, showPaywallAfter, paywallTier,
+  yearLabel, title, body, showPaywallAfter, paywallTier, delay = 0,
 }: {
   yearLabel: string;
   title: string;
   body: string;
   showPaywallAfter: boolean;
   paywallTier: "free" | "legend";
+  delay?: number;
 }) {
   return (
     <>
@@ -742,17 +747,19 @@ function TimelineRow({
           textTransform: "uppercase", position: "sticky", top: 88,
         }}>{yearLabel}</div>
       </div>
-      <div style={{ marginBottom: 8 }}>
-        <h2 style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, margin: "0 0 20px", color: TEXT, lineHeight: 1.2 }}>
-          {title}
-        </h2>
-        <Narrative text={body} />
-        {showPaywallAfter && (
-          <div style={{ marginTop: 40 }}>
-            {paywallTier === "free" ? <FreePaywall /> : <LegendPaywall />}
-          </div>
-        )}
-      </div>
+      <AnimatedSection delay={delay} direction="up">
+        <div style={{ marginBottom: 8 }}>
+          <h2 style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, margin: "0 0 20px", color: TEXT, lineHeight: 1.2 }}>
+            {title}
+          </h2>
+          <Narrative text={body} />
+          {showPaywallAfter && (
+            <div style={{ marginTop: 40 }}>
+              {paywallTier === "free" ? <FreePaywall /> : <LegendPaywall />}
+            </div>
+          )}
+        </div>
+      </AnimatedSection>
     </>
   );
 }

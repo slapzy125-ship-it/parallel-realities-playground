@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
+import ParticleBackground from '@/components/ParticleBackground'
+import AnimatedSection from '@/components/AnimatedSection'
+import MagneticCard from '@/components/MagneticCard'
+import GlowButton from '@/components/GlowButton'
 import PenaltyKick from '@/components/minigames/PenaltyKick'
 import MagicDuel from '@/components/minigames/MagicDuel'
 import CombatStrike from '@/components/minigames/CombatStrike'
@@ -504,41 +508,146 @@ const G: Record<string,React.CSSProperties> = {
   topbar:{background:'#0F0F14',borderBottom:'1px solid #2A2A3A',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky' as const,top:72,zIndex:40},
 }
 
-export default function Play() {
+function PlayComingSoon() {
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
+
+  const handleWaitlist = () => {
+    const trimmed = waitlistEmail.trim()
+    if (!trimmed) return
+    try {
+      const existing: string[] = JSON.parse(localStorage.getItem('revenio_waitlist') || '[]')
+      if (!existing.includes(trimmed)) {
+        localStorage.setItem('revenio_waitlist', JSON.stringify([...existing, trimmed]))
+      }
+    } catch {
+      localStorage.setItem('revenio_waitlist', JSON.stringify([trimmed]))
+    }
+    setWaitlistSubmitted(true)
+  }
+
+  const worlds = [
+    {icon:'⚽',name:'Champions Legacy',desc:'Football career sim',color:'#4A9EFF'},
+    {icon:'🔮',name:'Arcane Academy',desc:'Magic school RPG',color:'#A855F7'},
+    {icon:'💹',name:'Greed: The Floor',desc:'Wall Street empire',color:'#22C55E'},
+    {icon:'🐉',name:'Dragonfall Kingdoms',desc:'Medieval war game',color:'#EF4444'},
+    {icon:'🚀',name:'Galactic Frontier',desc:'Space adventure',color:'#06B6D4'},
+    {icon:'⚡',name:'Hero Nexus',desc:'Superhero career',color:'#F59E0B'},
+    {icon:'🕶️',name:'Shadow Guild',desc:'Assassin brotherhood',color:'#6B7280'},
+    {icon:'🌆',name:'Neon Domination',desc:'Cyberpunk hacker',color:'#EC4899'},
+  ]
+
   return (
-    <div style={{minHeight:'100vh',background:'#0A0A0C',fontFamily:"'Rajdhani',sans-serif",overflow:'hidden'}}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
-      <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}`}</style>
+    <div style={{minHeight:'100vh',background:'#0A0A0C',fontFamily:"'Rajdhani',sans-serif",overflow:'hidden',position:'relative'}}>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet"/>
+      <style>{`
+        @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+        @keyframes pulseGold{0%,100%{box-shadow:0 0 0 0 rgba(212,168,67,0.3)}50%{box-shadow:0 0 20px 4px rgba(212,168,67,0.15)}}
+        @keyframes scanDown{0%{top:0%;opacity:0.6}100%{top:100%;opacity:0}}
+        .world-card-hover:hover{transform:translateY(-4px)!important;border-color:rgba(212,168,67,0.35)!important}
+      `}</style>
 
-      <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',justifyContent:'center',minHeight:'100vh',textAlign:'center' as const,padding:'40px 20px'}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'8px',animation:'fadeUp 0.8s ease both'}}>REVENIO</div>
-        <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px',marginBottom:'16px',animation:'fadeUp 0.8s ease 0.2s both'}}>PLAY MODE</div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(20px,4vw,32px)',fontWeight:700,color:'#F0C060',letterSpacing:'4px',marginBottom:'12px',animation:'fadeUp 0.8s ease 0.3s both'}}>COMING SOON</div>
-        <div style={{color:'#7A7A8A',fontSize:'15px',maxWidth:'500px',lineHeight:1.7,marginBottom:'48px',animation:'fadeUp 0.8s ease 0.4s both'}}>Eight worlds. Eight alternate lives. We are putting the finishing touches on something extraordinary.</div>
+      <ParticleBackground count={50} gold={true} />
 
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'16px',maxWidth:'800px',width:'100%',marginBottom:'48px',animation:'fadeUp 0.8s ease 0.5s both'}}>
-          {[
-            {icon:'⚽',name:'Champions Legacy',desc:'Football career sim'},
-            {icon:'🔮',name:'Arcane Academy',desc:'Magic school RPG'},
-            {icon:'💹',name:'Greed: The Floor',desc:'Wall Street empire'},
-            {icon:'🐉',name:'Dragonfall Kingdoms',desc:'Medieval war game'},
-            {icon:'🚀',name:'Galactic Frontier',desc:'Space adventure'},
-            {icon:'⚡',name:'Hero Nexus',desc:'Superhero career'},
-            {icon:'🕶️',name:'Shadow Guild',desc:'Assassin brotherhood'},
-            {icon:'🌆',name:'Neon Domination',desc:'Cyberpunk hacker'},
-          ].map((world, i) => (
-            <div key={world.name} style={{background:'#1A1A24',border:'1px solid #2A2A3A',borderRadius:'4px',padding:'20px 16px',animation:`fadeUp 0.6s ease ${0.6 + i * 0.08}s both, float ${3 + i * 0.3}s ease ${i * 0.2}s infinite`}}>
-              <div style={{fontSize:'28px',marginBottom:'8px'}}>{world.icon}</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:'12px',fontWeight:700,color:'#D4A843',marginBottom:'4px',letterSpacing:'0.5px'}}>{world.name}</div>
-              <div style={{color:'#7A7A8A',fontSize:'11px'}}>{world.desc}</div>
-            </div>
+      <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',justifyContent:'center',minHeight:'100vh',textAlign:'center' as const,padding:'100px 20px 60px',position:'relative',zIndex:1}}>
+
+        {/* Header */}
+        <div style={{animation:'fadeUp 0.8s ease both'}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(36px,8vw,72px)',fontWeight:900,letterSpacing:'8px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'8px'}}>REVENIO</div>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'6px',marginBottom:'20px'}}>PLAY MODE</div>
+        </div>
+
+        <div style={{animation:'fadeUp 0.8s ease 0.15s both'}}>
+          <div style={{display:'inline-flex',alignItems:'center',gap:'12px',background:'rgba(212,168,67,0.06)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'40px',padding:'8px 24px',marginBottom:'24px'}}>
+            <div style={{width:8,height:8,borderRadius:'50%',background:'#D4A843',animation:'pulseGold 2s ease-in-out infinite'}} />
+            <span style={{fontFamily:"'Orbitron',monospace",fontSize:'11px',letterSpacing:'4px',color:'#D4A843'}}>COMING SOON</span>
+            <div style={{width:8,height:8,borderRadius:'50%',background:'#D4A843',animation:'pulseGold 2s ease-in-out infinite 1s'}} />
+          </div>
+        </div>
+
+        <div style={{animation:'fadeUp 0.8s ease 0.25s both',maxWidth:'560px',marginBottom:'16px'}}>
+          <h1 style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(22px,4vw,34px)',fontWeight:700,color:'#F0C060',letterSpacing:'2px',marginBottom:'16px',lineHeight:1.3}}>Eight Worlds. Eight Lives.<br/>One Headset.</h1>
+          <p style={{color:'#7A7A8A',fontSize:'15px',lineHeight:1.8}}>We are putting the finishing touches on something extraordinary. Eight fully AI-driven alternate lives — each one a complete world with its own story, characters, and consequences.</p>
+        </div>
+
+        {/* Divider */}
+        <div style={{width:60,height:1,background:'linear-gradient(to right,transparent,#D4A843,transparent)',margin:'32px auto 40px',animation:'fadeUp 0.8s ease 0.35s both'}} />
+
+        {/* World Cards Grid */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(175px,1fr))',gap:'16px',maxWidth:'860px',width:'100%',marginBottom:'60px'}}>
+          {worlds.map((world, i) => (
+            <AnimatedSection key={world.name} delay={400 + i * 80} direction="scale">
+              <MagneticCard style={{padding:'24px 16px',position:'relative',overflow:'hidden',cursor:'default',height:'100%'}}>
+                {/* Scan line effect */}
+                <div style={{position:'absolute',left:0,right:0,height:'2px',background:`linear-gradient(to right,transparent,${world.color}40,transparent)`,animation:`scanDown ${3 + i * 0.4}s ease-in-out ${i * 0.3}s infinite`,top:0,pointerEvents:'none'}} />
+
+                {/* COMING SOON badge */}
+                <div style={{position:'absolute',top:'10px',right:'10px',background:`rgba(212,168,67,0.12)`,border:'1px solid rgba(212,168,67,0.35)',borderRadius:'3px',padding:'2px 7px',fontSize:'8px',fontFamily:"'Orbitron',monospace",letterSpacing:'2px',color:'#D4A843',fontWeight:700}}>
+                  SOON
+                </div>
+
+                <div style={{fontSize:'32px',marginBottom:'10px',filter:'drop-shadow(0 0 8px rgba(212,168,67,0.3))'}}>{world.icon}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:'12px',fontWeight:700,color:'#D4A843',marginBottom:'6px',letterSpacing:'0.5px',lineHeight:1.3}}>{world.name}</div>
+                <div style={{color:'#7A7A8A',fontSize:'11px',letterSpacing:'0.5px'}}>{world.desc}</div>
+
+                {/* Bottom accent line */}
+                <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:`linear-gradient(to right,transparent,${world.color}60,transparent)`}} />
+              </MagneticCard>
+            </AnimatedSection>
           ))}
         </div>
 
-        <a href="/" style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',fontFamily:"'Cinzel',serif",fontWeight:700,padding:'14px 48px',textDecoration:'none',letterSpacing:'2px',fontSize:'14px',borderRadius:'2px',display:'inline-block',animation:'fadeUp 0.8s ease 1.2s both'}}>BACK TO HOME</a>
+        {/* JOIN THE WAITLIST */}
+        <AnimatedSection delay={800} direction="up" style={{width:'100%',maxWidth:'500px',marginBottom:'48px'}}>
+          <div style={{background:'rgba(26,26,36,0.8)',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'6px',padding:'40px 32px',backdropFilter:'blur(12px)'}}>
+            <div style={{color:'#D4A843',fontSize:'10px',letterSpacing:'4px',marginBottom:'12px',fontFamily:"'Cinzel',serif"}}>JOIN THE WAITLIST</div>
+            <h3 style={{fontFamily:"'Cinzel',serif",fontSize:'20px',fontWeight:700,color:'#F0C060',marginBottom:'8px'}}>Be First to Play</h3>
+            <p style={{color:'#7A7A8A',fontSize:'13px',lineHeight:1.7,marginBottom:'24px'}}>Get early access the moment Play launches. We will let you know before anyone else.</p>
+
+            {waitlistSubmitted ? (
+              <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',gap:'12px',padding:'20px'}}>
+                <div style={{fontSize:'32px'}}>✓</div>
+                <div style={{fontFamily:"'Cinzel',serif",color:'#D4A843',fontSize:'14px',fontWeight:700,letterSpacing:'1px'}}>You are on the list.</div>
+                <div style={{color:'#7A7A8A',fontSize:'13px',lineHeight:1.6,textAlign:'center' as const}}>We will let you know when Play launches.</div>
+              </div>
+            ) : (
+              <div style={{display:'flex',gap:'8px',flexWrap:'wrap' as const}}>
+                <input
+                  type="email"
+                  value={waitlistEmail}
+                  onChange={e => setWaitlistEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleWaitlist()}
+                  placeholder="your@email.com"
+                  style={{flex:1,minWidth:'180px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(212,168,67,0.25)',color:'#E8E4D8',padding:'12px 16px',fontFamily:"'Rajdhani',sans-serif",fontSize:'15px',outline:'none',borderRadius:'3px',transition:'border-color 0.3s'}}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.6)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.25)' }}
+                />
+                <GlowButton onClick={handleWaitlist} gold={true} style={{padding:'12px 28px',fontSize:'12px',letterSpacing:'1.5px',whiteSpace:'nowrap' as const}}>
+                  NOTIFY ME
+                </GlowButton>
+              </div>
+            )}
+          </div>
+        </AnimatedSection>
+
+        {/* Back to home */}
+        <AnimatedSection delay={1000}>
+          <GlowButton href="/" gold={true} ghost={true}>← BACK TO HOME</GlowButton>
+        </AnimatedSection>
+
+        {/* Bottom tagline */}
+        <AnimatedSection delay={1100}>
+          <p style={{color:'#3A3A4A',fontSize:'11px',letterSpacing:'3px',marginTop:'40px',fontFamily:"'Cinzel',serif"}}>REVENIO · EXPLORE THE LIFE YOU NEVER LIVED</p>
+        </AnimatedSection>
       </div>
     </div>
   )
+}
+
+export default function Play() {
+  return <PlayComingSoon />
   const [screen, setScreen] = useState('splash')
   const [player, setPlayer] = useState(defaultPlayer())
   const [currentWorld, setCurrentWorld] = useState<any>(null)

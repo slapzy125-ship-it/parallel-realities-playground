@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import AnimatedSection from '@/components/AnimatedSection'
+import GlowButton from '@/components/GlowButton'
+import MagneticCard from '@/components/MagneticCard'
 
 const STYLES = `
   @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
@@ -402,26 +405,16 @@ function HeroSection({ onStart, onQuickStart }: { onStart: () => void, onQuickSt
       <div style={{fontFamily:'Georgia,serif',fontSize:'clamp(16px,2vw,22px)',color:'rgba(240,240,240,0.7)',marginBottom:'48px',maxWidth:'600px',lineHeight:1.7,animation:'fadeUp 1s ease 1s both'}}>
         What would your life look like if you had chosen differently?
       </div>
-      <button
-        onClick={onStart}
-        style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'18px 56px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
-        onMouseEnter={e => e.currentTarget.style.transform='scale(1.03)'}
-        onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
-      >
+      <GlowButton onClick={onStart} gold={true} style={{fontSize:'18px',padding:'18px 56px',width:'100%',maxWidth:'400px',animation:'glow 2s infinite, fadeUp 1s ease 1.2s both',fontFamily:'Georgia,serif'}}>
         BEGIN YOUR SIMULATION
-      </button>
+      </GlowButton>
       <div style={{marginTop:'24px',color:'rgba(240,240,240,0.3)',fontSize:'13px',animation:'fadeUp 1s ease 1.4s both'}}>
         The more honestly you answer, the more surprising the result
       </div>
       <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',marginTop:'20px',animation:'fadeUp 1s ease 1.5s both'}}>
-        <button
-          onClick={onQuickStart}
-          style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'rgba(212,168,67,0.7)',padding:'12px 40px',fontSize:'14px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'1px',transition:'all 0.3s'}}
-          onMouseEnter={e=>{e.currentTarget.style.borderColor='#D4A843';e.currentTarget.style.color='#D4A843'}}
-          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(212,168,67,0.3)';e.currentTarget.style.color='rgba(212,168,67,0.7)'}}
-        >
+        <GlowButton onClick={onQuickStart} gold={true} ghost={true} style={{fontSize:'14px',padding:'12px 40px',fontFamily:'Georgia,serif'}}>
           ⚡ Quick Simulation — 30 seconds
-        </button>
+        </GlowButton>
         <div style={{color:'rgba(240,240,240,0.3)',fontSize:'12px',marginTop:'8px'}}>5 questions only. Full simulation in the deep version.</div>
       </div>
     </div>
@@ -861,14 +854,9 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
                 Optional. No spam. Unsubscribe anytime.
               </p>
             </div>
-            <button
-              onClick={onSubmit}
-              style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'20px 64px',fontSize:'18px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'2px',animation:'glow 2s infinite',transition:'transform 0.3s',width:'100%',maxWidth:'400px'}}
-              onMouseEnter={e=>e.currentTarget.style.transform='scale(1.02)'}
-              onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
-            >
+            <GlowButton onClick={onSubmit} gold={true} style={{fontSize:'18px',padding:'20px 64px',width:'100%',maxWidth:'400px',animation:'glow 2s infinite',fontFamily:'Georgia,serif'}}>
               RUN MY SIMULATION
-            </button>
+            </GlowButton>
           </div>
         )}
       </div>
@@ -985,15 +973,19 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
         </div>
       </div>
 
-      <div style={{...sectionStyle,animationDelay:'0.1s'}}>
-        <div style={yearStyle}>IMMEDIATELY AFTER</div>
-        <p style={narrativeStyle}>{sim.immediateAftermath}</p>
-      </div>
+      <AnimatedSection delay={100} direction="up">
+        <div style={sectionStyle}>
+          <div style={yearStyle}>IMMEDIATELY AFTER</div>
+          <p style={narrativeStyle}>{sim.immediateAftermath}</p>
+        </div>
+      </AnimatedSection>
 
-      <div style={{...sectionStyle,animationDelay:'0.2s'}}>
-        <div style={yearStyle}>THE FIRST YEAR</div>
-        <p style={narrativeStyle}>{sim.firstYear}</p>
-      </div>
+      <AnimatedSection delay={200} direction="up">
+        <div style={sectionStyle}>
+          <div style={yearStyle}>THE FIRST YEAR</div>
+          <p style={narrativeStyle}>{sim.firstYear}</p>
+        </div>
+      </AnimatedSection>
 
       {sim.teaserNarration && (
         <div style={{background:'#0F0F14',border:'1px solid rgba(212,168,67,0.2)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
@@ -1020,17 +1012,21 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
       {(userTier === 'legend' || userTier === 'immortal') && (
         <>
-          <div style={{...sectionStyle,animationDelay:'0.3s'}}>
-            <div style={yearStyle}>THE FORMATIVE YEARS</div>
-            <p style={narrativeStyle}>{sim.formativeYears}</p>
-          </div>
+          <AnimatedSection delay={150} direction="up">
+            <div style={sectionStyle}>
+              <div style={yearStyle}>THE FORMATIVE YEARS</div>
+              <p style={narrativeStyle}>{sim.formativeYears}</p>
+            </div>
+          </AnimatedSection>
 
           <TurningPoint tp={sim.turningPoint1} choice={tp1Choice} setChoice={setTp1Choice} number={1} />
 
-          <div style={{...sectionStyle,animationDelay:'0.4s'}}>
-            <div style={yearStyle}>THE MIDDLE YEARS</div>
-            <p style={narrativeStyle}>{sim.middleYears}</p>
-          </div>
+          <AnimatedSection delay={200} direction="up">
+            <div style={sectionStyle}>
+              <div style={yearStyle}>THE MIDDLE YEARS</div>
+              <p style={narrativeStyle}>{sim.middleYears}</p>
+            </div>
+          </AnimatedSection>
 
           <TurningPoint tp={sim.turningPoint2} choice={tp2Choice} setChoice={setTp2Choice} number={2} />
         </>
@@ -1038,17 +1034,21 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
       {userTier === 'immortal' && (
         <>
-          <div style={{...sectionStyle,animationDelay:'0.5s'}}>
-            <div style={yearStyle}>THE LATER YEARS</div>
-            <p style={narrativeStyle}>{sim.laterYears}</p>
-          </div>
+          <AnimatedSection delay={250} direction="up">
+            <div style={sectionStyle}>
+              <div style={yearStyle}>THE LATER YEARS</div>
+              <p style={narrativeStyle}>{sim.laterYears}</p>
+            </div>
+          </AnimatedSection>
 
           <TurningPoint tp={sim.turningPoint3} choice={tp3Choice} setChoice={setTp3Choice} number={3} />
 
-          <div style={{...sectionStyle,animationDelay:'0.6s'}}>
-            <div style={yearStyle}>OLD AGE AND LEGACY</div>
-            <p style={narrativeStyle}>{sim.oldAge}</p>
-          </div>
+          <AnimatedSection delay={300} direction="up">
+            <div style={sectionStyle}>
+              <div style={yearStyle}>OLD AGE AND LEGACY</div>
+              <p style={narrativeStyle}>{sim.oldAge}</p>
+            </div>
+          </AnimatedSection>
         </>
       )}
 
@@ -1398,16 +1398,31 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
 
 function TurningPoint({ tp, choice, setChoice, number }: any) {
   return (
-    <div style={{background:'rgba(212,168,67,0.03)',border:'1px solid rgba(212,168,67,0.25)',borderRadius:'8px',padding:'28px',marginBottom:'24px',animation:'fadeUp 0.8s ease both'}}>
-      <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>TURNING POINT {number}</div>
-      <p style={{fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.7,color:'rgba(240,240,240,0.85)',marginBottom:'20px'}}>{tp?.situation}</p>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
-        {['A','B'].map(opt => (
-          <button key={opt} onClick={() => setChoice(opt)} style={{background:choice===opt?'rgba(212,168,67,0.2)':'rgba(255,255,255,0.03)',border:`1px solid ${choice===opt?'#D4A843':'rgba(255,255,255,0.1)'}`,color:choice===opt?'#D4A843':'rgba(240,240,240,0.7)',padding:'16px',cursor:'pointer',borderRadius:'4px',textAlign:'left' as const,fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.5,transition:'all 0.2s'}}>
-            {opt === 'A' ? tp?.choiceA : tp?.choiceB}
-          </button>
-        ))}
+    <AnimatedSection delay={number * 100} direction="up" style={{marginBottom:'24px'}}>
+      <div style={{background:'rgba(212,168,67,0.03)',border:'1px solid rgba(212,168,67,0.25)',borderRadius:'8px',padding:'28px'}}>
+        <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'3px',marginBottom:'12px'}}>TURNING POINT {number}</div>
+        <p style={{fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.7,color:'rgba(240,240,240,0.85)',marginBottom:'20px'}}>{tp?.situation}</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',gap:'12px'}}>
+          {['A','B'].map(opt => (
+            <MagneticCard
+              key={opt}
+              style={{
+                padding:'16px',
+                cursor:'pointer',
+                background: choice===opt ? 'rgba(212,168,67,0.15)' : undefined,
+                border: `1px solid ${choice===opt?'#D4A843':'rgba(255,255,255,0.1)'}`,
+              }}
+            >
+              <button
+                onClick={() => setChoice(opt)}
+                style={{background:'transparent',border:'none',color:choice===opt?'#D4A843':'rgba(240,240,240,0.7)',width:'100%',textAlign:'left' as const,fontFamily:'Georgia,serif',fontSize:'14px',lineHeight:1.5,cursor:'pointer',padding:0}}
+              >
+                {opt === 'A' ? tp?.choiceA : tp?.choiceB}
+              </button>
+            </MagneticCard>
+          ))}
+        </div>
       </div>
-    </div>
+    </AnimatedSection>
   )
 }

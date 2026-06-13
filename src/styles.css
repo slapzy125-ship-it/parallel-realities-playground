@@ -76,7 +76,13 @@
     background-attachment: fixed;
   }
 
-  ::selection { background: oklch(0.78 0.14 82 / 0.4); color: var(--foreground); }
+  ::selection { background: rgba(212,168,67,0.3); color: #F0C060; }
+
+  /* Premium scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0A0A0C; }
+  ::-webkit-scrollbar-thumb { background: #8B6914; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #D4A843; }
 }
 
 @utility text-gold-gradient {
@@ -145,3 +151,20 @@
   pointer-events: none;
   mix-blend-mode: overlay;
 }
+
+/* Additional premium animation utilities */
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes gold-line-grow {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.animate-slide-up { animation: slide-up-fade 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-scale-in { animation: scale-in 0.7s cubic-bezier(0.16,1,0.3,1) both; }
