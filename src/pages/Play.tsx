@@ -1689,7 +1689,7 @@ RESPOND WITH ONLY THIS JSON NO MARKDOWN NO BACKTICKS:
         {showSeasonSummary && <SeasonSummary {...showSeasonSummary} />}
         {showTransferWindow && <TransferWindow {...showTransferWindow} />}
         {showChapterCard && <ChapterCard chapterNumber={showChapterCard.chapterNumber} chapterName={showChapterCard.chapterName} actName={showChapterCard.actName} onClose={showChapterCard.onContinue} />}
-        {showSaveSlots !== null && <SaveSlots mode={showSaveSlots} currentSlot={player.saveSlot} onSave={handleSave} onLoad={handleLoad} onClose={()=>setShowSaveSlots(null)} />}
+        {(() => { const m = showSaveSlots; return m && <SaveSlots mode={m} currentSlot={player.saveSlot} onSave={handleSave} onLoad={handleLoad} onClose={()=>setShowSaveSlots(null)} /> })()}
         {currentTrophy && <TrophyPopup title={currentTrophy.title} desc={currentTrophy.desc} tier={currentTrophy.tier} onDone={()=>setCurrentTrophy(null)} />}
       </div>
     )
