@@ -368,12 +368,28 @@ What I most want to know: ${profile.mostWantToKnow}`
         const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: section.text, sectionLabel: section.label })
+          body: JSON.stringify({ text: section.text })
         })
-        const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
-        const audio = new Audio(url)
-        await new Promise(resolve => { audio.onended = resolve; audio.onerror = resolve; audio.play() })
+        const data = await res.json()
+        if (data.audioBase64) {
+          const binaryString = atob(data.audioBase64)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], { type: 'audio/mpeg' })
+          const url = URL.createObjectURL(blob)
+          const audio = new Audio(url)
+          audio.volume = 1
+          await new Promise<void>((resolve) => {
+            audio.onended = () => resolve()
+            audio.onerror = (e) => { console.error('Audio error:', e); resolve() }
+            audio.play().catch(e => { console.error('Play error:', e); resolve() })
+          })
+          URL.revokeObjectURL(url)
+        } else {
+          console.error('No audio returned:', data)
+        }
       } catch(e) {
         console.error('Narration error:', e)
       }
