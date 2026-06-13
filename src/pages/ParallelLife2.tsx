@@ -432,7 +432,7 @@ function LoadingSection({ lines, profile }: { lines: string[], profile: any }) {
   const [currentLine, setCurrentLine] = useState(0)
   const [particles, setParticles] = useState<{x:number,y:number,size:number,speed:number,opacity:number}[]>([])
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animRef = useRef<number>()
+  const animRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
     const ps = Array.from({length: 60}, () => ({
