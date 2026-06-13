@@ -96,6 +96,8 @@ export default function ParallelLife2() {
   const [email, setEmail] = useState('')
   const [quickMode, setQuickMode] = useState(false)
   const [quickProfile, setQuickProfile] = useState({ firstName:'', age:'', grewUpCity:'', theDecision:'', alternativePath:'' })
+  const [narrating, setNarrating] = useState(false)
+  const [narratingSection, setNarratingSection] = useState('')
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
@@ -348,6 +350,38 @@ What I most want to know: ${profile.mostWantToKnow}`
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const narrateSimulation = async () => {
+    if (!sim) return
+    setNarrating(true)
+    const sections = [
+      { text: sim.immediateAftermath, label: 'Immediately After' },
+      { text: sim.firstYear, label: 'The First Year' },
+      { text: sim.formativeYears, label: 'The Formative Years' },
+      { text: sim.middleYears, label: 'The Middle Years' },
+      { text: sim.laterYears, label: 'The Later Years' },
+      { text: sim.oldAge, label: 'Old Age' },
+      { text: sim.messageFromOtherSelf, label: 'A Message From The Other You' },
+    ].filter(s => s.text)
+    for (const section of sections) {
+      setNarratingSection(section.label)
+      try {
+        const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: section.text, sectionLabel: section.label })
+        })
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const audio = new Audio(url)
+        await new Promise(resolve => { audio.onended = resolve; audio.onerror = resolve; audio.play() })
+      } catch(e) {
+        console.error('Narration error:', e)
+      }
+    }
+    setNarrating(false)
+    setNarratingSection('')
+  }
+
   const regretColor = regretAnimated < 40 ? '#D4A843' : regretAnimated < 70 ? '#D4A843' : '#ff6b6b'
   const circumference = 2 * Math.PI * 54
   const strokeDash = circumference - (regretAnimated / 100) * circumference
@@ -408,6 +442,7 @@ What I most want to know: ${profile.mostWantToKnow}`
             generateDocumentary={generateDocumentary}
             shareToTwitter={shareToTwitter} copyShareLink={copyShareLink} copied={copied}
             switchChoice={switchChoice} setSwitchChoice={setSwitchChoice}
+            narrating={narrating} narratingSection={narratingSection} narrateSimulation={narrateSimulation} stopNarration={()=>setNarrating(false)}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
             onExploreDecision={(decision: string, alternativePath: string) => {
@@ -1004,7 +1039,7 @@ function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLD
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, onReset, onNewProfile, onExploreDecision }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, narrating, narratingSection, narrateSimulation, stopNarration, onReset, onNewProfile, onExploreDecision }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
   const butterflyRef = useRef<HTMLDivElement>(null)
 
@@ -1032,6 +1067,39 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
           <div style={{textAlign:'center' as const}}><div style={{color:'rgba(240,240,240,0.4)',fontSize:'11px',letterSpacing:'2px'}}>ALTERNATE PATH</div><div style={{color:'#D4A843',fontSize:'13px',marginTop:'4px',maxWidth:'200px'}}>{profile.alternativePath}</div></div>
         </div>
       </div>
+
+      {sim && (
+        <div style={{textAlign:'center' as const,marginBottom:'32px'}}>
+          <style>{`@keyframes soundBar{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}`}</style>
+          {!narrating ? (
+            <button
+              onClick={narrateSimulation}
+              style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'14px 36px',cursor:'pointer',borderRadius:'4px',fontSize:'14px',fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:'2px',display:'inline-flex',alignItems:'center',gap:'10px',transition:'transform 0.2s'}}
+              onMouseEnter={e=>e.currentTarget.style.transform='scale(1.03)'}
+              onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+            >
+              ▶ HEAR YOUR OTHER LIFE
+            </button>
+          ) : (
+            <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',gap:'12px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:'14px'}}>
+                <div style={{display:'flex',gap:'3px',alignItems:'flex-end',height:'24px'}}>
+                  {[0,1,2,3,4].map(i=>(
+                    <div key={i} style={{width:'3px',background:'#D4A843',borderRadius:'2px',transformOrigin:'bottom',animation:`soundBar 0.6s ease ${i*0.12}s infinite alternate`,height:'100%'}}/>
+                  ))}
+                </div>
+                <span style={{color:'#D4A843',fontSize:'13px',letterSpacing:'2px',fontFamily:"'Rajdhani',sans-serif",textTransform:'uppercase' as const}}>{narratingSection}</span>
+              </div>
+              <button
+                onClick={stopNarration}
+                style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'12px',textDecoration:'underline'}}
+              >
+                Stop
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <AnimatedSection delay={100} direction="up">
         <div style={sectionStyle}>
