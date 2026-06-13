@@ -432,7 +432,7 @@ function LoadingSection({ lines, profile }: { lines: string[], profile: any }) {
   const [currentLine, setCurrentLine] = useState(0)
   const [particles, setParticles] = useState<{x:number,y:number,size:number,speed:number,opacity:number}[]>([])
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animRef = useRef<number>()
+  const animRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
     const ps = Array.from({length: 60}, () => ({
@@ -885,10 +885,10 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
   )
 }
 
-function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement> }) {
+function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const [pos, setPos] = useState({ x: 0, y: 0, angle: 0 })
   const [flap, setFlap] = useState(1)
-  const frameRef = useRef<number>()
+  const frameRef = useRef<number | undefined>(undefined)
   const progressRef = useRef(0)
   const startTimeRef = useRef(Date.now())
 
