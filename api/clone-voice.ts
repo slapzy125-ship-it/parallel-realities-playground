@@ -25,7 +25,7 @@ export default async function handler(req: any, res: any) {
 
     if (!response.ok) {
       const err = await response.text()
-      return res.status(500).json({ error: err })
+      return res.status(500).json({ error: err, status: response.status })
     }
 
     const data = await response.json()
