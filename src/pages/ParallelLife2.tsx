@@ -138,6 +138,7 @@ export default function ParallelLife2() {
   }, [step, sim])
 
   const runSimulation = async () => {
+    if (quickMode) localStorage.removeItem('revenio_parallel2_profile')
     localStorage.setItem('revenio_parallel2_profile', JSON.stringify(profile))
     if (email) localStorage.setItem('revenio_user_email', email)
     setStep('loading')
@@ -156,7 +157,14 @@ export default function ParallelLife2() {
       if (i >= lines.length) clearInterval(lt)
     }, 700)
 
-    const systemPrompt = `LOCATION RULES — CRITICAL:
+    const systemPrompt = `CRITICAL CONTENT RULES:
+1. DO NOT default to business or entrepreneurship storylines. Match the alternate path exactly. If someone would have gone to a different university show that university life. If they would have moved to a different city show life in that city. Do not invent a business unless the user explicitly mentions business in their alternate path.
+2. Most alternate lives involve different relationships, different employment careers, different cities, different education, different family situations. Reflect real ordinary human lives not startup success stories.
+3. The alternate life should have ups and downs. Not every alternate path leads to wealth or success. Some lead to more happiness with less money. Some lead to better relationships but harder careers. Reflect realistic consequences.
+4. Only use locations directly mentioned in the profile or logically implied by the alternate decision. Never add London or any other city not mentioned by the user.
+5. Read the alternativePath field very carefully. The entire simulation must flow logically from that one specific change and nothing else.
+
+LOCATION RULES — CRITICAL:
 1. The user's current city is ${profile.liveCity} ${profile.liveCountry}. The user grew up in ${profile.grewUpCity} ${profile.grewUpCountry}.
 2. In the ALTERNATE timeline only reference locations that make sense for the alternate path the user described. If the alternate path does not involve London do not mention London at all.
 3. Never default to London as a location. Only use London if the user explicitly mentioned London in their profile or their alternate path.
@@ -181,7 +189,13 @@ Return ONLY this exact JSON with no markdown no backticks:
 
 CRITICAL: Your entire response must be a single valid JSON object. No text before it. No text after it. No markdown. No backticks. No explanation. Just the raw JSON object starting with { and ending with }`
 
-    const userMsg = `Here is my complete life profile:
+    const userMsg = quickMode
+      ? `Name: ${quickProfile.firstName}, Age: ${quickProfile.age}
+Grew up in: ${quickProfile.grewUpCity}
+The decision they actually made: ${quickProfile.theDecision}
+The alternative they did not take: ${quickProfile.alternativePath}
+No other information is available. Build the simulation using only these facts. Do not invent locations beyond what is mentioned. Do not reference any places not directly implied by the decision or the city they grew up in.`
+      : `Here is my complete life profile:
 Name: ${profile.firstName}, Age: ${profile.age}
 Grew up in: ${profile.grewUpCity}, ${profile.grewUpCountry}
 Now live in: ${profile.liveCity}, ${profile.liveCountry}
