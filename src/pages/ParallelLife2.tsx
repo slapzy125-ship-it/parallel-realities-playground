@@ -99,6 +99,7 @@ export default function ParallelLife2() {
   const [narrating, setNarrating] = useState(false)
   const [narratingSection, setNarratingSection] = useState('')
   const timelineRef = useRef<HTMLDivElement>(null)
+  const stopNarrationRef = useRef(false)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
 
@@ -301,10 +302,31 @@ What I most want to know: ${profile.mostWantToKnow}`
     }
   }
 
+  const compressImage = (base64: string): Promise<string> => {
+    return new Promise(resolve => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const maxSize = 512
+        let width = img.width
+        let height = img.height
+        if (width > height) { if (width > maxSize) { height = height * maxSize / width; width = maxSize } }
+        else { if (height > maxSize) { width = width * maxSize / height; height = maxSize } }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1])
+      }
+      img.src = base64
+    })
+  }
+
   const generateDocumentary = async () => {
     if (!sim) return
     setDocState('generating')
     try {
+      const compressedPhoto = userPhoto ? await compressImage(userPhoto) : undefined
       const scenes = [
         { visualPrompt: sim.immediateAftermath },
         { visualPrompt: sim.firstYear },
@@ -315,7 +337,7 @@ What I most want to know: ${profile.mostWantToKnow}`
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           scenes,
-          userPhotoBase64: userPhoto ? userPhoto.split(',')[1] : undefined,
+          userPhotoBase64: compressedPhoto,
           userPhotoMediaType: userPhoto ? userPhoto.split(';')[0].split(':')[1] : undefined
         })
       })
@@ -352,23 +374,25 @@ What I most want to know: ${profile.mostWantToKnow}`
 
   const narrateSimulation = async () => {
     if (!sim) return
+    stopNarrationRef.current = false
     setNarrating(true)
     const sections = [
-      { text: sim.immediateAftermath, label: 'Immediately After' },
-      { text: sim.firstYear, label: 'The First Year' },
-      { text: sim.formativeYears, label: 'The Formative Years' },
-      { text: sim.middleYears, label: 'The Middle Years' },
-      { text: sim.laterYears, label: 'The Later Years' },
-      { text: sim.oldAge, label: 'Old Age' },
-      { text: sim.messageFromOtherSelf, label: 'A Message From The Other You' },
+      { text: sim.immediateAftermath, label: 'Immediately After', index: 0 },
+      { text: sim.firstYear, label: 'The First Year', index: 1 },
+      { text: sim.formativeYears, label: 'The Formative Years', index: 2 },
+      { text: sim.middleYears, label: 'The Middle Years', index: 3 },
+      { text: sim.laterYears, label: 'The Later Years', index: 4 },
+      { text: sim.oldAge, label: 'Old Age', index: 5 },
+      { text: sim.messageFromOtherSelf, label: 'A Message From The Other You', index: 6 },
     ].filter(s => s.text)
     for (const section of sections) {
+      if (stopNarrationRef.current) break
       setNarratingSection(section.label)
       try {
         const res = await fetch('https://parallel-realities-playground.vercel.app/api/narrate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: section.text })
+          body: JSON.stringify({ text: section.text, sectionIndex: section.index })
         })
         const data = await res.json()
         if (data.audioBase64) {
@@ -383,12 +407,17 @@ What I most want to know: ${profile.mostWantToKnow}`
           audio.volume = 1
           await new Promise<void>((resolve) => {
             audio.onended = () => resolve()
-            audio.onerror = (e) => { console.error('Audio error:', e); resolve() }
-            audio.play().catch(e => { console.error('Play error:', e); resolve() })
+            audio.onerror = () => resolve()
+            audio.play().catch(() => resolve())
+            const checkStop = setInterval(() => {
+              if (stopNarrationRef.current) {
+                audio.pause()
+                clearInterval(checkStop)
+                resolve()
+              }
+            }, 100)
           })
           URL.revokeObjectURL(url)
-        } else {
-          console.error('No audio returned:', data)
         }
       } catch(e) {
         console.error('Narration error:', e)
@@ -458,7 +487,7 @@ What I most want to know: ${profile.mostWantToKnow}`
             generateDocumentary={generateDocumentary}
             shareToTwitter={shareToTwitter} copyShareLink={copyShareLink} copied={copied}
             switchChoice={switchChoice} setSwitchChoice={setSwitchChoice}
-            narrating={narrating} narratingSection={narratingSection} narrateSimulation={narrateSimulation} stopNarration={()=>setNarrating(false)}
+            narrating={narrating} narratingSection={narratingSection} narrateSimulation={narrateSimulation} stopNarration={()=>{ stopNarrationRef.current = true; setNarrating(false); setNarratingSection('') }}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
             onExploreDecision={(decision: string, alternativePath: string) => {
