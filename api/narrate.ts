@@ -31,7 +31,7 @@ export default async function handler(req: any, res: any) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'xi-api-key': ELEVEN_KEY },
       body: JSON.stringify({
-        text: text.slice(0, 300),
+        text: text.slice(0, 5000),
         model_id: 'eleven_multilingual_v2',
         voice_settings: { stability: settings.stability, similarity_boost: settings.similarity_boost, style: settings.style, use_speaker_boost: true }
       })
