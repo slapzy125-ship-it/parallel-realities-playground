@@ -24,18 +24,16 @@ serve(async (req) => {
     const audioBuffer = await elevenRes.arrayBuffer()
     const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
 
+    void userPhotoBase64; void userPhotoMediaType; void personName;
     const videoTaskIds: string[] = []
     for (const scene of scenes) {
-      const body: any = {
+      const body = {
         model: 'gen4_turbo',
         promptText: scene.visualPrompt,
-        duration: 10,
-        ratio: '1280:720',
+        duration: 5,
+        ratio: '1280:720'
       }
-      if (userPhotoBase64) {
-        body.promptImage = `data:${userPhotoMediaType};base64,${userPhotoBase64}`
-      }
-      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/image_to_video', {
+      const runwayRes = await fetch('https://api.dev.runwayml.com/v1/text_to_video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
