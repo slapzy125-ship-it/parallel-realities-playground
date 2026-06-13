@@ -89,7 +89,10 @@ export default function ParallelLife2() {
   const [docVideos, setDocVideos] = useState<string[]>([])
   const [videoUrls, setVideoUrls] = useState<string[]>([])
   const [copied, setCopied] = useState(false)
+  const [switchChoice, setSwitchChoice] = useState<'switch'|'stay'|null>(null)
   const [email, setEmail] = useState('')
+  const [quickMode, setQuickMode] = useState(false)
+  const [quickProfile, setQuickProfile] = useState({ firstName:'', age:'', grewUpCity:'', theDecision:'', alternativePath:'' })
   const timelineRef = useRef<HTMLDivElement>(null)
 
   const up = (k: keyof Profile, v: string) => setProfile(p => ({...p, [k]:v}))
@@ -150,7 +153,14 @@ export default function ParallelLife2() {
       if (i >= lines.length) clearInterval(lt)
     }, 700)
 
-    const systemPrompt = `You are simulating a parallel life for a real person based on one different decision they made. You have their complete profile. Generate their alternate timeline as a detailed flowing narrative.
+    const systemPrompt = `LOCATION RULES — CRITICAL:
+1. The user's current city is ${profile.liveCity} ${profile.liveCountry}. The user grew up in ${profile.grewUpCity} ${profile.grewUpCountry}.
+2. In the ALTERNATE timeline only reference locations that make sense for the alternate path the user described. If the alternate path does not involve London do not mention London at all.
+3. Never default to London as a location. Only use London if the user explicitly mentioned London in their profile or their alternate path.
+4. The alternate timeline should be set in locations that logically follow from the alternate decision the user made. If they said they would have gone to a university in Manchester the alternate life is set in Manchester not London.
+5. Read the alternativePath field carefully and base all locations on what is actually described there.
+
+You are simulating a parallel life for a real person based on one different decision they made. You have their complete profile. Generate their alternate timeline as a detailed flowing narrative.
 
 ABSOLUTE RULES:
 1. TIMELINE CUT: Anyone met AFTER the real decision does not exist in the alternate timeline. The profile lists these people under peopleNotMet. Never mention them. Not once. Build an entirely new social world for the alternate path.
@@ -209,20 +219,25 @@ What I think would have been different: ${profile.initialHypothesis}
 What I most want to know: ${profile.mostWantToKnow}`
 
     try {
-      const response = await fetch('https://parallel-realities-playground.vercel.app/api/anthropic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 4000,
-          system: systemPrompt,
-          messages: [{ role: 'user', content: userMsg }]
-        })
-      })
-      const responseText = await response.text()
-      console.log('Vercel proxy status:', response.status)
-      console.log('Vercel proxy response:', responseText.slice(0, 500))
-      const data = JSON.parse(responseText)
+      const [, data] = await Promise.all([
+        new Promise(r => setTimeout(r, 6000)),
+        (async () => {
+          const response = await fetch('https://parallel-realities-playground.vercel.app/api/anthropic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-5',
+              max_tokens: 4000,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: userMsg }]
+            })
+          })
+          const responseText = await response.text()
+          console.log('Vercel proxy status:', response.status)
+          console.log('Vercel proxy response:', responseText.slice(0, 500))
+          return JSON.parse(responseText)
+        })()
+      ])
       const raw = (data.content || []).map((c: any) => c.text || '').join('')
       console.log('Raw AI response:', raw.slice(0, 500))
       let result
@@ -340,15 +355,18 @@ What I most want to know: ${profile.mostWantToKnow}`
         <div key={p.id} style={{position:'fixed',left:p.left,bottom:'-20px',width:p.size,height:p.size,borderRadius:'50%',background:'#D4A843',opacity:0.3,animation:`particleFloat ${p.duration} ${p.delay} infinite linear`,pointerEvents:'none',zIndex:0}}/>
       ))}
       <div style={{position:'relative',zIndex:1}}>
-        {step === 'hero' && <HeroSection onStart={() => setStep('form')} />}
+        {step === 'hero' && <HeroSection onStart={() => setStep('form')} onQuickStart={() => { setQuickMode(true); setStep('form') }} />}
         {step === 'form' && (
           <FormSection
             profile={profile} up={up} formStep={formStep}
             setFormStep={setFormStep} onSubmit={runSimulation}
             email={email} setEmail={setEmail}
+            quickMode={quickMode} setQuickMode={setQuickMode}
+            quickProfile={quickProfile} setQuickProfile={setQuickProfile}
+            setProfile={setProfile} runSimulation={runSimulation}
           />
         )}
-        {step === 'loading' && <LoadingSection lines={loadingLines} />}
+        {step === 'loading' && <LoadingSection lines={loadingLines} profile={profile} />}
         {step === 'result' && sim && (
           <ResultSection
             sim={sim} profile={profile} userTier={userTier}
@@ -362,6 +380,7 @@ What I most want to know: ${profile.mostWantToKnow}`
             docState={docState} audioUrl={audioUrl} videoUrls={videoUrls}
             generateDocumentary={generateDocumentary}
             shareToTwitter={shareToTwitter} copyShareLink={copyShareLink} copied={copied}
+            switchChoice={switchChoice} setSwitchChoice={setSwitchChoice}
             onReset={() => { setSim(null); setStep('form'); setFormStep(5) }}
             onNewProfile={() => { setSim(null); setProfile(defaultProfile()); setStep('form'); setFormStep(1) }}
           />
@@ -371,7 +390,7 @@ What I most want to know: ${profile.mostWantToKnow}`
   )
 }
 
-function HeroSection({ onStart }: { onStart: () => void }) {
+function HeroSection({ onStart, onQuickStart }: { onStart: () => void, onQuickStart: () => void }) {
   const title = 'PARALLEL LIFE 2.0'.split('')
   return (
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'40px 20px'}}>
@@ -394,23 +413,143 @@ function HeroSection({ onStart }: { onStart: () => void }) {
       <div style={{marginTop:'24px',color:'rgba(240,240,240,0.3)',fontSize:'13px',animation:'fadeUp 1s ease 1.4s both'}}>
         The more honestly you answer, the more surprising the result
       </div>
+      <div style={{display:'flex',flexDirection:'column' as const,alignItems:'center',marginTop:'20px',animation:'fadeUp 1s ease 1.5s both'}}>
+        <button
+          onClick={onQuickStart}
+          style={{background:'transparent',border:'1px solid rgba(212,168,67,0.3)',color:'rgba(212,168,67,0.7)',padding:'12px 40px',fontSize:'14px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',letterSpacing:'1px',transition:'all 0.3s'}}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor='#D4A843';e.currentTarget.style.color='#D4A843'}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(212,168,67,0.3)';e.currentTarget.style.color='rgba(212,168,67,0.7)'}}
+        >
+          ⚡ Quick Simulation — 30 seconds
+        </button>
+        <div style={{color:'rgba(240,240,240,0.3)',fontSize:'12px',marginTop:'8px'}}>5 questions only. Full simulation in the deep version.</div>
+      </div>
     </div>
   )
 }
 
-function LoadingSection({ lines }: { lines: string[] }) {
+function LoadingSection({ lines, profile }: { lines: string[], profile: any }) {
+  const [currentLine, setCurrentLine] = useState(0)
+  const [particles, setParticles] = useState<{x:number,y:number,size:number,speed:number,opacity:number}[]>([])
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animRef = useRef<number>()
+
+  useEffect(() => {
+    const ps = Array.from({length: 60}, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.5 + 0.1,
+      opacity: Math.random() * 0.5 + 0.1,
+    }))
+    setParticles(ps)
+  }, [])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    let running = true
+    let time = 0
+
+    const draw = () => {
+      if (!running) return
+      time += 0.01
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ctx.fillStyle = '#0A0A0C'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      particles.forEach((p, i) => {
+        p.y -= p.speed
+        if (p.y < 0) p.y = canvas.height
+        const pulse = 0.5 + Math.sin(time * 2 + i) * 0.3
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(212,168,67,${p.opacity * pulse})`
+        ctx.fill()
+      })
+
+      const cx = canvas.width / 2
+      const cy = canvas.height / 2
+      for (let i = 0; i < 3; i++) {
+        const radius = 80 + i * 40
+        const alpha = 0.05 + Math.sin(time + i) * 0.03
+        ctx.beginPath()
+        ctx.arc(cx, cy, radius + Math.sin(time * 0.5 + i) * 10, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(212,168,67,${alpha})`
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+
+      for (let i = 0; i < 6; i++) {
+        const angle = (time * 0.3 + i * Math.PI / 3)
+        const r = 120 + Math.sin(time + i) * 20
+        const x = cx + Math.cos(angle) * r
+        const y = cy + Math.sin(angle) * r
+        ctx.beginPath()
+        ctx.arc(x, y, 2, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(212,168,67,0.6)`
+        ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(cx, cy)
+        ctx.lineTo(x, y)
+        ctx.strokeStyle = `rgba(212,168,67,0.08)`
+        ctx.lineWidth = 1
+        ctx.stroke()
+      }
+
+      animRef.current = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => { running = false; if (animRef.current) cancelAnimationFrame(animRef.current) }
+  }, [particles])
+
+  useEffect(() => {
+    if (lines.length > currentLine) setCurrentLine(lines.length - 1)
+  }, [lines])
+
+  const loadingMessages = [
+    `Mapping ${profile?.grewUpCity || 'your hometown'}...`,
+    `Tracing the decision at age ${profile?.decisionAge || 'that moment'}...`,
+    `Building your alternate world...`,
+    `Calculating who you would have met...`,
+    `Writing the life you never lived...`,
+    `Your other self is ready.`,
+  ]
+
   return (
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'20px',position:'relative',overflow:'hidden',padding:'20px'}}>
-      <div style={{position:'absolute',top:0,left:'50%',width:'1px',height:'100%',background:'linear-gradient(180deg,transparent,#D4A843,transparent)',animation:'scanLine 3s linear infinite',opacity:0.3}}/>
-      <div style={{width:'48px',height:'48px',border:'2px solid rgba(212,168,67,0.3)',borderTopColor:'#D4A843',borderRadius:'50%',animation:'spin 1s linear infinite',marginBottom:'16px'}}/>
-      {lines.map((line,i) => (
-        <div key={i} style={{color:i===lines.length-1?'#D4A843':'rgba(240,240,240,0.6)',fontSize:'15px',letterSpacing:'2px',animation:'fadeUp 0.5s ease both',fontFamily:'Georgia,serif'}}>{line}</div>
-      ))}
+    <div style={{position:'fixed',inset:0,zIndex:100,display:'flex',flexDirection:'column' as const,alignItems:'center',justifyContent:'center'}}>
+      <canvas ref={canvasRef} style={{position:'absolute',inset:0,width:'100%',height:'100%'}}/>
+      <div style={{position:'relative',zIndex:1,textAlign:'center' as const,padding:'40px'}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:'clamp(28px,6vw,48px)',fontWeight:900,letterSpacing:'6px',background:'linear-gradient(135deg,#8B6914,#D4A843,#F0C060)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:'8px'}}>REVENIO</div>
+        <div style={{color:'rgba(212,168,67,0.5)',fontSize:'11px',letterSpacing:'4px',marginBottom:'48px'}}>BUILDING YOUR OTHER LIFE</div>
+        <div style={{display:'flex',flexDirection:'column' as const,gap:'12px',minHeight:'160px',justifyContent:'center'}}>
+          {loadingMessages.map((msg, i) => (
+            <div key={i} style={{color: i <= currentLine ? (i === currentLine ? '#F0C060' : 'rgba(212,168,67,0.4)') : 'rgba(255,255,255,0.08)',fontSize:'14px',letterSpacing:'2px',fontFamily:"'Rajdhani',sans-serif",transition:'color 0.5s ease',display:'flex',alignItems:'center',justifyContent:'center',gap:'10px'}}>
+              {i < currentLine && <span style={{color:'#D4A843'}}>✓</span>}
+              {i === currentLine && <span style={{display:'inline-block',width:'6px',height:'6px',borderRadius:'50%',background:'#D4A843',animation:'pulse 1s infinite'}}/>}
+              {i > currentLine && <span style={{width:'16px'}}/>}
+              {msg}
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop:'48px',width:'300px',height:'2px',background:'rgba(255,255,255,0.05)',borderRadius:'2px',overflow:'hidden',margin:'48px auto 0'}}>
+          <div style={{height:'100%',background:'linear-gradient(90deg,#8B6914,#D4A843)',borderRadius:'2px',transition:'width 0.8s ease',width:`${Math.min(95, (currentLine / 5) * 100)}%`}}/>
+        </div>
+        <div style={{color:'rgba(240,240,240,0.2)',fontSize:'12px',marginTop:'16px',letterSpacing:'1px'}}>
+          {profile?.firstName ? `${profile.firstName}'s alternate life is being written` : 'Your alternate life is being written'}
+        </div>
+      </div>
+      <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}`}</style>
     </div>
   )
 }
 
-function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setEmail }: any) {
+function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setEmail, quickMode, setQuickMode, quickProfile, setQuickProfile, setProfile, runSimulation }: any) {
   const totalSteps = 6
   const pct = ((formStep-1)/totalSteps)*100
 
@@ -429,6 +568,52 @@ function FormSection({ profile, up, formStep, setFormStep, onSubmit, email, setE
 
   const next = () => setFormStep((s:number) => Math.min(s+1, totalSteps))
   const prev = () => setFormStep((s:number) => Math.max(s-1, 1))
+
+  if (quickMode) {
+    return (
+      <div style={{maxWidth:'600px',width:'100%',margin:'0 auto',padding:'clamp(16px,4vw,40px)'}}>
+        <div style={{textAlign:'center' as const,marginBottom:'32px'}}>
+          <div style={{color:'#D4A843',fontSize:'11px',letterSpacing:'4px',marginBottom:'8px'}}>⚡ QUICK SIMULATION</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'clamp(20px,4vw,28px)',color:'#F0F0F0',marginBottom:'8px'}}>5 questions. 30 seconds.</div>
+          <div style={{color:'rgba(240,240,240,0.4)',fontSize:'13px'}}>We will fill in the rest with smart defaults.</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column' as const,gap:'20px'}}>
+          <div>
+            <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px'}}>YOUR FIRST NAME</label>
+            <input value={quickProfile.firstName} onChange={e=>setQuickProfile((p: any)=>({...p,firstName:e.target.value}))} placeholder="Your name" style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'16px',borderRadius:'4px',outline:'none',boxSizing:'border-box' as const}}/>
+          </div>
+          <div>
+            <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px'}}>YOUR AGE</label>
+            <input type="number" value={quickProfile.age} onChange={e=>setQuickProfile((p: any)=>({...p,age:e.target.value}))} placeholder="Your age" style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'16px',borderRadius:'4px',outline:'none',boxSizing:'border-box' as const}}/>
+          </div>
+          <div>
+            <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px'}}>WHERE YOU GREW UP</label>
+            <input value={quickProfile.grewUpCity} onChange={e=>setQuickProfile((p: any)=>({...p,grewUpCity:e.target.value}))} placeholder="City and country" style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'16px',borderRadius:'4px',outline:'none',boxSizing:'border-box' as const}}/>
+          </div>
+          <div>
+            <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px'}}>THE DECISION YOU MADE</label>
+            <textarea value={quickProfile.theDecision} onChange={e=>setQuickProfile((p: any)=>({...p,theDecision:e.target.value}))} placeholder="What did you actually do" rows={3} style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'15px',borderRadius:'4px',outline:'none',resize:'vertical' as const,fontFamily:'system-ui',boxSizing:'border-box' as const}}/>
+          </div>
+          <div>
+            <label style={{display:'block',color:'rgba(240,240,240,0.6)',fontSize:'12px',letterSpacing:'2px',marginBottom:'8px'}}>WHAT YOU COULD HAVE DONE INSTEAD</label>
+            <textarea value={quickProfile.alternativePath} onChange={e=>setQuickProfile((p: any)=>({...p,alternativePath:e.target.value}))} placeholder="The path you did not take" rows={3} style={{width:'100%',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(212,168,67,0.2)',color:'#F0F0F0',padding:'12px 16px',fontSize:'15px',borderRadius:'4px',outline:'none',resize:'vertical' as const,fontFamily:'system-ui',boxSizing:'border-box' as const}}/>
+          </div>
+          <button
+            onClick={()=>{
+              setProfile((p: any)=>({...p,...quickProfile}))
+              runSimulation()
+            }}
+            style={{background:'linear-gradient(135deg,#8B6914,#D4A843)',color:'#0A0A0C',border:'none',padding:'16px',fontSize:'16px',fontFamily:'Georgia,serif',cursor:'pointer',borderRadius:'4px',fontWeight:700,letterSpacing:'2px'}}
+          >
+            RUN QUICK SIMULATION →
+          </button>
+          <button onClick={()=>setQuickMode(false)} style={{background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'13px',textDecoration:'underline'}}>
+            Switch to full simulation
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{minHeight:'100vh',padding:'clamp(16px, 4vw, 40px) clamp(12px, 3vw, 20px)',maxWidth:'720px',margin:'0 auto'}}>
@@ -771,7 +956,7 @@ function FlyingButterfly({ containerRef }: { containerRef: React.RefObject<HTMLD
   )
 }
 
-function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, onReset, onNewProfile }: any) {
+function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Choice, setTp2Choice, tp3Choice, setTp3Choice, visibleWords, regretAnimated, regretColor, circumference, strokeDash, userPhoto, setUserPhoto, docState, audioUrl, videoUrls, generateDocumentary, shareToTwitter, copyShareLink, copied, switchChoice, setSwitchChoice, onReset, onNewProfile }: any) {
   const words = sim.messageFromOtherSelf.split(' ')
   const butterflyRef = useRef<HTMLDivElement>(null)
 
@@ -1120,6 +1305,59 @@ function ResultSection({ sim, profile, userTier, tp1Choice, setTp1Choice, tp2Cho
             <div>
               <div style={{color:'#ff6b6b',fontSize:'13px',marginBottom:'16px'}}>Generation failed. Please try again.</div>
               <button onClick={generateDocumentary} style={{background:'transparent',border:'1px solid #D4A843',color:'#D4A843',padding:'10px 24px',cursor:'pointer',borderRadius:'4px',fontSize:'13px'}}>RETRY</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {sim && (
+        <div style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(212,168,67,0.3)',borderRadius:'8px',padding:'40px',marginBottom:'24px',textAlign:'center' as const,animation:'fadeUp 0.8s ease both'}}>
+          <div style={{fontFamily:'Georgia,serif',fontSize:'22px',color:'#F0F0F0',marginBottom:'8px',lineHeight:1.5}}>If this timeline were real and you could switch permanently right now...</div>
+          <div style={{color:'rgba(240,240,240,0.4)',fontSize:'13px',marginBottom:'32px',fontStyle:'italic'}}>Think carefully. There is no going back.</div>
+          {!switchChoice ? (
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',maxWidth:'480px',margin:'0 auto'}}>
+              <button
+                onClick={()=>setSwitchChoice('switch')}
+                style={{background:'rgba(212,168,67,0.1)',border:'2px solid rgba(212,168,67,0.4)',color:'#F0C060',padding:'24px 16px',cursor:'pointer',borderRadius:'6px',fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.5,transition:'all 0.3s'}}
+                onMouseEnter={e=>{e.currentTarget.style.background='rgba(212,168,67,0.2)';e.currentTarget.style.borderColor='#D4A843'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='rgba(212,168,67,0.1)';e.currentTarget.style.borderColor='rgba(212,168,67,0.4)'}}
+              >
+                <div style={{fontSize:'28px',marginBottom:'8px'}}>🔀</div>
+                Switch Lives
+                <div style={{fontSize:'12px',color:'rgba(240,240,240,0.4)',marginTop:'6px'}}>Take the alternate path</div>
+              </button>
+              <button
+                onClick={()=>setSwitchChoice('stay')}
+                style={{background:'rgba(255,255,255,0.03)',border:'2px solid rgba(255,255,255,0.1)',color:'#F0F0F0',padding:'24px 16px',cursor:'pointer',borderRadius:'6px',fontFamily:'Georgia,serif',fontSize:'16px',lineHeight:1.5,transition:'all 0.3s'}}
+                onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,0.07)';e.currentTarget.style.borderColor='rgba(255,255,255,0.3)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.03)';e.currentTarget.style.borderColor='rgba(255,255,255,0.1)'}}
+              >
+                <div style={{fontSize:'28px',marginBottom:'8px'}}>🏠</div>
+                Stay In My Life
+                <div style={{fontSize:'12px',color:'rgba(240,240,240,0.4)',marginTop:'6px'}}>Keep what I have</div>
+              </button>
+            </div>
+          ) : (
+            <div style={{animation:'fadeUp 0.6s ease both'}}>
+              {switchChoice === 'switch' ? (
+                <div>
+                  <div style={{fontSize:'48px',marginBottom:'16px'}}>🔀</div>
+                  <div style={{fontFamily:'Georgia,serif',fontSize:'22px',color:'#D4A843',marginBottom:'12px'}}>You would switch.</div>
+                  <div style={{color:'rgba(240,240,240,0.6)',fontSize:'15px',lineHeight:1.7,maxWidth:'500px',margin:'0 auto',fontFamily:'Georgia,serif',fontStyle:'italic'}}>That is worth sitting with. What does it tell you about your real life right now?</div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{fontSize:'48px',marginBottom:'16px'}}>🏠</div>
+                  <div style={{fontFamily:'Georgia,serif',fontSize:'22px',color:'#D4A843',marginBottom:'12px'}}>You would stay.</div>
+                  <div style={{color:'rgba(240,240,240,0.6)',fontSize:'15px',lineHeight:1.7,maxWidth:'500px',margin:'0 auto',fontFamily:'Georgia,serif',fontStyle:'italic'}}>Even knowing what the other path looked like. That says something real about who you are and what you value.</div>
+                </div>
+              )}
+              <button
+                onClick={()=>setSwitchChoice(null)}
+                style={{marginTop:'20px',background:'transparent',border:'none',color:'rgba(240,240,240,0.3)',cursor:'pointer',fontSize:'13px',textDecoration:'underline'}}
+              >
+                Change my answer
+              </button>
             </div>
           )}
         </div>
