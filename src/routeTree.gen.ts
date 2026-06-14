@@ -16,6 +16,7 @@ import { Route as PlayRouteImport } from './routes/play'
 import { Route as Parallel2RouteImport } from './routes/parallel2'
 import { Route as ParallelRouteImport } from './routes/parallel'
 import { Route as HardwareRouteImport } from './routes/hardware'
+import { Route as ChampionsLegacyRouteImport } from './routes/champions-legacy'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -55,6 +56,11 @@ const HardwareRoute = HardwareRouteImport.update({
   path: '/hardware',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChampionsLegacyRoute = ChampionsLegacyRouteImport.update({
+  id: '/champions-legacy',
+  path: '/champions-legacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -75,6 +81,7 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/champions-legacy'
     | '/hardware'
     | '/parallel'
     | '/parallel2'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/champions-legacy'
     | '/hardware'
     | '/parallel'
     | '/parallel2'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/champions-legacy'
     | '/hardware'
     | '/parallel'
     | '/parallel2'
@@ -151,6 +163,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ChampionsLegacyRoute: typeof ChampionsLegacyRoute
   HardwareRoute: typeof HardwareRoute
   ParallelRoute: typeof ParallelRoute
   Parallel2Route: typeof Parallel2Route
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HardwareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/champions-legacy': {
+      id: '/champions-legacy'
+      path: '/champions-legacy'
+      fullPath: '/champions-legacy'
+      preLoaderRoute: typeof ChampionsLegacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -239,6 +259,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ChampionsLegacyRoute: ChampionsLegacyRoute,
   HardwareRoute: HardwareRoute,
   ParallelRoute: ParallelRoute,
   Parallel2Route: Parallel2Route,
