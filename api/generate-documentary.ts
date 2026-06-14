@@ -35,10 +35,13 @@ export default async function handler(req: any, res: any) {
       let runwayData: any = {}
       try { runwayData = JSON.parse(runwayText) } catch(e) {}
       if (runwayData.id) videoTaskIds.push(runwayData.id)
+      if (!runwayData.id) {
+        console.error('Runway error for scene:', runwayData)
+      }
     }
     return res.status(200).json({ audioBase64: null, videoTaskIds, success: true })
   } catch (error: any) {
     console.error('Error:', error.message)
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message, stack: error.stack })
   }
 }
