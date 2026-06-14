@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ashroot-wand",
+    "name": "Ashroot Wand",
+    "type": "wand",
+    "icon": "I",
+    "description": "A responsive student wand with a warm pulse near old stone."
+  },
+  {
+    "id": "moonmilk-tonic",
+    "name": "Moonmilk Tonic",
+    "type": "potion",
+    "icon": "!",
+    "description": "Restores a small amount of health after duels and risky exploration."
+  },
+  {
+    "id": "brass-house-pin",
+    "name": "Brass House Pin",
+    "type": "artifact",
+    "icon": "*",
+    "description": "A polished badge that records your house points in faint golden script."
+  },
+  {
+    "id": "glimmercap",
+    "name": "Glimmercap",
+    "type": "ingredient",
+    "icon": "^",
+    "description": "A tiny mushroom that flashes when stirred in the correct order."
+  },
+  {
+    "id": "duelist-token",
+    "name": "Duelist Token",
+    "type": "artifact",
+    "icon": "o",
+    "description": "A silver practice token awarded for a clean arena victory."
+  }
+]

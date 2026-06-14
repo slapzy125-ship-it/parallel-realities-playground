@@ -54,6 +54,7 @@ const worlds = [
     tag: "Learn real magic.",
     desc: "A hidden school of magic. Cast spells, mix potions, duel students, and uncover old secrets.",
     img: arcaneAcademyWorld.url,
+    href: "/magic-school",
   },
   {
     name: "Galactic Frontier",
@@ -120,8 +121,9 @@ function Worlds() {
       <section className="relative pb-32 px-6">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {worlds.map((w) => (
-            <article
+            <a
               key={w.name}
+              href={w.href ?? "/play"}
               className="group relative aspect-[3/4] overflow-hidden border border-border hover:border-[var(--gold)] transition-all duration-500 cursor-pointer"
             >
               <img
@@ -144,7 +146,7 @@ function Worlds() {
               <div className="absolute top-4 right-4 w-8 h-8 border border-[var(--gold)]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-[var(--gold)] text-xs">↗</span>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>

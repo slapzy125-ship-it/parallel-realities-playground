@@ -1,0 +1,36 @@
+[
+  {
+    "id": "year-one-arrival",
+    "title": "The Lantern Stair",
+    "year": 1,
+    "location": "great-hall",
+    "description": "Attend the opening feast at Eldergrove Institute and follow the lanterns to your first secret.",
+    "rewards": {
+      "xp": 40,
+      "housePoints": 10
+    }
+  },
+  {
+    "id": "first-duel",
+    "title": "Sparks Before Supper",
+    "year": 1,
+    "location": "dueling-arena",
+    "description": "Face Rowan Cinderglass in a supervised duel and prove you can think under pressure.",
+    "rewards": {
+      "xp": 65,
+      "housePoints": 15,
+      "itemId": "duelist-token"
+    }
+  },
+  {
+    "id": "library-margins",
+    "title": "Ink in the Margins",
+    "year": 1,
+    "location": "library",
+    "description": "Decode a borrowed field guide to learn why the school ravens avoid the north tower.",
+    "rewards": {
+      "xp": 35,
+      "spellId": "wardweave"
+    }
+  }
+]
