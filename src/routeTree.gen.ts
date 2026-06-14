@@ -19,6 +19,7 @@ import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as ChampionsLegacyRouteImport } from './routes/champions-legacy'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChampionsLegacyHubRouteImport } from './routes/champions-legacy_/hub'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const WorldsRoute = WorldsRouteImport.update({
@@ -71,6 +72,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChampionsLegacyHubRoute = ChampionsLegacyHubRouteImport.update({
+  id: '/champions-legacy_/hub',
+  path: '/champions-legacy/hub',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/worlds': typeof WorldsRoute
+  '/champions-legacy/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/worlds': typeof WorldsRoute
+  '/champions-legacy/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/worlds': typeof WorldsRoute
+  '/champions-legacy_/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/worlds'
+    | '/champions-legacy/hub'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/worlds'
+    | '/champions-legacy/hub'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/worlds'
+    | '/champions-legacy_/hub'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WorldsRoute: typeof WorldsRoute
+  ChampionsLegacyHubRoute: typeof ChampionsLegacyHubRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/champions-legacy_/hub': {
+      id: '/champions-legacy_/hub'
+      path: '/champions-legacy/hub'
+      fullPath: '/champions-legacy/hub'
+      preLoaderRoute: typeof ChampionsLegacyHubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WorldsRoute: WorldsRoute,
+  ChampionsLegacyHubRoute: ChampionsLegacyHubRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
