@@ -24,10 +24,18 @@ export function Potions() {
   const finish = () => {
     if (!complete) return;
     if (success) {
-      completeChoice("potions-first-perfect-brew", { xp: 35, housePoints: 8, mana: 12 }, "Your tonic flashes gold and earns a clean first mark.");
+      completeChoice(
+        "potions-first-perfect-brew",
+        { xp: 35, housePoints: 8, mana: 12 },
+        "Your tonic flashes gold and earns a clean first mark.",
+      );
       setResult("Success: the tonic flashes gold. You gain XP, mana, and house points.");
     } else {
-      completeChoice("potions-first-fizz", { xp: 12, health: -4 }, "The mixture fizzes purple and singes your cuff, but you learn from it.");
+      completeChoice(
+        "potions-first-fizz",
+        { xp: 12, health: -4 },
+        "The mixture fizzes purple and singes your cuff, but you learn from it.",
+      );
       setResult("Fizzled: the brew pops purple. You gain a little XP but lose minor health.");
     }
   };
@@ -37,15 +45,20 @@ export function Potions() {
       <p className="text-xs uppercase tracking-[0.35em] text-[#8a4f1d]">Potions prototype</p>
       <h2 className="mt-2 font-display text-4xl">Glimmercap Tonic</h2>
       <p className="mt-4 text-sm leading-7 text-[#5c3a1c]">
-        Match the ingredient sequence from the board. This scaffold establishes the minigame loop while the
-        duel system receives the complete first combat implementation.
+        Match the ingredient sequence from the board. This scaffold establishes the minigame loop
+        while the duel system receives the complete first combat implementation.
       </p>
 
       <div className="mt-6 rounded-2xl border border-[#8a4f1d]/25 bg-[#fff0c8]/70 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">Recipe order</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">
+          Recipe order
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {recipe.map((ingredient) => (
-            <span key={ingredient} className="rounded-full bg-[#2d1b10] px-3 py-1 text-sm text-[#f8e7b9]">
+            <span
+              key={ingredient}
+              className="rounded-full bg-[#2d1b10] px-3 py-1 text-sm text-[#f8e7b9]"
+            >
               {ingredient}
             </span>
           ))}
@@ -67,11 +80,17 @@ export function Potions() {
       </div>
 
       <div className="mt-5 rounded-2xl bg-[#2d1b10]/10 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">Your cauldron</p>
-        <p className="mt-2 min-h-6 font-display text-2xl">{sequence.length ? sequence.join(" → ") : "Empty"}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">
+          Your cauldron
+        </p>
+        <p className="mt-2 min-h-6 font-display text-2xl">
+          {sequence.length ? sequence.join(" → ") : "Empty"}
+        </p>
       </div>
 
-      {result && <p className="mt-4 rounded-2xl bg-[#fff0c8]/70 p-4 text-sm text-[#5c3a1c]">{result}</p>}
+      {result && (
+        <p className="mt-4 rounded-2xl bg-[#fff0c8]/70 p-4 text-sm text-[#5c3a1c]">{result}</p>
+      )}
 
       <div className="mt-6 flex flex-wrap gap-3">
         <button

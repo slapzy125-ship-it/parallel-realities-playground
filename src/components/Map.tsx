@@ -104,13 +104,15 @@ export function SchoolMap() {
                 onClick={() => selectLocation(location.id, locked ? "dialogue" : location.activity)}
                 className={`group min-h-32 rounded-2xl border bg-[#f8e7b9]/85 p-4 text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:bg-[#fff0c8] ${location.position}`}
                 style={{
-                  borderColor: active ? house?.accent ?? "#b7791f" : "rgba(93, 55, 24, 0.28)",
+                  borderColor: active ? (house?.accent ?? "#b7791f") : "rgba(93, 55, 24, 0.28)",
                   boxShadow: active ? `0 0 0 2px ${house?.accent ?? "#b7791f"}66` : undefined,
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-[#8a4f1d]">{location.label}</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-[#8a4f1d]">
+                      {location.label}
+                    </p>
                     <h3 className="mt-2 font-display text-2xl text-[#2f2116]">{location.name}</h3>
                   </div>
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#2f2116] text-[#f8e7b9]">
@@ -118,7 +120,11 @@ export function SchoolMap() {
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-[#5c3a1c]">{location.description}</p>
-                {locked && <p className="mt-3 text-xs font-semibold text-[#8a4f1d]">Unlocks in Year {location.unlockYear}</p>}
+                {locked && (
+                  <p className="mt-3 text-xs font-semibold text-[#8a4f1d]">
+                    Unlocks in Year {location.unlockYear}
+                  </p>
+                )}
               </button>
             );
           })}

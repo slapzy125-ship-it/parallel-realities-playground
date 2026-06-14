@@ -36,7 +36,10 @@ export function Spellbook() {
         <h3 className="text-xs uppercase tracking-[0.3em] text-gold/80">Locked lessons</h3>
         <div className="mt-3 grid gap-2">
           {futureSpells.slice(0, 3).map((spell) => (
-            <div key={spell.id} className="flex items-center justify-between gap-4 rounded-xl bg-black/20 px-3 py-2 text-sm">
+            <div
+              key={spell.id}
+              className="flex items-center justify-between gap-4 rounded-xl bg-black/20 px-3 py-2 text-sm"
+            >
               <span className="text-[#e8d8b0]/70">{spell.name}</span>
               <span className="text-xs text-gold/70">Year {spell.unlockYear}</span>
             </div>

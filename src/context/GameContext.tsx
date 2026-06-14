@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useCallback,
@@ -232,8 +233,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [hydrated, state]);
 
-  const getHouse = useCallback((houseId?: string | null) => HOUSES.find((house) => house.id === houseId), []);
-  const getSpell = useCallback((spellId: string) => spells.find((spell) => spell.id === spellId), []);
+  const getHouse = useCallback(
+    (houseId?: string | null) => HOUSES.find((house) => house.id === houseId),
+    [],
+  );
+  const getSpell = useCallback(
+    (spellId: string) => spells.find((spell) => spell.id === spellId),
+    [],
+  );
   const getItem = useCallback((itemId: string) => items.find((item) => item.id === itemId), []);
 
   const startNewGame = useCallback(() => {
@@ -370,7 +377,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       );
       const housePoints = { ...current.housePoints };
       if (reward.housePoints) {
-        housePoints[player.houseId] = Math.max(0, (housePoints[player.houseId] ?? 0) + reward.housePoints);
+        housePoints[player.houseId] = Math.max(
+          0,
+          (housePoints[player.houseId] ?? 0) + reward.housePoints,
+        );
       }
 
       const relationships = { ...current.relationships };

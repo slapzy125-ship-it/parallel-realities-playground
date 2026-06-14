@@ -55,8 +55,8 @@ export function CharacterCreation() {
           <p className="text-xs uppercase tracking-[0.4em] text-gold">Enrollment Ledger</p>
           <h1 className="mt-4 font-display text-5xl text-[#f8e7b9]">Create your student</h1>
           <p className="mt-4 text-sm leading-7 text-[#e8d8b0]/80">
-            Eldergrove Institute accepts one promising new apprentice tonight. Name them, choose a house,
-            and spend every starting point before the lantern stair fades.
+            Eldergrove Institute accepts one promising new apprentice tonight. Name them, choose a
+            house, and spend every starting point before the lantern stair fades.
           </p>
 
           <label className="mt-8 block text-sm font-medium text-[#f8e7b9]" htmlFor="student-name">
@@ -85,7 +85,9 @@ export function CharacterCreation() {
                     <div>
                       <p className="font-medium text-[#f8e7b9]">{STAT_LABELS[key]}</p>
                       {selectedHouse.bonus === key && (
-                        <p className="text-xs text-gold">+2 {selectedHouse.name} house bonus after enrollment</p>
+                        <p className="text-xs text-gold">
+                          +2 {selectedHouse.name} house bonus after enrollment
+                        </p>
                       )}
                     </div>
                     <div className="flex items-center gap-3">
@@ -97,7 +99,9 @@ export function CharacterCreation() {
                       >
                         -
                       </button>
-                      <span className="w-8 text-center font-display text-2xl text-[#f8e7b9]">{stats[key]}</span>
+                      <span className="w-8 text-center font-display text-2xl text-[#f8e7b9]">
+                        {stats[key]}
+                      </span>
                       <button
                         type="button"
                         onClick={() => adjustStat(key, 1)}
@@ -135,13 +139,19 @@ export function CharacterCreation() {
                   <div className="flex items-center gap-3">
                     <span
                       className="h-4 w-4 rounded-full"
-                      style={{ background: `linear-gradient(135deg, ${house.color}, ${house.accent})` }}
+                      style={{
+                        background: `linear-gradient(135deg, ${house.color}, ${house.accent})`,
+                      }}
                     />
                     <h3 className="font-display text-2xl text-[#f8e7b9]">{house.name}</h3>
                   </div>
                   <p className="mt-3 text-sm italic text-[#e8d8b0]/90">"{house.motto}"</p>
-                  <p className="mt-3 text-xs uppercase tracking-[0.25em] text-gold/80">{house.trait}</p>
-                  <p className="mt-2 text-xs text-[#e8d8b0]/70">Bonus: {STAT_LABELS[house.bonus]}</p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.25em] text-gold/80">
+                    {house.trait}
+                  </p>
+                  <p className="mt-2 text-xs text-[#e8d8b0]/70">
+                    Bonus: {STAT_LABELS[house.bonus]}
+                  </p>
                 </button>
               ))}
             </div>
@@ -150,8 +160,8 @@ export function CharacterCreation() {
           <div className="rounded-3xl border border-gold/30 bg-[#f2dfad] p-6 text-[#2d1b10] shadow-xl">
             <h2 className="font-display text-3xl">Enrollment preview</h2>
             <p className="mt-3 text-sm leading-6">
-              {name.trim() || "Your student"} will enter <strong>{selectedHouse.name}</strong>, carrying an
-              Ashroot Wand, a Moonmilk Tonic, and the house spell tradition into Year 1.
+              {name.trim() || "Your student"} will enter <strong>{selectedHouse.name}</strong>,
+              carrying an Ashroot Wand, a Moonmilk Tonic, and the house spell tradition into Year 1.
             </p>
             <button
               type="button"

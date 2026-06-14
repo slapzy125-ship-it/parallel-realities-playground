@@ -43,7 +43,9 @@ export function CharacterSheet() {
       <div className="mt-6 grid grid-cols-2 gap-3">
         {statKeys.map((key) => (
           <div key={key} className="rounded-2xl border border-gold/15 bg-black/20 p-3">
-            <p className="text-[0.65rem] uppercase tracking-[0.24em] text-gold/75">{STAT_LABELS[key]}</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.24em] text-gold/75">
+              {STAT_LABELS[key]}
+            </p>
             <p className="mt-1 font-display text-3xl text-[#f8e7b9]">{player.stats[key]}</p>
           </div>
         ))}
@@ -57,7 +59,9 @@ export function CharacterSheet() {
             if (!item) return null;
             return (
               <div key={item.id} className="flex items-center gap-3 text-sm text-[#e8d8b0]/80">
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-gold/10 text-gold">{item.icon}</span>
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-gold/10 text-gold">
+                  {item.icon}
+                </span>
                 <span>{item.name}</span>
               </div>
             );
@@ -71,7 +75,9 @@ export function CharacterSheet() {
           {npcs.map((npc) => (
             <div key={npc.id} className="flex items-center justify-between gap-3 text-sm">
               <span className="text-[#e8d8b0]/80">{npc.name}</span>
-              <span className="font-display text-lg text-[#f8e7b9]">{state.relationships[npc.id] ?? 0}</span>
+              <span className="font-display text-lg text-[#f8e7b9]">
+                {state.relationships[npc.id] ?? 0}
+              </span>
             </div>
           ))}
         </div>
@@ -102,7 +108,10 @@ function Meter({
         <span>{suffix ?? `${Math.round(value)} / ${Math.round(max)}`}</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-black/40">
-        <div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, background: color }} />
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${percent}%`, background: color }}
+        />
       </div>
     </div>
   );

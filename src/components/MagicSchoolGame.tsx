@@ -36,8 +36,8 @@ function MainMenu() {
             <span className="block italic text-gold-gradient">Institute</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-[#e8d8b0]/75">
-            A parchment-styled magic school RPG with original houses, spells, rivals, year progression,
-            branching choices, and localStorage save state.
+            A parchment-styled magic school RPG with original houses, spells, rivals, year
+            progression, branching choices, and localStorage save state.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <button
@@ -69,11 +69,16 @@ function MainMenu() {
           <p className="text-xs uppercase tracking-[0.35em] text-[#8a4f1d]">Houses</p>
           <div className="mt-5 grid gap-3">
             {HOUSES.map((house) => (
-              <article key={house.id} className="rounded-2xl border border-[#8a4f1d]/20 bg-[#fff0c8]/70 p-4">
+              <article
+                key={house.id}
+                className="rounded-2xl border border-[#8a4f1d]/20 bg-[#fff0c8]/70 p-4"
+              >
                 <div className="flex items-center gap-3">
                   <span
                     className="h-4 w-4 rounded-full"
-                    style={{ background: `linear-gradient(135deg, ${house.color}, ${house.accent})` }}
+                    style={{
+                      background: `linear-gradient(135deg, ${house.color}, ${house.accent})`,
+                    }}
                   />
                   <h2 className="font-display text-2xl">{house.name}</h2>
                 </div>
@@ -100,7 +105,9 @@ function Settings() {
           <label className="flex items-center justify-between gap-4 rounded-2xl bg-[#fff0c8]/70 p-4">
             <span>
               <span className="block font-display text-2xl">Reduced motion</span>
-              <span className="text-sm text-[#5c3a1c]">Softens transitions in future animated scenes.</span>
+              <span className="text-sm text-[#5c3a1c]">
+                Softens transitions in future animated scenes.
+              </span>
             </span>
             <input
               type="checkbox"
@@ -114,7 +121,9 @@ function Settings() {
             <span className="font-display text-2xl">Text size</span>
             <select
               value={state.settings.textSize}
-              onChange={(event) => updateSettings({ textSize: event.target.value as "normal" | "large" })}
+              onChange={(event) =>
+                updateSettings({ textSize: event.target.value as "normal" | "large" })
+              }
               className="mt-3 w-full rounded-xl border border-[#8a4f1d]/30 bg-[#f8e7b9] px-4 py-3"
             >
               <option value="normal">Normal</option>
@@ -149,7 +158,9 @@ function Hub() {
   const player = state.player;
   if (!player) return <MainMenu />;
 
-  const sortedHouses = [...houses].sort((a, b) => (state.housePoints[b.id] ?? 0) - (state.housePoints[a.id] ?? 0));
+  const sortedHouses = [...houses].sort(
+    (a, b) => (state.housePoints[b.id] ?? 0) - (state.housePoints[a.id] ?? 0),
+  );
 
   return (
     <div className={state.settings.textSize === "large" ? "text-lg" : ""}>
@@ -157,7 +168,9 @@ function Hub() {
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-gold">Eldergrove Institute</p>
-            <h1 className="font-display text-3xl text-[#f8e7b9]">Year {player.year}: The Lantern Stair</h1>
+            <h1 className="font-display text-3xl text-[#f8e7b9]">
+              Year {player.year}: The Lantern Stair
+            </h1>
           </div>
           <button
             type="button"
@@ -190,12 +203,17 @@ function Hub() {
             <p className="text-xs uppercase tracking-[0.35em] text-gold">House Cup</p>
             <div className="mt-4 space-y-3">
               {sortedHouses.map((house, index) => (
-                <div key={house.id} className="flex items-center justify-between rounded-2xl bg-black/25 p-3">
+                <div
+                  key={house.id}
+                  className="flex items-center justify-between rounded-2xl bg-black/25 p-3"
+                >
                   <div className="flex items-center gap-3">
                     <span className="font-display text-2xl text-gold">{index + 1}</span>
                     <span className="text-[#e8d8b0]">{house.name}</span>
                   </div>
-                  <span className="font-display text-2xl text-[#f8e7b9]">{state.housePoints[house.id] ?? 0}</span>
+                  <span className="font-display text-2xl text-[#f8e7b9]">
+                    {state.housePoints[house.id] ?? 0}
+                  </span>
                 </div>
               ))}
             </div>

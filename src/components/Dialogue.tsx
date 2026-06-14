@@ -140,7 +140,9 @@ export function Dialogue() {
     () => scenes.find((candidate) => candidate.id === state.activeLocationId) ?? scenes[0],
     [state.activeLocationId],
   );
-  const relatedQuests = quests.filter((quest) => quest.location === scene.id && quest.year <= (player?.year ?? 1));
+  const relatedQuests = quests.filter(
+    (quest) => quest.location === scene.id && quest.year <= (player?.year ?? 1),
+  );
 
   if (!player) return null;
 
@@ -152,7 +154,9 @@ export function Dialogue() {
 
       {relatedQuests.length > 0 && (
         <div className="mt-5 rounded-2xl border border-[#8a4f1d]/25 bg-[#fff0c8]/60 p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">Active quest threads</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8a4f1d]">
+            Active quest threads
+          </h3>
           <div className="mt-3 space-y-2">
             {relatedQuests.map((quest) => (
               <div key={quest.id}>

@@ -21,7 +21,9 @@ const chooseOpponentSpell = (spells: Spell[], opponentState: Combatant) => {
     return spells.find((spell) => spell.effect === "shield") ?? spells[0];
   }
 
-  const affordable = spells.filter((spell) => spell.manaCost <= opponentState.mana && spell.effect !== "focus");
+  const affordable = spells.filter(
+    (spell) => spell.manaCost <= opponentState.mana && spell.effect !== "focus",
+  );
   return affordable[Math.floor(Math.random() * affordable.length)] ?? spells[0];
 };
 
@@ -65,7 +67,9 @@ export function Duel() {
       return;
     }
 
-    const playerAttackBonus = Math.floor(player.stats.mysticPower * 1.6 + player.stats.intellect * 0.8);
+    const playerAttackBonus = Math.floor(
+      player.stats.mysticPower * 1.6 + player.stats.intellect * 0.8,
+    );
     const courageGuard = Math.floor(player.stats.courage * 0.8);
 
     let nextPlayer = {
@@ -94,7 +98,10 @@ export function Duel() {
         caster === "player"
           ? spell.power + playerAttackBonus + Math.floor(Math.random() * 7)
           : spell.power + 5 + Math.floor(Math.random() * 8);
-      const mitigated = Math.max(4, rawDamage - targetShield - (caster === "opponent" ? courageGuard : 0));
+      const mitigated = Math.max(
+        4,
+        rawDamage - targetShield - (caster === "opponent" ? courageGuard : 0),
+      );
 
       if (caster === "player") {
         nextOpponent = {
@@ -114,7 +121,8 @@ export function Duel() {
     }
 
     if (spell.effect === "shield") {
-      const shieldAmount = caster === "player" ? spell.power + player.stats.intellect : spell.power + 8;
+      const shieldAmount =
+        caster === "player" ? spell.power + player.stats.intellect : spell.power + 8;
       if (caster === "player") {
         nextPlayer = { ...nextPlayer, shield: nextPlayer.shield + shieldAmount };
         nextLog.push(`You weave a shield worth ${shieldAmount} protection.`);
@@ -136,7 +144,10 @@ export function Duel() {
         nextPlayer = { ...nextPlayer, mana: Math.min(player.maxMana, nextPlayer.mana + focusMana) };
         nextLog.push(`You center yourself with ${spell.name} and recover ${focusMana} mana.`);
       } else {
-        nextOpponent = { ...nextOpponent, mana: Math.min(opponent.maxMana, nextOpponent.mana + focusMana) };
+        nextOpponent = {
+          ...nextOpponent,
+          mana: Math.min(opponent.maxMana, nextOpponent.mana + focusMana),
+        };
         nextLog.push(`Rowan pauses to refocus.`);
       }
     }
@@ -171,7 +182,8 @@ export function Duel() {
     currentOpponentState: Combatant,
     previousLog: string[],
   ) => {
-    const rawDamage = spell.effect === "damage" ? spell.power + 5 + Math.floor(Math.random() * 8) : 0;
+    const rawDamage =
+      spell.effect === "damage" ? spell.power + 5 + Math.floor(Math.random() * 8) : 0;
     let nextPlayer = {
       ...currentPlayerState,
       shield: Math.max(0, currentPlayerState.shield - 4),
@@ -184,7 +196,10 @@ export function Duel() {
     const nextLog = [...previousLog];
 
     if (spell.effect === "damage") {
-      const mitigated = Math.max(4, rawDamage - nextPlayer.shield - Math.floor(player.stats.courage * 0.8));
+      const mitigated = Math.max(
+        4,
+        rawDamage - nextPlayer.shield - Math.floor(player.stats.courage * 0.8),
+      );
       nextPlayer = {
         ...nextPlayer,
         health: Math.max(0, nextPlayer.health - mitigated),
@@ -227,8 +242,8 @@ export function Duel() {
           <p className="text-xs uppercase tracking-[0.35em] text-gold">Dueling Arena</p>
           <h2 className="mt-2 font-display text-4xl text-[#f8e7b9]">Sparks Before Supper</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#e8d8b0]/75">
-            A complete turn-based duel: choose spells, manage mana, absorb hits with shields, and let Rowan's
-            AI choose a response after every cast.
+            A complete turn-based duel: choose spells, manage mana, absorb hits with shields, and
+            let Rowan's AI choose a response after every cast.
           </p>
         </div>
         <button
@@ -242,7 +257,9 @@ export function Duel() {
 
       {!started ? (
         <div className="mt-8 rounded-3xl border border-gold/20 bg-black/25 p-8 text-center">
-          <p className="text-sm uppercase tracking-[0.35em] text-gold">{player.name} vs {opponent.name}</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-gold">
+            {player.name} vs {opponent.name}
+          </p>
           <h3 className="mt-4 font-display text-5xl text-[#f8e7b9]">Wands Ready</h3>
           <button
             type="button"
@@ -256,7 +273,13 @@ export function Duel() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="rounded-3xl border border-gold/20 bg-black/25 p-5">
             <div className="grid gap-4 sm:grid-cols-2">
-              <DuelistCard name={player.name} title="You" state={playerState} maxHealth={player.maxHealth} maxMana={player.maxMana} />
+              <DuelistCard
+                name={player.name}
+                title="You"
+                state={playerState}
+                maxHealth={player.maxHealth}
+                maxMana={player.maxMana}
+              />
               <DuelistCard
                 name={opponent.name}
                 title="Rival"
@@ -277,10 +300,14 @@ export function Duel() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-display text-2xl">{spell.icon} {spell.name}</p>
+                      <p className="font-display text-2xl">
+                        {spell.icon} {spell.name}
+                      </p>
                       <p className="mt-1 text-sm text-[#5c3a1c]">{spell.description}</p>
                     </div>
-                    <span className="rounded-full bg-[#2d1b10] px-2 py-1 text-xs text-[#f8e7b9]">{spell.manaCost}</span>
+                    <span className="rounded-full bg-[#2d1b10] px-2 py-1 text-xs text-[#f8e7b9]">
+                      {spell.manaCost}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -298,7 +325,10 @@ export function Duel() {
                 </div>
               )}
               {log.map((entry, index) => (
-                <p key={`${entry}-${index}`} className="rounded-2xl bg-[#f2dfad]/10 p-3 text-sm leading-6 text-[#e8d8b0]/80">
+                <p
+                  key={`${entry}-${index}`}
+                  className="rounded-2xl bg-[#f2dfad]/10 p-3 text-sm leading-6 text-[#e8d8b0]/80"
+                >
                   {entry}
                 </p>
               ))}
@@ -336,16 +366,31 @@ function DuelistCard({
   );
 }
 
-function Meter({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+function Meter({
+  label,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+}) {
   const percent = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div>
       <div className="mb-1 flex justify-between text-xs text-[#5c3a1c]">
         <span>{label}</span>
-        <span>{Math.round(value)} / {Math.round(max)}</span>
+        <span>
+          {Math.round(value)} / {Math.round(max)}
+        </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[#2d1b10]/20">
-        <div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, background: color }} />
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${percent}%`, background: color }}
+        />
       </div>
     </div>
   );
