@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as WhatifRouteImport } from './routes/whatif'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
@@ -25,6 +26,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
   path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatifRoute = WhatifRouteImport.update({
+  id: '/whatif',
+  path: '/whatif',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/champions-legacy/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/champions-legacy/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/champions-legacy_/hub': typeof ChampionsLegacyHubRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/champions-legacy/hub'
     | '/api/public/payments/webhook'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/champions-legacy/hub'
     | '/api/public/payments/webhook'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/champions-legacy_/hub'
     | '/api/public/payments/webhook'
@@ -182,6 +194,7 @@ export interface RootRouteChildren {
   PlayRoute: typeof PlayRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WhatifRoute: typeof WhatifRoute
   WorldsRoute: typeof WorldsRoute
   ChampionsLegacyHubRoute: typeof ChampionsLegacyHubRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/worlds'
       fullPath: '/worlds'
       preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/whatif': {
+      id: '/whatif'
+      path: '/whatif'
+      fullPath: '/whatif'
+      preLoaderRoute: typeof WhatifRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -286,6 +306,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayRoute: PlayRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WhatifRoute: WhatifRoute,
   WorldsRoute: WorldsRoute,
   ChampionsLegacyHubRoute: ChampionsLegacyHubRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
