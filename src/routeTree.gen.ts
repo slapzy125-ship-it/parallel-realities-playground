@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorldsRouteImport } from './routes/worlds'
+import { Route as WhatifRouteImport } from './routes/whatif'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
@@ -24,6 +25,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const WorldsRoute = WorldsRouteImport.update({
   id: '/worlds',
   path: '/worlds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatifRoute = WhatifRouteImport.update({
+  id: '/whatif',
+  path: '/whatif',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/play': typeof PlayRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/whatif': typeof WhatifRoute
   '/worlds': typeof WorldsRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/api/public/payments/webhook'
   id:
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/play'
     | '/pricing'
     | '/sitemap.xml'
+    | '/whatif'
     | '/worlds'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -170,6 +182,7 @@ export interface RootRouteChildren {
   PlayRoute: typeof PlayRoute
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WhatifRoute: typeof WhatifRoute
   WorldsRoute: typeof WorldsRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/worlds'
       fullPath: '/worlds'
       preLoaderRoute: typeof WorldsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/whatif': {
+      id: '/whatif'
+      path: '/whatif'
+      fullPath: '/whatif'
+      preLoaderRoute: typeof WhatifRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -266,19 +286,10 @@ const rootRouteChildren: RootRouteChildren = {
   PlayRoute: PlayRoute,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WhatifRoute: WhatifRoute,
   WorldsRoute: WorldsRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
