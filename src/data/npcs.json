@@ -1,0 +1,29 @@
+[
+  {
+    "id": "mira-vale",
+    "name": "Mira Vale",
+    "role": "first-year friend",
+    "house": "moonveil",
+    "description": "A brilliant stargazer who notices patterns in old murals before anyone else."
+  },
+  {
+    "id": "rowan-cinderglass",
+    "name": "Rowan Cinderglass",
+    "role": "dueling rival",
+    "house": "suncrest",
+    "description": "A confident spell-slinger who respects bold choices and clean victories."
+  },
+  {
+    "id": "selene-morcant",
+    "name": "Selene Morcant",
+    "role": "mysterious upper-year",
+    "house": "ironthorn",
+    "description": "An ambitious student who knows which corridors listen after midnight."
+  },
+  {
+    "id": "professor-orlan-quill",
+    "name": "Professor Orlan Quill",
+    "role": "charms professor",
+    "description": "A patient mentor with ink-stained cuffs and a habit of hiding lessons inside riddles."
+  }
+]

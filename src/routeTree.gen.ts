@@ -16,6 +16,7 @@ import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as Parallel2RouteImport } from './routes/parallel2'
 import { Route as ParallelRouteImport } from './routes/parallel'
+import { Route as MagicSchoolRouteImport } from './routes/magic-school'
 import { Route as HardwareRouteImport } from './routes/hardware'
 import { Route as ChampionsLegacyRouteImport } from './routes/champions-legacy'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -58,6 +59,11 @@ const ParallelRoute = ParallelRouteImport.update({
   path: '/parallel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MagicSchoolRoute = MagicSchoolRouteImport.update({
+  id: '/magic-school',
+  path: '/magic-school',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HardwareRoute = HardwareRouteImport.update({
   id: '/hardware',
   path: '/hardware',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
+  '/magic-school': typeof MagicSchoolRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
+  '/magic-school': typeof MagicSchoolRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/champions-legacy': typeof ChampionsLegacyRoute
   '/hardware': typeof HardwareRoute
+  '/magic-school': typeof MagicSchoolRoute
   '/parallel': typeof ParallelRoute
   '/parallel2': typeof Parallel2Route
   '/play': typeof PlayRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/champions-legacy'
     | '/hardware'
+    | '/magic-school'
     | '/parallel'
     | '/parallel2'
     | '/play'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/champions-legacy'
     | '/hardware'
+    | '/magic-school'
     | '/parallel'
     | '/parallel2'
     | '/play'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/champions-legacy'
     | '/hardware'
+    | '/magic-school'
     | '/parallel'
     | '/parallel2'
     | '/play'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChampionsLegacyRoute: typeof ChampionsLegacyRoute
   HardwareRoute: typeof HardwareRoute
+  MagicSchoolRoute: typeof MagicSchoolRoute
   ParallelRoute: typeof ParallelRoute
   Parallel2Route: typeof Parallel2Route
   PlayRoute: typeof PlayRoute
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParallelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/magic-school': {
+      id: '/magic-school'
+      path: '/magic-school'
+      fullPath: '/magic-school'
+      preLoaderRoute: typeof MagicSchoolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hardware': {
       id: '/hardware'
       path: '/hardware'
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChampionsLegacyRoute: ChampionsLegacyRoute,
   HardwareRoute: HardwareRoute,
+  MagicSchoolRoute: MagicSchoolRoute,
   ParallelRoute: ParallelRoute,
   Parallel2Route: Parallel2Route,
   PlayRoute: PlayRoute,

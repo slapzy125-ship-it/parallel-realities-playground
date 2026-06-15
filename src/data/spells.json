@@ -1,0 +1,68 @@
+[
+  {
+    "id": "luminara",
+    "name": "Luminara",
+    "icon": "✦",
+    "description": "Coaxes a small star-glow from the caster's wand to reveal hidden markings and steady the mind.",
+    "manaCost": 4,
+    "school": "mind",
+    "power": 6,
+    "effect": "focus",
+    "unlockYear": 1
+  },
+  {
+    "id": "ember-spark",
+    "name": "Ember Spark",
+    "icon": "◆",
+    "description": "A brisk bolt of warm amber fire favored by first-year duelists.",
+    "manaCost": 8,
+    "school": "spark",
+    "power": 16,
+    "effect": "damage",
+    "unlockYear": 1
+  },
+  {
+    "id": "wardweave",
+    "name": "Wardweave",
+    "icon": "◇",
+    "description": "Braids a translucent shield that softens the next hostile charm.",
+    "manaCost": 10,
+    "school": "ward",
+    "power": 18,
+    "effect": "shield",
+    "unlockYear": 1
+  },
+  {
+    "id": "silver-mend",
+    "name": "Silver Mend",
+    "icon": "✺",
+    "description": "Knits minor bruises with cool silver light during tense expeditions.",
+    "manaCost": 12,
+    "school": "mending",
+    "power": 20,
+    "effect": "heal",
+    "unlockYear": 2
+  },
+  {
+    "id": "aether-lash",
+    "name": "Aether Lash",
+    "icon": "⌁",
+    "description": "Cracks a ribbon of force across the dueling floor, testing courage and precision.",
+    "manaCost": 14,
+    "school": "spark",
+    "power": 26,
+    "effect": "damage",
+    "unlockYear": 2
+  },
+  {
+    "id": "thorncall",
+    "name": "Thorncall",
+    "icon": "❧",
+    "description": "Summons spectral vines that interrupt creatures and careless rivals alike.",
+    "manaCost": 16,
+    "school": "wild",
+    "power": 30,
+    "effect": "damage",
+    "unlockYear": 3
+  }
+]

@@ -14,14 +14,16 @@ export const Route = createFileRoute("/worlds")({
   head: () => ({
     meta: [
       { title: "Worlds — Revenio" },
-      { name: "description", content: "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it." },
+      {
+        name: "description",
+        content:
+          "Eight worlds. Magic schools, space wars, dragon kingdoms, and more. Pick one. Live it.",
+      },
       { property: "og:title", content: "Pick Your World — Revenio" },
       { property: "og:description", content: "Eight AI worlds. One headset. Endless lives." },
       { property: "og:url", content: "https://revenio.net/worlds" },
     ],
-    links: [
-      { rel: "canonical", href: "https://revenio.net/worlds" },
-    ],
+    links: [{ rel: "canonical", href: "https://revenio.net/worlds" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -54,6 +56,7 @@ const worlds = [
     tag: "Learn real magic.",
     desc: "A hidden school of magic. Cast spells, mix potions, duel students, and uncover old secrets.",
     img: arcaneAcademyWorld.url,
+    href: "/magic-school",
   },
   {
     name: "Galactic Frontier",
@@ -106,22 +109,26 @@ function Worlds() {
 
       <section className="relative pt-40 pb-20 px-6 text-center">
         <div className="gold-hairline w-24 mx-auto mb-8" />
-        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Pick Your World</p>
+        <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">
+          Pick Your World
+        </p>
         <h1 className="font-display text-6xl md:text-8xl font-light leading-[1]">
-          Eight worlds.<br />
+          Eight worlds.
+          <br />
           <span className="italic text-gold-gradient">One is yours.</span>
         </h1>
         <p className="mt-8 text-muted-foreground max-w-2xl mx-auto">
-          Magic schools, space wars, hero teams, dragon kingdoms, and more.
-          You pick. The AI does the rest.
+          Magic schools, space wars, hero teams, dragon kingdoms, and more. You pick. The AI does
+          the rest.
         </p>
       </section>
 
       <section className="relative pb-32 px-6">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {worlds.map((w) => (
-            <article
+            <a
               key={w.name}
+              href={w.href ?? "/play"}
               className="group relative aspect-[3/4] overflow-hidden border border-border hover:border-[var(--gold)] transition-all duration-500 cursor-pointer"
             >
               <img
@@ -136,15 +143,19 @@ function Worlds() {
               <div className="absolute inset-0 bg-[var(--gold)]/0 group-hover:bg-[var(--gold)]/10 transition-colors duration-500" />
 
               <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <p className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)] mb-2">{w.tag}</p>
+                <p className="text-[0.6rem] tracking-[0.35em] uppercase text-[var(--gold)] mb-2">
+                  {w.tag}
+                </p>
                 <h2 className="font-display text-2xl mb-2 leading-tight">{w.name}</h2>
-                <p className="text-xs text-muted-foreground/90 leading-relaxed opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">{w.desc}</p>
+                <p className="text-xs text-muted-foreground/90 leading-relaxed opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500">
+                  {w.desc}
+                </p>
               </div>
 
               <div className="absolute top-4 right-4 w-8 h-8 border border-[var(--gold)]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-[var(--gold)] text-xs">↗</span>
               </div>
-            </article>
+            </a>
           ))}
         </div>
       </section>
@@ -154,7 +165,9 @@ function Worlds() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs tracking-[0.4em] uppercase text-[var(--gold)] mb-4">Imagine</p>
-            <h2 className="font-display text-5xl md:text-7xl font-light">What if<span className="italic text-gold-gradient"> …</span></h2>
+            <h2 className="font-display text-5xl md:text-7xl font-light">
+              What if<span className="italic text-gold-gradient"> …</span>
+            </h2>
           </div>
           <div className="space-y-px">
             {[
@@ -165,10 +178,19 @@ function Worlds() {
               "you scored the winning goal in front of 80,000 fans?",
               "you broke into a giant tower and walked out with its secrets?",
             ].map((q, i) => (
-              <div key={q} className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer">
-                <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">{String(i + 1).padStart(2, "0")}</span>
-                <p className="font-display text-2xl md:text-3xl font-light italic flex-1 group-hover:translate-x-2 transition-transform">{q}</p>
-                <span className="text-[var(--gold)] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              <div
+                key={q}
+                className="group flex items-center gap-6 py-8 border-b border-border hover:bg-[var(--gold)]/5 transition-colors px-4 cursor-pointer"
+              >
+                <span className="font-display text-3xl text-[var(--gold)]/40 group-hover:text-[var(--gold)] transition-colors w-16">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="font-display text-2xl md:text-3xl font-light italic flex-1 group-hover:translate-x-2 transition-transform">
+                  {q}
+                </p>
+                <span className="text-[var(--gold)] opacity-0 group-hover:opacity-100 transition-opacity">
+                  →
+                </span>
               </div>
             ))}
           </div>
